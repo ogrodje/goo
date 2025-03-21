@@ -1,17 +1,12 @@
 package si.ogrodje.goo.sync
 
 import si.ogrodje.goo.clients.HyGraph
-import si.ogrodje.goo.db.{DB, DBOps}
+import si.ogrodje.goo.db.DB
 import si.ogrodje.goo.models.{Meetup, Meetups}
 import zio.*
-import zio.ZIO.logInfo
-import doobie.*
-import doobie.implicits.*
-import doobie.postgres.implicits.*
+import zio.ZIO.{logInfo, logWarning}
 
 final class MeetupsSync private (private val hyGraph: HyGraph):
-  import DBOps.*
-  import DBOps.given
   private val syncSchedule = Schedule.fixed(10.seconds)
 
   private def partitionMeetups(
@@ -19,14 +14,15 @@ final class MeetupsSync private (private val hyGraph: HyGraph):
     graphMeetups: List[Meetup]
   ): (List[Meetup], List[Meetup], List[Meetup]) =
     val dbMeetupsMap = dbMeetups.map(m => m.id -> m).toMap
-    graphMeetups.foldLeft((List.empty[Meetup], List.empty[Meetup], List.empty[Meetup])):
+    graphMeetups.foldLeft((List.empty, List.empty, List.empty)):
       case ((newAcc, updateAcc, unchangedAcc), graphMeetup) =>
         dbMeetupsMap.get(graphMeetup.id) match
-          case None           =>
+          case None                                                                =>
             (graphMeetup :: newAcc, updateAcc, unchangedAcc)
-          case Some(dbMeetup) =>
-            if graphMeetup.updatedAt.isAfter(dbMeetup.updatedAt) then (newAcc, graphMeetup :: updateAcc, unchangedAcc)
-            else (newAcc, updateAcc, dbMeetup :: unchangedAcc)
+          case Some(dbMeetup) if graphMeetup.updatedAt.isAfter(dbMeetup.updatedAt) =>
+            (newAcc, graphMeetup :: updateAcc, unchangedAcc)
+          case Some(dbMeetup)                                                      =>
+            (newAcc, updateAcc, dbMeetup :: unchangedAcc)
 
   private def sync = for
     (graphMeetups, dbMeetups)   <- hyGraph.allMeetups <&> Meetups.all
@@ -38,12 +34,17 @@ final class MeetupsSync private (private val hyGraph: HyGraph):
   yield ()
 
   def run: ZIO[Scope & DB, Throwable, Unit] = for
-    f <- sync.repeat(syncSchedule).forever.fork
+    f <-
+      sync
+        .retryOrElse(
+          policy = Schedule.exponential(10.seconds) && Schedule.recurs(3),
+          orElse = (err, _) => logWarning(s"Retry failed with ${err.getMessage}")
+        )
+        .repeat(syncSchedule)
+        .forever
+        .fork
     _ <- Scope.addFinalizer(f.interrupt <* logInfo("Syncing meetups stopped."))
   yield ()
 
 object MeetupsSync:
-
-  def live = ZLayer.fromZIO:
-    for hyGraph <- ZIO.service[HyGraph]
-    yield new MeetupsSync(hyGraph)
+  def live = ZLayer.derive[MeetupsSync]

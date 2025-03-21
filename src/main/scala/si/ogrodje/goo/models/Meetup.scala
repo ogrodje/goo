@@ -2,8 +2,8 @@ package si.ogrodje.goo.models
 
 import zio.http.URL
 import zio.schema.{DeriveSchema, Schema}
-import zio.http.codec.PathCodec._
-import zio.http.codec._
+import zio.http.codec.PathCodec.*
+import zio.http.codec.*
 import java.time.OffsetDateTime
 
 type MeetupID = String
@@ -23,9 +23,11 @@ final case class Meetup(
 )
 
 object Meetup:
-  given Schema[URL] = Schema.primitive[String].transform(
-    str => URL.decode(str).toOption.get,
-    url => url.encode
-  )
+  given Schema[URL] = Schema
+    .primitive[String]
+    .transform(
+      str => URL.decode(str).toOption.get,
+      url => url.encode
+    )
 
   given schema: Schema[Meetup] = DeriveSchema.gen

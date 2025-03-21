@@ -10,12 +10,14 @@ object Dependencies {
     val doobie: Version        = "1.0.0-RC8"
     val sentryLogback: Version = "8.5.0"
     val ical4j: Version        = "4.0.1"
-    val quartz: Version        = "2.3.2"
+    val quartz: Version        = "2.5.0"
     val zio: Version           = "2.1.16"
     val zioLogging: Version    = "2.5.0"
     val zioHttp: Version       = "3.1.0"
+    val zioConfig: Version     = "4.0.4"
     val postgresql: Version    = "42.7.5"
     val flyway: Version        = "11.4.0"
+    val circe: Version         = "0.14.11"
   }
 
   lazy val zio: Modules = Seq(
@@ -49,7 +51,12 @@ object Dependencies {
   ) ++ Seq(
     "dev.zio" %% "zio-http"         % Versions.zioHttp,
     "dev.zio" %% "zio-http-testkit" % Versions.zioHttp % Test
-  )
+  ) ++ Seq(
+    "dev.zio" %% "zio-config",
+    "dev.zio" %% "zio-config-magnolia",
+    "dev.zio" %% "zio-config-typesafe",
+    "dev.zio" %% "zio-config-refined"
+  ).map(_ % Versions.zioConfig)
 
   lazy val logging: Modules = Seq(
     "ch.qos.logback" % "logback-classic" % "1.5.18"
@@ -73,6 +80,17 @@ object Dependencies {
   ).map(_ % Versions.flyway) ++ Seq(
     "dev.zio" %% "zio-interop-cats" % "23.1.0.5"
   )
+
+  lazy val scheduler: Modules = Seq(
+    "org.quartz-scheduler" % "quartz"      % Versions.quartz,
+    "org.quartz-scheduler" % "quartz-jobs" % Versions.quartz
+  )
+
+  lazy val json: Modules = Seq(
+    "io.circe" %% "circe-core",
+    "io.circe" %% "circe-generic",
+    "io.circe" %% "circe-parser"
+  ).map(_ % Versions.circe)
 
   lazy val projectResolvers: Seq[MavenRepository] = Seq(
     // Resolver.sonatypeOssRepos("snapshots"),

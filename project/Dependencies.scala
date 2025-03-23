@@ -87,6 +87,15 @@ object Dependencies {
     "org.quartz-scheduler" % "quartz-jobs" % Versions.quartz
   )
 
+  lazy val enumeratum: Modules = Seq(
+    "com.beachape" %% "enumeratum",
+    "com.beachape" %% "enumeratum-circe"
+  ).map(_ % "1.7.2")
+
+  lazy val jsoup: Modules = Seq(
+    "org.jsoup" % "jsoup" % "1.19.1"
+  )
+
   lazy val json: Modules = Seq(
     "io.circe" %% "circe-core",
     "io.circe" %% "circe-generic",

@@ -12,7 +12,7 @@ lazy val root = project
     name         := "goo",
     scalaVersion := scala3Version,
     libraryDependencies ++= {
-      zio ++ logging ++ db ++ scheduler ++ json
+      zio ++ logging ++ db ++ scheduler ++ json ++ jsoup ++ enumeratum
     },
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     scalacOptions ++= Seq(

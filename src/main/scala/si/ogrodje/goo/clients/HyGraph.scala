@@ -1,12 +1,10 @@
 package si.ogrodje.goo.clients
 
-import doobie.util.query
 import io.circe.{Decoder, Json}
 import si.ogrodje.goo.AppConfig
 import si.ogrodje.goo.models.Meetup
 import zio.*
-import zio.ZIO.logInfo
-import zio.http.{Body, Client, URL}
+import zio.http.*
 
 import java.nio.charset.Charset
 import java.time.OffsetDateTime
@@ -15,18 +13,19 @@ final class HyGraph private (private val client: Client):
   private given Decoder[URL] = Decoder[String].emap(raw => URL.decode(raw).left.map(_.getMessage))
 
   private given Decoder[Meetup] = Decoder[Json].emap { json =>
+    val cursor = json.hcursor
     val parsed = for
-      id            <- json.hcursor.get[String]("id")
-      name          <- json.hcursor.get[String]("name")
-      homepageUrl   <- json.hcursor.get[Option[URL]]("homePageUrl")
-      meetupUrl     <- json.hcursor.get[Option[URL]]("meetupUrl")
-      discordUrl    <- json.hcursor.get[Option[URL]]("discordUrl")
-      linkedinUrl   <- json.hcursor.get[Option[URL]]("linkedinUrl")
-      kompotUrl     <- json.hcursor.get[Option[URL]]("kompotUrl")
-      eventbriteUrl <- json.hcursor.get[Option[URL]]("eventbriteUrl")
-      icalUrl       <- json.hcursor.get[Option[URL]]("icalUrl")
-      updatedAt     <- json.hcursor.get[OffsetDateTime]("updatedAt")
-      createdAt     <- json.hcursor.get[OffsetDateTime]("createdAt")
+      id            <- cursor.get[String]("id")
+      name          <- cursor.get[String]("name")
+      homepageUrl   <- cursor.get[Option[URL]]("homePageUrl")
+      meetupUrl     <- cursor.get[Option[URL]]("meetupUrl")
+      discordUrl    <- cursor.get[Option[URL]]("discordUrl")
+      linkedinUrl   <- cursor.get[Option[URL]]("linkedinUrl")
+      kompotUrl     <- cursor.get[Option[URL]]("kompotUrl")
+      eventbriteUrl <- cursor.get[Option[URL]]("eventbriteUrl")
+      icalUrl       <- cursor.get[Option[URL]]("icalUrl")
+      updatedAt     <- cursor.get[OffsetDateTime]("updatedAt")
+      createdAt     <- cursor.get[OffsetDateTime]("createdAt")
     yield Meetup(
       id = id,
       name = name,
@@ -44,7 +43,10 @@ final class HyGraph private (private val client: Client):
     parsed.left.map(_.getMessage)
   }
 
-  private def readFromGraph(query: String, variables: (String, Json)*): ZIO[Scope, Throwable, Json] = for
+  private def readFromGraph(
+    query: String,
+    variables: (String, Json)*
+  ): ZIO[Scope, Throwable, Json] = for
     json         <- ZIO.succeed:
                       Json
                         .fromFields(

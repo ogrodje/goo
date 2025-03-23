@@ -27,7 +27,7 @@ object Meetup:
     .primitive[String]
     .transform(
       str => URL.decode(str).toOption.get,
-      url => url.encode
+      _.encode
     )
 
   given schema: Schema[Meetup] = DeriveSchema.gen

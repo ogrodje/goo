@@ -7,7 +7,7 @@ import zio.*
 import zio.ZIO.{logInfo, logWarning}
 
 final class MeetupsSync private (private val hyGraph: HyGraph):
-  private val syncSchedule = Schedule.fixed(10.seconds)
+  private val syncSchedule = Schedule.fixed(10.minutes)
 
   private def partitionMeetups(
     dbMeetups: List[Meetup],

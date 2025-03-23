@@ -6,7 +6,7 @@ import zio.http.{Client, URL}
 import zio.stream.{Stream, ZStream}
 import ZIO.logInfo
 import si.ogrodje.goo.db.DB
-import si.ogrodje.goo.parsers.MeetupComParser
+import si.ogrodje.goo.parsers.*
 
 final class EventsSync:
 
@@ -22,10 +22,12 @@ final class EventsSync:
       .flatMap(meetups => ZStream.fromIterable(meetups))
       .flatMap(meetup => ZStream.fromIterable(sourcesOf(meetup)))
       .flatMap {
-        case (meetup, url) if url.host.exists(_.contains("meetup.com")) =>
+        case (meetup, url) if url.host.exists(_.contains("meetup.com"))     =>
           ZStream.fromZIO(MeetupComParser(meetup).parseWithClient(url))
-
-        case (meetup, url) => ZStream.empty
+        case (meetup, url) if url.host.exists(_.contains("eventbrite.com")) =>
+          ZStream.fromZIO(EventbriteParser(meetup).parseWithClient(url))
+        case (meetup, url)                                                  =>
+          ZStream.empty
       }
       .mapZIO(events => ZIO.foreachDiscard(events)(Events.upsert))
       // .tap(p => logInfo(s"Parsed ${p.size} events."))

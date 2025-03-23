@@ -7,8 +7,7 @@ import doobie.implicits.*
 import doobie.postgres.implicits.*
 
 object Events:
-  import DBOps.*
-  import DBOps.given
+  import DBOps.{*, given}
 
   def upsert(event: Event): RIO[DB, Int] = DB.transact(
     sql"""
@@ -43,6 +42,7 @@ object Events:
           event_url = ${event.eventURL},
           end_date_time = ${event.endDateTime},
           has_start_time = ${event.hasStartTime},
-          has_end_time = ${event.hasEndTime}
+          has_end_time = ${event.hasEndTime},
+          updated_at = now()
         """.updateWithLabel("upsert-event").run
   )

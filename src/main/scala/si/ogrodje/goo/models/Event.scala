@@ -17,5 +17,6 @@ final case class Event(
   eventURL: Option[URL] = None,
   endDateTime: Option[OffsetDateTime] = None,
   hasStartTime: Boolean = true,
-  hasEndTime: Boolean = true
+  hasEndTime: Boolean = true,
+  updatedAt: Option[OffsetDateTime] = None
 )

@@ -1,4 +1,4 @@
-## goo for Ogrodje
+## goo the Ogrodje Operating System
 
 ```bash
 sbt run

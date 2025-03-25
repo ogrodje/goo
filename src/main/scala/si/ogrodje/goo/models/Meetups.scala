@@ -10,38 +10,29 @@ object Meetups:
   import DBOps.*
   import DBOps.given
 
-  def all: RIO[DB, List[Meetup]] = DB.transact(
+  private val allFields: Fragment =
+    fr"id, name, homepage_url, meetup_url, discord_url, linkedin_url, kompot_url, ical_url, eventbrite_url, created_at, updated_at"
+
+  def all: RIO[DB, List[Meetup]] = DB.transact:
     sql"""
-         |SELECT 
-         |id, 
-         |name, 
-         |homepage_url,
-         |meetup_url,
-         |discord_url,
-         |linkedin_url,
-         |kompot_url,
-         |ical_url,
-         |eventbrite_url,
-         |created_at,
-         |updated_at
+         |SELECT
+         |$allFields
          |FROM meetups""".stripMargin.queryWithLabel[Meetup]("all-meetups").to[List]
-  )
+
+  def allPaginated(limit: Int, offset: Int): RIO[DB, List[Meetup]] = DB.transact:
+    sql"""
+         |SELECT
+         |$allFields
+         |FROM meetups
+         |ORDER BY name
+         |LIMIT $limit OFFSET $offset
+         |""".stripMargin.queryWithLabel[Meetup]("all-meetups").to[List]
 
   def insert(meetups: Meetup*): RIO[DB, Unit] = ZIO.foreachDiscard(meetups.toSeq): meetup =>
     DB.transact:
       sql"""
            |INSERT INTO meetups (
-           |id,
-           |name,
-           |homepage_url,
-           |meetup_url,
-           |discord_url,
-           |linkedin_url,
-           |kompot_url,
-           |ical_url,
-           |eventbrite_url,
-           |created_at,
-           |updated_at
+           |$allFields
            |) VALUES (
            |${meetup.id}, ${meetup.name}, ${meetup.homepageUrl},
            |${meetup.meetupUrl}, ${meetup.discordUrl}, ${meetup.linkedinUrl}, ${meetup.kompotUrl},

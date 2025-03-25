@@ -21,6 +21,7 @@ lazy val root = project
       "UTF-8",
       "-feature",
       "-unchecked",
+      "-explain",
       "-Yretain-trees",
       "-Xmax-inlines:100",
       "-language:implicitConversions"

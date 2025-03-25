@@ -9,13 +9,15 @@ import zio.interop.catz.*
 import doobie.*
 import doobie.implicits.*
 import doobie.util.transactor
+import si.ogrodje.goo.models.Source
 import zio.http.URL
 
 final class DB private (private val transactor: Transactor[Task]):
   def call: Transactor[Task] = transactor
 
 object DBOps:
-  given urlMeta: Meta[URL] = Meta[String].imap(raw => URL.decode(raw).toTry.get)(_.toString)
+  given urlMeta: Meta[URL]   = Meta[String].imap(raw => URL.decode(raw).toTry.get)(_.toString)
+  given source: Meta[Source] = Meta[String].imap(raw => Source.withName(raw))(_.entryName)
 
 object DB:
   import DBOps.given

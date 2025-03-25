@@ -30,7 +30,6 @@ final class EventsSync:
           ZStream.empty
       }
       .mapZIO(events => ZIO.foreachDiscard(events)(Events.upsert))
-      // .tap(p => logInfo(s"Parsed ${p.size} events."))
       .runDrain
 
   def run = for

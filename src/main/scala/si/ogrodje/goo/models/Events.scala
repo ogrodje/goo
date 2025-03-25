@@ -1,15 +1,15 @@
 package si.ogrodje.goo.models
 
-import si.ogrodje.goo.db.{DB, DBOps}
-import zio.{RIO, ZIO}
 import doobie.*
 import doobie.implicits.*
 import doobie.postgres.implicits.*
+import si.ogrodje.goo.db.{DB, DBOps}
+import zio.RIO
 
 object Events:
-  import DBOps.{*, given}
+  import DBOps.given
 
-  def upsert(event: Event): RIO[DB, Int] = DB.transact(
+  def upsert(event: Event): RIO[DB, Int] = DB.transact:
     sql"""
           INSERT INTO events (
             id,
@@ -45,4 +45,17 @@ object Events:
           has_end_time = ${event.hasEndTime},
           updated_at = now()
         """.updateWithLabel("upsert-event").run
-  )
+
+  private val baseFields: Fragment =
+    fr"id, meetup_id, source, source_url, title, start_date_time, description, event_url, end_date_time, has_start_time, has_end_time, updated_at"
+
+  def all(limit: Int, offset: Int, maybeMeetupID: Option[MeetupID] = None) =
+    val baseQuery = fr"""SELECT $baseFields FROM events """
+
+    val whereFilter = maybeMeetupID match
+      case Some(meetupID) => fr"WHERE meetup_id = $meetupID"
+      case None           => fr""
+
+    val orderAndLimit = fr"ORDER BY start_date_time DESC LIMIT $limit OFFSET $offset"
+
+    DB.transact((baseQuery ++ whereFilter ++ orderAndLimit).queryWithLabel[Event]("read-events").to[List])

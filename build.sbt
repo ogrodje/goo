@@ -24,6 +24,7 @@ lazy val root = project
       "-explain",
       "-Yretain-trees",
       "-Xmax-inlines:100",
+      "-Ximplicit-search-limit:100000",
       "-language:implicitConversions"
     )
   )

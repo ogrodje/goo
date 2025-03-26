@@ -17,8 +17,8 @@ object Dependencies {
     val zioConfig: Version     = "4.0.4"
     val zioMetrics: Version    = "2.3.1"
     val postgresql: Version    = "42.7.5"
-    val flyway: Version        = "11.4.0"
-    val circe: Version         = "0.14.11"
+    val flyway: Version        = "11.4.1"
+    val circe: Version         = "0.14.12"
   }
 
   lazy val zio: Modules = Seq(
@@ -90,7 +90,7 @@ object Dependencies {
   lazy val enumeratum: Modules = Seq(
     "com.beachape" %% "enumeratum",
     "com.beachape" %% "enumeratum-circe"
-  ).map(_ % "1.7.2")
+  ).map(_ % "1.7.5")
 
   lazy val jsoup: Modules = Seq(
     "org.jsoup" % "jsoup" % "1.19.1"

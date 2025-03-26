@@ -11,7 +11,7 @@ object Meetups:
   import DBOps.given
 
   private val allFields: Fragment =
-    fr"id, name, homepage_url, meetup_url, discord_url, linkedin_url, kompot_url, ical_url, eventbrite_url, created_at, updated_at"
+    fr"id, name, homepage_url, meetup_url, discord_url, linkedin_url, kompot_url, eventbrite_url, ical_url, created_at, updated_at"
 
   def all: RIO[DB, List[Meetup]] = DB.transact:
     sql"""

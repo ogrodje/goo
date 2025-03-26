@@ -1,6 +1,6 @@
 package si.ogrodje.goo
 import si.ogrodje.goo.db.DB
-import si.ogrodje.goo.models.{Event, Events, Meetup, Meetups}
+import si.ogrodje.goo.models.*
 import zio.*
 import zio.ZIO.logInfo
 import zio.http.*
@@ -32,6 +32,9 @@ final class APIServer private (
     .query(HttpCodec.query[Int]("limit").optional ++ HttpCodec.query[Int]("offset").optional)
     .out[List[Event]]
 
+  private val getTimeline = Endpoint(RoutePattern.GET / "timeline" ?? Doc.p("Events timeline"))
+    .out[List[TimelineEvent]]
+
   // Routes
   private def meetupsRoute = getMeetups.implement: (maybeLimit, maybeOffset) =>
     Meetups
@@ -51,8 +54,21 @@ final class APIServer private (
       .tapError(err => ZIO.logErrorCause("Error in events route", Cause.fail(err)))
       .orDie
 
+  private def timelineRoute = getTimeline.implement: _ =>
+    Events
+      .timeline(100, 0)
+      .tapError(err => ZIO.logErrorCause("Error in events route", Cause.fail(err)))
+      .orDie
+
   private val openAPI =
-    OpenAPIGen.fromEndpoints(title = "Ogrodje Goo", version = "1.0", getMeetups, getMeetupEvents, getEvents)
+    OpenAPIGen.fromEndpoints(
+      title = "Ogrodje Goo",
+      version = "1.0",
+      getMeetups,
+      getMeetupEvents,
+      getEvents,
+      getTimeline
+    )
 
   private val swaggerRoutes = SwaggerUI.routes("docs" / "openapi", openAPI)
 
@@ -61,7 +77,7 @@ final class APIServer private (
     _      <- logInfo(s"Starting server on port $port")
     server <-
       Server
-        .serve(routes ++ Routes(meetupsRoute, eventsRoute, meetupEventsRoute) ++ swaggerRoutes)
+        .serve(routes ++ Routes(meetupsRoute, eventsRoute, meetupEventsRoute, timelineRoute) ++ swaggerRoutes)
         .provide(dbLayer, Server.defaultWith(_.port(port)))
   yield server
 

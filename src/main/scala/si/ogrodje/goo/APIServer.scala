@@ -38,7 +38,7 @@ final class APIServer private (
   // Routes
   private def meetupsRoute = getMeetups.implement: (maybeLimit, maybeOffset) =>
     Meetups
-      .allPaginated(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0))
+      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0))
       .tapError(err => ZIO.logErrorCause("Error in events route", Cause.fail(err)))
       .orDie
 

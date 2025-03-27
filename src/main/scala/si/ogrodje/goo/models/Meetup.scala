@@ -11,6 +11,7 @@ type MeetupID = String
 final case class Meetup(
   id: MeetupID,
   name: String,
+  stage: Option[String],
   homepageUrl: Option[URL],
   meetupUrl: Option[URL],
   discordUrl: Option[URL],

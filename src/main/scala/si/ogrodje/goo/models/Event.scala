@@ -1,5 +1,4 @@
 package si.ogrodje.goo.models
-import si.ogrodje.goo.models.Source
 import zio.http.URL
 import zio.schema.{DeriveSchema, Schema}
 
@@ -19,7 +18,9 @@ final case class Event(
   endDateTime: Option[OffsetDateTime] = None,
   hasStartTime: Boolean = true,
   hasEndTime: Boolean = true,
-  updatedAt: Option[OffsetDateTime] = None
+  updatedAt: Option[OffsetDateTime] = None,
+  locationName: Option[String] = None,
+  locationAddress: Option[String] = None
 )
 
 object Event:

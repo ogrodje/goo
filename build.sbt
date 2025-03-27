@@ -12,7 +12,8 @@ lazy val root = project
     name         := "goo",
     scalaVersion := scala3Version,
     libraryDependencies ++= {
-      zio ++ logging ++ db ++ scheduler ++ json ++ jsoup ++ enumeratum
+      zio ++ logging ++ db ++ scheduler ++
+        json ++ jsoup ++ ical4j ++ enumeratum
     },
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     scalacOptions ++= Seq(
@@ -24,7 +25,7 @@ lazy val root = project
       "-explain",
       "-Yretain-trees",
       "-Xmax-inlines:100",
-      "-Ximplicit-search-limit:100000",
+      "-Ximplicit-search-limit:150000",
       "-language:implicitConversions"
     )
   )

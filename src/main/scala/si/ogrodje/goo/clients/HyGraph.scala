@@ -17,6 +17,7 @@ final class HyGraph private (private val client: Client):
     val parsed = for
       id            <- cursor.get[String]("id")
       name          <- cursor.get[String]("name")
+      stage         <- cursor.get[Option[String]]("stage")
       homepageUrl   <- cursor.get[Option[URL]]("homePageUrl")
       meetupUrl     <- cursor.get[Option[URL]]("meetupUrl")
       discordUrl    <- cursor.get[Option[URL]]("discordUrl")
@@ -29,6 +30,7 @@ final class HyGraph private (private val client: Client):
     yield Meetup(
       id = id,
       name = name,
+      stage = stage,
       homepageUrl = homepageUrl,
       meetupUrl = meetupUrl,
       discordUrl = discordUrl,
@@ -71,7 +73,8 @@ final class HyGraph private (private val client: Client):
     """query AllMeetups($size: Int) {
       | meetups(first: $size) { 
       |   id 
-      |   name 
+      |   name
+      |   stage
       |   homePageUrl 
       |   meetupUrl
       |   discordUrl

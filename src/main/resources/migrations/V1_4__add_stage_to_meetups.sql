@@ -1,0 +1,2 @@
+ALTER TABLE meetups
+    ADD COLUMN stage VARCHAR(20);

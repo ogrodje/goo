@@ -1,6 +1,6 @@
 package si.ogrodje.goo.parsers
 
-import io.circe.Json
+import io.circe.{ACursor, HCursor, Json}
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.parser.Parser
 import zio.{Task, ZIO}
@@ -22,7 +22,11 @@ object DocumentOps:
     def query(query: Query): Task[List[Element]]       = ZIO.attempt(document.select(query).asScala.toList)
     def queryFirst(path: Query): Task[Option[Element]] = query(path).map(_.headOption)
     def first(path: Query): Task[Element]              =
-      queryFirst(path).flatMap(ZIO.fromOption(_).orElseFail(new NoSuchElementException(s"No element found for $path")))
+      queryFirst(path).flatMap(
+        ZIO
+          .fromOption(_)
+          .orElseFail(new NoSuchElementException(s"No element found for $path"))
+      )
 
   extension (element: Element)
     def textAsJson: Task[Json] = for
@@ -34,3 +38,8 @@ object DocumentOps:
       readText <- ZIO.attempt(element.data())
       json     <- ZIO.fromEither(parse(readText))
     yield json
+
+  extension (cursor: HCursor)
+    def downFields(field: String*): ACursor =
+      val (head, tail) = field.toList.splitAt(1)
+      tail.foldLeft(cursor.downField(head.head))(_.downField(_))

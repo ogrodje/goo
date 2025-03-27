@@ -2,7 +2,7 @@ package si.ogrodje.goo.parsers
 
 import io.circe.{Decoder, DecodingFailure, Json}
 import si.ogrodje.goo.models.{Event, Meetup, Source}
-import zio.ZIO.fromOption
+import zio.ZIO.{fromOption, logInfo}
 import zio.http.{Client, Request, URL}
 import zio.{Scope, Task, ZIO}
 
@@ -13,7 +13,15 @@ final case class MeetupComParser(meetup: Meetup) extends Parser:
 
   private given Decoder[URL] = Decoder.decodeString.emap(raw => URL.decode(raw).left.map(err => err.getMessage))
 
-  private def eventToEvent(sourceURL: URL)(json: Json): Option[Event] =
+  private def venueIDFromEvent(json: Json): Option[String] =
+    json.hcursor
+      .downField("venue")
+      .downField("__ref")
+      .as[String]
+      .toOption
+      .map(_.split(":").tail.head)
+
+  private def eventToEvent(sourceURL: URL)(json: Json): Option[(Event, Option[String])] =
     val cursor = json.hcursor
     val parsed = for
       eventID       <- cursor.get[String]("id")
@@ -22,9 +30,9 @@ final case class MeetupComParser(meetup: Meetup) extends Parser:
       eventURL      <- cursor.get[Option[URL]]("eventUrl")
       startDateTime <- cursor.get[OffsetDateTime]("dateTime")
       endDateTime   <- cursor.get[Option[OffsetDateTime]]("endTime")
-    // _ = println(json)
+      maybeVenueID   = venueIDFromEvent(json)
     yield Event(
-      id = s"meetup.com/$eventID",
+      id = s"meetup-$eventID",
       meetupID = meetup.id,
       source = Source.Meetup,
       sourceURL = sourceURL,
@@ -32,27 +40,57 @@ final case class MeetupComParser(meetup: Meetup) extends Parser:
       description = description,
       eventURL = eventURL,
       startDateTime = startDateTime,
-      endDateTime = endDateTime
-    )
+      endDateTime = endDateTime,
+      locationName = None,
+      locationAddress = None
+    ) -> maybeVenueID
+
     parsed.toOption
+
+  final private case class Venue(name: String, address: String)
+
+  private def venueToVenue(json: Json): Option[(String, Venue)] =
+    val parsed = for
+      id         <- json.hcursor.get[String]("id").map(_.split(":").head)
+      name       <- json.hcursor.get[String]("name")
+      addressOne <- json.hcursor.get[Option[String]]("address").map(_.filterNot(_.isEmpty))
+      city       <- json.hcursor.get[Option[String]]("city").map(_.filterNot(_.isEmpty))
+      state      <- json.hcursor.get[Option[String]]("state").map(_.filterNot(_.isEmpty))
+    yield (id, name, List(addressOne, city, state).map(_.getOrElse("")).filter(_.nonEmpty).mkString(", ").strip())
+
+    parsed.toOption.map((id, name, address) => id -> Venue(name, address))
 
   private def readEventsFromMeta(sourceURL: URL, json: Json): Task[List[Event]] = for
     apolloState <-
-      fromOption(
-        json.hcursor.downField("props").downField("pageProps").downField("__APOLLO_STATE__").focus
-      )
+      fromOption(json.hcursor.downFields("props", "pageProps", "__APOLLO_STATE__").focus)
         .orElseFail(new NoSuchElementException("No __APOLLO_STATE__ found in JSON"))
     eventKeys    = apolloState.hcursor.keys.toList.flatMap(_.filter(_.startsWith("Event")))
     venueKeys    = apolloState.hcursor.keys.toList.flatMap(_.filter(_.startsWith("Venue")))
-
-    // TODO: Add venue
-    events =
+    venues       =
+      venueKeys
+        .map(key => apolloState.hcursor.downField(key).focus.flatMap(venueToVenue))
+        .collect { case Some(id, venue) => id -> venue }
+        .toMap
+    events       =
       eventKeys
         .map(key => apolloState.hcursor.downField(key).focus.flatMap(eventToEvent(sourceURL)))
+        .map {
+          case None                       => None
+          case Some(event, Some(venueID)) =>
+            Some(
+              venues
+                .get(venueID)
+                .fold(event)(venue =>
+                  event.copy(locationName = Some(venue.name), locationAddress = Some(venue.address))
+                )
+            )
+          case Some(event, None)          => Some(event)
+        }
         .collect { case Some(event) => event }
   yield events
 
   private def parseEventsFrom(client: Client, url: URL) = for
+    _        <- logInfo(s"Parsing events from $url")
     response <- client.request(Request.get(url))
     document <- response.body.asDocument
     metaJson <-

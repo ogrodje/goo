@@ -9,15 +9,15 @@ object Dependencies {
     val scalaTest: Version     = "3.2.19"
     val doobie: Version        = "1.0.0-RC8"
     val sentryLogback: Version = "8.5.0"
-    val ical4j: Version        = "4.0.1"
+    val ical4j: Version        = "4.1.1"
     val quartz: Version        = "2.5.0"
     val zio: Version           = "2.1.16"
     val zioLogging: Version    = "2.5.0"
-    val zioHttp: Version       = "3.1.0"
+    val zioHttp: Version       = "3.2.0"
     val zioConfig: Version     = "4.0.4"
     val zioMetrics: Version    = "2.3.1"
     val postgresql: Version    = "42.7.5"
-    val flyway: Version        = "11.4.1"
+    val flyway: Version        = "11.5.0"
     val circe: Version         = "0.14.12"
   }
 
@@ -94,6 +94,10 @@ object Dependencies {
 
   lazy val jsoup: Modules = Seq(
     "org.jsoup" % "jsoup" % "1.19.1"
+  )
+
+  lazy val ical4j: Modules = Seq(
+    "org.mnode.ical4j" % "ical4j" % Versions.ical4j
   )
 
   lazy val json: Modules = Seq(

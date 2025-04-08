@@ -8,5 +8,7 @@ object Source extends Enum[Source] with CirceEnum[Source]:
   case object Meetup                  extends Source
   case object Eventbrite              extends Source
   case object TehnoloskiParkLjubljana extends Source
+  case object PrimorskiTehnoloskiPark extends Source
+  case object GZS                     extends Source
 
-  val values = findValues
+  val values: IndexedSeq[Source] = findValues

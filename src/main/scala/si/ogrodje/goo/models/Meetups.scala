@@ -25,7 +25,7 @@ object Meetups:
          |SELECT
          |$allFields
          |FROM meetups
-         |WHERE meetups.status = 'PUBLISHED'
+         |WHERE meetups.stage = 'PUBLISHED'
          |ORDER BY name
          |LIMIT $limit OFFSET $offset
          |""".stripMargin.queryWithLabel[Meetup]("all-meetups").to[List]

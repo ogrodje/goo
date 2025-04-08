@@ -1,5 +1,6 @@
 package si.ogrodje.goo.parsers
 
+import com.microsoft.playwright.Browser
 import doobie.syntax.OptionPutOps
 import io.circe.{Decoder, DecodingFailure, Json}
 import si.ogrodje.goo.models.Source.Eventbrite
@@ -14,9 +15,6 @@ import scala.util.Try
 
 final case class EventbriteParser(meetup: Meetup) extends Parser:
   import DocumentOps.{*, given}
-
-  private given Decoder[URL] =
-    Decoder.decodeString.emap(raw => URL.decode(raw).left.map(err => err.getMessage))
 
   private given Decoder[OffsetDateTime] =
     Decoder.decodeString.emap { raw =>
@@ -75,7 +73,7 @@ final case class EventbriteParser(meetup: Meetup) extends Parser:
   override protected def parse(
     client: Client,
     url: URL
-  ): ZIO[Scope, Throwable, List[Event]] = for
+  ): ZIO[Scope & Browser, Throwable, List[Event]] = for
     response <- client.request(Request.get(url))
     document <- response.body.asDocument
     lds      <- document.query("script[type='application/ld+json']").map(_.filter(_.data.contains("itemListElement")))

@@ -13,6 +13,9 @@ services:
       - POSTGRES_HOST=pg
       - POSTGRES_PORT=5432
       - HYGRAPH_ENDPOINT=${HYGRAPH_ENDPOINT}
+      - SOURCES=Meetup,Eventbrite,TehnoloskiParkLjubljana,PrimorskiTehnoloskiPark,GZS
+    volumes:
+      - playwright-cache:/root/.cache/ms-playwright
 
   pg:
     image: postgres:17-alpine
@@ -22,3 +25,11 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+
+volumes:
+  playwright-cache:
+    driver: "local"
+    driver_opts:
+      type: none
+      device: "$HOME/docker-volumes/playwright-cache"
+      o: bind

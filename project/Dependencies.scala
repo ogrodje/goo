@@ -8,7 +8,7 @@ object Dependencies {
     val log4cats: Version      = "2.7.0"
     val scalaTest: Version     = "3.2.19"
     val doobie: Version        = "1.0.0-RC8"
-    val sentryLogback: Version = "8.5.0"
+    val sentryLogback: Version = "8.6.0"
     val ical4j: Version        = "4.1.1"
     val quartz: Version        = "2.5.0"
     val zio: Version           = "2.1.16"
@@ -98,6 +98,10 @@ object Dependencies {
 
   lazy val ical4j: Modules = Seq(
     "org.mnode.ical4j" % "ical4j" % Versions.ical4j
+  )
+
+  lazy val playwright: Modules = Seq(
+    "com.microsoft.playwright" % "playwright" % "1.51.0"
   )
 
   lazy val json: Modules = Seq(

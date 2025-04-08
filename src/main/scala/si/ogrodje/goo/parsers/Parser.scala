@@ -1,14 +1,15 @@
 package si.ogrodje.goo.parsers
 
+import com.microsoft.playwright.Browser
 import si.ogrodje.goo.models.Event
 import zio.*
 import zio.ZIO.{logError, logInfo}
 import zio.http.{Body, Client, URL}
 
 trait Parser:
-  protected def parse(client: Client, url: URL): ZIO[Scope, Throwable, List[Event]]
+  protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]]
 
-  def parseWithClient(url: URL): ZIO[Scope & Client, Throwable, List[Event]] = for
+  def parseWithClient(url: URL): ZIO[Scope & Client & Browser, Throwable, List[Event]] = for
     client <- ZIO.service[Client]
     events <-
       parse(client, url)

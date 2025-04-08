@@ -1,14 +1,15 @@
 package si.ogrodje.goo.apps
 
+import si.ogrodje.goo.browser.PWright
 import si.ogrodje.goo.clients.HyGraph
 import si.ogrodje.goo.db.DB
+import si.ogrodje.goo.scheduler.Scheduler
 import si.ogrodje.goo.sync.{EventsSync, MeetupsSync}
 import si.ogrodje.goo.{APIServer, AppConfig}
-import zio.ZIOAppDefault
-import zio.*
-import zio.logging.backend.SLF4J
 import zio.ZIO.logInfo
+import zio.{ZIOAppDefault, *}
 import zio.http.Client
+import zio.logging.backend.SLF4J
 
 object Main extends ZIOAppDefault:
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
@@ -17,19 +18,27 @@ object Main extends ZIOAppDefault:
 
   private def program = for
     port <- AppConfig.port
-    _    <- logInfo(s"Booting on port $port")
     _    <- DB.migrate
-    _    <- ZIO.serviceWithZIO[MeetupsSync](_.run) <&> ZIO.serviceWithZIO[EventsSync](_.run)
-    _    <- APIServer.run.forever
+    _    <- logInfo(s"Booting on port $port")
+
+    meetupsSyncFib <- ZIO.serviceWithZIO[MeetupsSync](_.runScheduled).fork
+    eventsSyncFib  <- ZIO.serviceWithZIO[EventsSync](_.runScheduled).fork
+
+    _ <- Scope.addFinalizer(meetupsSyncFib.interrupt)
+    _ <- Scope.addFinalizer(eventsSyncFib.interrupt)
+
+    _ <- APIServer.run.forever
   yield ()
 
   def run = program
     .provide(
       Scope.default,
+      Scheduler.live,
       Client.default,
       HyGraph.live,
       MeetupsSync.live,
       EventsSync.live,
-      DB.transactorLayer
+      DB.transactorLayer,
+      PWright.livePlaywright,
+      PWright.liveBrowser
     )
-    .as(ExitCode.success)

@@ -1,5 +1,6 @@
 package si.ogrodje.goo.parsers
 
+import com.microsoft.playwright.Browser
 import io.circe.{Decoder, DecodingFailure, Json}
 import si.ogrodje.goo.models.{Event, Meetup, Source}
 import zio.ZIO.{fromOption, logInfo}
@@ -10,8 +11,6 @@ import java.time.OffsetDateTime
 
 final case class MeetupComParser(meetup: Meetup) extends Parser:
   import DocumentOps.{*, given}
-
-  private given Decoder[URL] = Decoder.decodeString.emap(raw => URL.decode(raw).left.map(err => err.getMessage))
 
   private def venueIDFromEvent(json: Json): Option[String] =
     json.hcursor
@@ -104,7 +103,7 @@ final case class MeetupComParser(meetup: Meetup) extends Parser:
   override protected def parse(
     client: Client,
     url: URL
-  ): ZIO[Scope, Throwable, List[Event]] = (
+  ): ZIO[Scope & Browser, Throwable, List[Event]] = (
     parseEventsFrom(client, url.addQueryParam("type", "upcoming")) <&>
       parseEventsFrom(client, url.addQueryParam("type", "past"))
   ).map(_ ++ _)

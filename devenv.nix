@@ -12,7 +12,8 @@
   };
 
   packages = [ 
-  	pkgs.git 
+  	pkgs.git
+  	pkgs.awscli2
   ];
 
   enterShell = ''

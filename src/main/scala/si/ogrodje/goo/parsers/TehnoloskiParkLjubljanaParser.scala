@@ -1,11 +1,11 @@
 package si.ogrodje.goo.parsers
 
-import io.circe.{parser, Decoder, DecodingFailure, Json}
+import com.microsoft.playwright.Browser
+import io.circe.{parser, Decoder, Json}
 import si.ogrodje.goo.models.{Event, Meetup, Source}
-import zio.ZIO.{attempt, fromOption, logInfo}
+import zio.ZIO.{attempt, fromOption}
 import zio.http.{Client, Request, URL}
-import zio.{Scope, Task, ZIO}
-import io.circe.parser.parse
+import zio.{Scope, ZIO}
 
 import java.time.{LocalDate, OffsetDateTime, ZoneId}
 
@@ -51,7 +51,7 @@ final case class TehnoloskiParkLjubljanaParser(meetup: Meetup) extends Parser:
   override protected def parse(
     client: Client,
     url: URL
-  ): ZIO[Scope, Throwable, List[Event]] = for
+  ): ZIO[Scope & Browser, Throwable, List[Event]] = for
     eventsURL      <- ZIO.succeed(url.addPath("/sl/koledar-dogodkov"))
     response       <- client.request(Request.get(eventsURL))
     document       <- response.body.asDocument

@@ -5,6 +5,8 @@ import si.ogrodje.goo.db.DB
 import si.ogrodje.goo.models.{Meetup, Meetups}
 import zio.*
 import zio.ZIO.{logInfo, logWarning}
+import si.ogrodje.goo.scheduler.ScheduleOps.*
+import si.ogrodje.goo.scheduler.Scheduler
 
 final class MeetupsSync private (private val hyGraph: HyGraph):
   private val syncSchedule = Schedule.fixed(10.minutes)
@@ -44,6 +46,22 @@ final class MeetupsSync private (private val hyGraph: HyGraph):
         .forever
         .fork
     _ <- Scope.addFinalizer(f.interrupt <* logInfo("Syncing meetups stopped."))
+  yield ()
+
+  def runScheduled: ZIO[Scope & DB & Scheduler, Throwable, Unit] = for
+    _  <- logInfo("Syncing meetups started.")
+    _  <- sync
+    f1 <-
+      sync
+        .retryOrElse(
+          policy = Schedule.exponential(10.seconds) && Schedule.recurs(3),
+          orElse = (err, _) => logWarning(s"Retry failed with ${err.getMessage}")
+        )
+        .scheduleTo(Scheduler.simple.withIntervalInHours(1).repeatForever())
+        .fork
+
+    _ <- Scope.addFinalizer(f1.interrupt <* logInfo("Syncing meetups stopped."))
+    _ <- ZIO.never
   yield ()
 
 object MeetupsSync:

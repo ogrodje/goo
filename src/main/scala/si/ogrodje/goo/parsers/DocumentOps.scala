@@ -1,16 +1,19 @@
 package si.ogrodje.goo.parsers
 
-import io.circe.{ACursor, HCursor, Json}
+import io.circe.{ACursor, Decoder, HCursor, Json}
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.parser.Parser
 import zio.{Task, ZIO}
-import zio.http.Body
+import zio.http.{Body, URL}
 
 import scala.jdk.CollectionConverters.*
 import io.circe.parser.parse
 
 object DocumentOps:
   private type Query = String
+
+  given urlDecoder: Decoder[URL] =
+    Decoder.decodeString.emap(raw => URL.decode(raw).left.map(err => err.getMessage))
 
   extension (body: Body)
     def asDocument: Task[Document] = for

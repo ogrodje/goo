@@ -1,0 +1,60 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: goo-prod
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: goo-pg-pv
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 10Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/goo-pg-pv"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: goo-pg-pvc
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 10Gi
+---
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: playwright-cache-pv
+  namespace: goo-prod
+  labels:
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 5Gi
+  accessModes:
+    - ReadWriteOnce
+  hostPath:
+    path: "/mnt/playwright-cache"
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: playwright-cache-pvc
+  namespace: goo-prod
+spec:
+  storageClassName: manual
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 5Gi

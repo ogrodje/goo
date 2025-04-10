@@ -7,18 +7,22 @@
 
   languages.java.jdk.package = pkgs.jdk21_headless;
   languages.scala = {
-  	enable = true;
-	sbt.enable = true;
+    enable = true;
+	  sbt.enable = true;
   };
 
   packages = [ 
   	pkgs.git
-  	pkgs.awscli2
+    pkgs.kubectl
+    pkgs.k9s
+    pkgs.kubie
+    pkgs.kubectx
+    pkgs.kubernetes-helm
   ];
 
   enterShell = ''
-    hello
-    git --version
+    echo "~~~ goo in $GOO_ENV ~~~"
+    alias k='microk8s kubectl
   '';
   
   enterTest = ''

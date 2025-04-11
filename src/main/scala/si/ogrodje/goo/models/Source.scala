@@ -11,5 +11,6 @@ object Source extends Enum[Source] with CirceEnum[Source]:
   case object PrimorskiTehnoloskiPark extends Source
   case object GZS                     extends Source
   case object StartupSi               extends Source
+  case object ICal                    extends Source
 
   val values: IndexedSeq[Source] = findValues

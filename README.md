@@ -1,5 +1,8 @@
 ## goo the Ogrodje Operating System
 
+Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si)
+with [OpenAPI Docs here](https://goo.ogrodje.si/docs/openapi).
+
 ```bash
 sbt run
 ```
@@ -11,9 +14,9 @@ sbt run
 - [x] Add [Tehnološki Park Ljubljana](https://www.tp-lj.si)
 - [x] Add [Primorski Tehnološki Park](https://www.primorski-tp.si/)
 - [x] Add [GZS ZIT Dogodki](https://www.gzs.si/zdruzenje_za_informatiko_in_telekomunikacije/vsebina/Dogodki)
-- [ ] Add [START:UP Slovenija](https://www.startup.si/sl-si/dogodki)
-- [ ] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
+- [x] Add [START:UP Slovenija](https://www.startup.si/sl-si/dogodki)
 - [ ] Add [Finance IKTInformator](https://www.finance.si/ikt)
+- [ ] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
 - [ ] Add [Kompot](https://kompot.si/)
 - [ ] Sent automatic newsletter for weekly/monthly events (via [Postmark](https://postmarkapp.com/))
 - [ ] Add Sentry for error and release tracking

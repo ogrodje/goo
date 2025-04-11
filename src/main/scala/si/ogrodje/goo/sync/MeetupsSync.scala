@@ -19,11 +19,11 @@ final class MeetupsSync private (private val hyGraph: HyGraph):
     graphMeetups.foldLeft((List.empty, List.empty, List.empty)):
       case ((newAcc, updateAcc, unchangedAcc), graphMeetup) =>
         dbMeetupsMap.get(graphMeetup.id) match
-          case None                                                                =>
+          case None                                                                                           =>
             (graphMeetup :: newAcc, updateAcc, unchangedAcc)
-          case Some(dbMeetup) if graphMeetup.updatedAt.isAfter(dbMeetup.updatedAt) =>
+          case Some(dbMeetup) if graphMeetup.updatedAt.isAfter(dbMeetup.updatedAt) || dbMeetup != graphMeetup =>
             (newAcc, graphMeetup :: updateAcc, unchangedAcc)
-          case Some(dbMeetup)                                                      =>
+          case Some(dbMeetup)                                                                                 =>
             (newAcc, updateAcc, dbMeetup :: unchangedAcc)
 
   private def sync = for

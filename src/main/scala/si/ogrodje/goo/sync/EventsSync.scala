@@ -8,20 +8,25 @@ import ZIO.logInfo
 import com.microsoft.playwright.Browser
 import si.ogrodje.goo.AppConfig
 import si.ogrodje.goo.db.DB
-import si.ogrodje.goo.models.Source.{Eventbrite, GZS, PrimorskiTehnoloskiPark, StartupSi, TehnoloskiParkLjubljana}
+import si.ogrodje.goo.models.Source.{Eventbrite, GZS, ICal, PrimorskiTehnoloskiPark, StartupSi, TehnoloskiParkLjubljana}
 import si.ogrodje.goo.parsers.*
 import si.ogrodje.goo.scheduler.ScheduleOps.*
 import si.ogrodje.goo.scheduler.Scheduler
 
 final class EventsSync:
+  type FieldName = String
 
-  private def sourcesOf(meetup: Meetup): List[(Meetup, URL)] =
+  private def sourcesOf(meetup: Meetup): List[(FieldName, Meetup, URL)] =
     meetup.productElementNames
       .zip(meetup.productIterator)
-      .collect { case (fieldName, Some(url: URL)) => (meetup, url) }
+      .collect { case (fieldName, Some(url: URL)) => (fieldName, meetup, url) }
       .toList
 
-  private def runParser(meetup: Meetup, url: URL): ZStream[Scope & Client & Browser, Throwable, List[Event]] = for
+  private def runParser(
+    fieldName: FieldName,
+    meetup: Meetup,
+    url: URL
+  ): ZStream[Scope & Client & Browser, Throwable, List[Event]] = for
     sourcesList <- ZStream.fromZIO(AppConfig.sourcesList)
     events      <-
       if sourcesList.enabled(Source.Meetup) && url.host.exists(_.contains("meetup.com")) then
@@ -36,6 +41,8 @@ final class EventsSync:
         ZStream.fromZIO(PrimorskiTehnoloskiParkParser(meetup).parseWithClient(url))
       else if sourcesList.enabled(StartupSi) && url.host.exists(_.contains("startup.si")) then
         ZStream.fromZIO(StartupSiParser(meetup).parseWithClient(url))
+      else if sourcesList.enabled(ICal) && fieldName == "icalUrl" && url.host.exists(_.contains("google.com")) then
+        ZStream.fromZIO(ICalParser(meetup).parseWithClient(url))
       else ZStream.empty
   yield events
 

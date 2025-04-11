@@ -36,7 +36,7 @@ object Meetups:
            |INSERT INTO meetups ( $allFields ) VALUES (
            |${meetup.id}, ${meetup.name}, ${meetup.stage}, ${meetup.homepageUrl},
            |${meetup.meetupUrl}, ${meetup.discordUrl}, ${meetup.linkedinUrl}, ${meetup.kompotUrl},
-           |${meetup.icalUrl}, ${meetup.eventbriteUrl}, ${meetup.createdAt}, ${meetup.updatedAt}
+           |${meetup.eventbriteUrl}, ${meetup.icalUrl}, ${meetup.createdAt}, ${meetup.updatedAt}
            |)
            |ON CONFLICT (id) DO UPDATE SET
            |name = ${meetup.name},
@@ -46,18 +46,19 @@ object Meetups:
            |discord_url = ${meetup.discordUrl},
            |linkedin_url = ${meetup.linkedinUrl},
            |kompot_url = ${meetup.kompotUrl},
-           |ical_url = ${meetup.icalUrl},
-           |eventbrite_url = ${meetup.eventbriteUrl}""".stripMargin.update.run
+           |eventbrite_url = ${meetup.eventbriteUrl},
+           |ical_url = ${meetup.icalUrl}
+           """.stripMargin.update.run
 
   def update(meetups: Meetup*): RIO[DB, Unit] = ZIO.foreachDiscard(meetups.toSeq): meetup =>
     DB.transact:
       sql"""
            UPDATE meetups SET (
             name, stage, homepage_url, meetup_url, discord_url, linkedin_url, kompot_url, 
-            ical_url, eventbrite_url, updated_at
+            eventbrite_url, ical_url, updated_at
            ) = (
             ${meetup.name}, ${meetup.stage}, ${meetup.homepageUrl}, ${meetup.meetupUrl}, 
             ${meetup.discordUrl}, ${meetup.linkedinUrl}, 
-            ${meetup.kompotUrl}, ${meetup.icalUrl}, ${meetup.eventbriteUrl}, 
+            ${meetup.kompotUrl}, ${meetup.eventbriteUrl}, ${meetup.icalUrl},
             ${meetup.updatedAt}
          ) WHERE id = ${meetup.id}""".update.run

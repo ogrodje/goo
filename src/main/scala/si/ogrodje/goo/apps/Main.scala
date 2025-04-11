@@ -10,6 +10,7 @@ import zio.ZIO.logInfo
 import zio.{ZIOAppDefault, *}
 import zio.http.Client
 import zio.logging.backend.SLF4J
+import si.ogrodje.goo.info.BuildInfo
 
 object Main extends ZIOAppDefault:
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
@@ -19,7 +20,7 @@ object Main extends ZIOAppDefault:
   private def program = for
     port <- AppConfig.port
     _    <- DB.migrate
-    _    <- logInfo(s"Booting on port $port")
+    _    <- logInfo(s"Booting on port $port, version: ${BuildInfo.version}, w/ ${BuildInfo.scalaVersion}")
 
     meetupsSyncFib <- ZIO.serviceWithZIO[MeetupsSync](_.runScheduled).fork
     eventsSyncFib  <- ZIO.serviceWithZIO[EventsSync](_.runScheduled).fork

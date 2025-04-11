@@ -14,8 +14,10 @@ final class APIServer private (
 ):
   private val dbLayer = ZLayer.succeed(db)
 
+  private val ogrodjeHome: URL = URL.decode("https://ogrodje.si?from=goo").toOption.get
+
   private val routes: Routes[Any, Response] = Routes(
-    Method.GET / Root -> handler(Response.text("Hello, world!"))
+    Method.GET / Root -> handler(Response.redirect(ogrodjeHome, isPermanent = true))
   )
 
   // Endpoints

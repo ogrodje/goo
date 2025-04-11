@@ -9,10 +9,13 @@ ThisBuild / dynverSeparator  := "-"
 ThisBuild / scalaVersion     := scala3Version
 
 lazy val root = project
-  .enablePlugins(JavaAppPackaging, LauncherJarPlugin, DockerPlugin)
+  .enablePlugins(BuildInfoPlugin, JavaAppPackaging, LauncherJarPlugin, DockerPlugin)
   .in(file("."))
   .settings(
-    version      := "0.0.1",
+    buildInfoKeys    := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "si.ogrodje.goo.info"
+  )
+  .settings(
     name         := "goo",
     scalaVersion := scala3Version,
     libraryDependencies ++= {
@@ -34,7 +37,7 @@ lazy val root = project
     )
   )
   .settings(
-    assembly / mainClass             := Some("si.ogrodje.ogg.apps.Main"),
+    assembly / mainClass             := Some("si.ogrodje.goo.apps.Main"),
     assembly / assemblyJarName       := "goo.jar",
     assembly / assemblyMergeStrategy := {
       case PathList("module-info.class")                        =>

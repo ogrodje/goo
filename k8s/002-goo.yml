@@ -78,35 +78,17 @@ spec:
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: goo-ingress
+  name: goo-short-ingress
   namespace: goo-prod
   labels:
     version: "1"
   annotations:
-    cert-manager.io/cluster-issuer: lets-encrypt
-    acme.cert-manager.io/http01-edit-in-place: "true"
-    nginx.ingress.kubernetes.io/ssl-redirect: "false"
-
-    # nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    ## acme.cert-manager.io/http01-edit-in-place: "true"
-    ## acme.cert-manager.io/http01-ingress-class: nginx
-
-    # cert-manager.io/issuer: letsencrypt
-    #ingress.kubernetes.io/ssl-redirect: "false"
-    #ingress.kubernetes.io/force-ssl-redirect: "false"
-
-  # nginx.ingress.kubernetes.io/rewrite-target: /
-  # nginx.ingress.kubernetes.io/ssl-redirect: "true"
-  # nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-  # nginx.ingress.kubernetes.io/backend-protocol: HTTPS
+    nginx.ingress.kubernetes.io/ssl-redirect: "true"
+    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
 spec:
   ingressClassName: nginx
-  tls:
-    - hosts:
-        - goo.ogrodje-one.ogrodje.si
-      secretName: goo-ingress-tls-x
   rules:
-    - host: goo.ogrodje-one.ogrodje.si
+    - host: goo.ogrodje.si
       http:
         paths:
           - path: /

@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: goo
-          image: ghcr.io/ogrodje/goo:0.0.1
+          image: ghcr.io/ogrodje/goo:0.0.3
           ports: [ { containerPort: 7777 } ]
 
           env:
@@ -35,14 +35,6 @@ spec:
           volumeMounts:
             - name: playwright-cache
               mountPath: /root/.cache/ms-playwright
-
-          # resources:
-          #   requests:
-          #     memory: "128Mi"
-          #     cpu: "100m"
-          #   limits:
-          #     memory: "256Mi"
-          #     cpu: "200m"
           livenessProbe:
             httpGet:
               path: /

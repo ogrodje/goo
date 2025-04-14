@@ -15,7 +15,8 @@ sbt run
 - [x] Add [Primorski Tehnološki Park](https://www.primorski-tp.si/)
 - [x] Add [GZS ZIT Dogodki](https://www.gzs.si/zdruzenje_za_informatiko_in_telekomunikacije/vsebina/Dogodki)
 - [x] Add [START:UP Slovenija](https://www.startup.si/sl-si/dogodki)
-- [ ] Add [Finance IKTInformator](https://www.finance.si/ikt)
+- [x] Integrate the system into [Ogrodje.si](https://ogrodje.si)
+- [x] Add [Finance IKTInformator](https://www.finance.si/ikt)
 - [ ] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
 - [ ] Add [Kompot](https://kompot.si/)
 - [ ] Sent automatic newsletter for weekly/monthly events (via [Postmark](https://postmarkapp.com/))
@@ -32,6 +33,5 @@ sbt run
 - [ ] Allow users to be notified about new events
 - [ ] Expose the data via RSS feed
 - [ ] Expose the data via iCal format/feed
-- [ ] Integrate the system into [Ogrodje.si](https://ogrodje.si)
 - [ ] Add parser for Facebook Events
 - [ ] Add parser for LinkedIn Events

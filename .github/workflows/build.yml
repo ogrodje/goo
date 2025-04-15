@@ -70,7 +70,7 @@ jobs:
         run: sbt "docker:publish"
 
       - name: "Deploy"
-        run:
+        run: |
           ./bin/prod-tunnel.sh &
           echo ${{ env.OGRODJE_ONE_CONFIG }} > ogrodje-one-config
           export KUBECONFIG=ogrodje-one-config

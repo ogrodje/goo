@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: goo
-          image: ghcr.io/ogrodje/goo:0.0.5
+          image: ghcr.io/ogrodje/goo:0.0.6
           ports: [ { containerPort: 7777 } ]
 
           env:

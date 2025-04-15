@@ -91,5 +91,5 @@ jobs:
           echo "Checking kubeconfig settings..."
           kubectl config view --minify | grep server
 
-          echo "Get pods."
-          kubectl get pods -n goo-prod
+          echo "Applying k8s,..."
+          k apply -f k8s

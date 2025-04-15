@@ -15,3 +15,6 @@ devenv.local.nix
 
 # pre-commit
 .pre-commit-config.yaml
+
+# Should not be in git.
+k8s/000-secrets.yml

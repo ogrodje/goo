@@ -14,16 +14,24 @@ spec:
     spec:
       containers:
         - name: goo
-          image: ghcr.io/ogrodje/goo:0.0.4
+          image: ghcr.io/ogrodje/goo:0.0.5
           ports: [ { containerPort: 7777 } ]
 
           env:
+            - { name: GOO_ENVIRONMENT, value: "Production" }
             - { name: PORT, value: "7777" }
+            - { name: OTEL_TRACES_EXPORTER, value: "none" }
+            - { name: OTEL_METRICS_EXPORTER, value: "none" }
+            - { name: OTEL_LOGS_EXPORTER, value: "none" }
             - { name: POSTGRES_DB, value: "goo" }
             - { name: POSTGRES_HOST, value: "pg-one-postgresql.goo-prod.svc.cluster.local" }
             - { name: POSTGRES_PORT, value: "5432" }
             - { name: POSTGRES_USER, value: "goo" }
             - { name: SOURCES, value: "All" }
+
+            - name: SENTRY_AUTH_TOKEN
+              valueFrom:
+                secretKeyRef: { name: goo-secret, key: sentry_auth_token }
 
             - name: HYGRAPH_ENDPOINT
               valueFrom:

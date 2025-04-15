@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: goo-service
+  namespace: goo-prod
+spec:
+  selector:
+    app: goo
+  ports:
+    - port: 80
+      targetPort: 7777
+  type: ClusterIP

@@ -1,0 +1,8 @@
+resources:
+  - setup.yml
+  - deployment.yaml
+  - service.yaml
+  - ingress.yaml
+images:
+  - name: ghcr.io/ogrodje/goo
+    newTag: '0.0.7'

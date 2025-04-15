@@ -17,6 +17,8 @@
     pkgs.kubie
     pkgs.kubectx
     pkgs.kubernetes-helm
+	pkgs.jq
+	pkgs.yq-go
   ];
 
   enterShell = ''

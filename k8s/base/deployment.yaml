@@ -16,7 +16,6 @@ spec:
         - name: goo
           image: ghcr.io/ogrodje/goo:0.0.6
           ports: [ { containerPort: 7777 } ]
-
           env:
             - { name: GOO_ENVIRONMENT, value: "Production" }
             - { name: PORT, value: "7777" }
@@ -60,41 +59,3 @@ spec:
         - name: playwright-cache
           persistentVolumeClaim:
             claimName: playwright-cache-pvc
-
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: goo-service
-  namespace: goo-prod
-spec:
-  selector:
-    app: goo
-  ports:
-    - port: 80
-      targetPort: 7777
-  type: ClusterIP
----
-apiVersion: networking.k8s.io/v1
-kind: Ingress
-metadata:
-  name: goo-short-ingress
-  namespace: goo-prod
-  labels:
-    version: "1"
-  annotations:
-    nginx.ingress.kubernetes.io/ssl-redirect: "true"
-    nginx.ingress.kubernetes.io/force-ssl-redirect: "true"
-spec:
-  ingressClassName: nginx
-  rules:
-    - host: goo.ogrodje.si
-      http:
-        paths:
-          - path: /
-            pathType: Prefix
-            backend:
-              service:
-                name: goo-service
-                port:
-                  number: 80

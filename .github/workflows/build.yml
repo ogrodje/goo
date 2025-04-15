@@ -68,6 +68,11 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: sbt "docker:publish"
 
+      - name: Install yq v4
+        run: |
+          wget https://github.com/mikefarah/yq/releases/download/v4.45.1/yq_linux_amd64 -O /usr/local/bin/yq
+          chmod +x /usr/local/bin/yq
+
       - name: "Deploy"
         if: ${{ github.ref == 'refs/heads/master' }}
         env:
@@ -77,6 +82,9 @@ jobs:
           echo "$OGRODJE_ONE_CONFIG" > ogrodje-one-config
           export KUBECONFIG=ogrodje-one-config
     
+          # Refresh version
+          ./bin/refresh-version.sh
+          
           ssh -o "ExitOnForwardFailure yes" \
             -o "ServerAliveInterval 60" \
             -o "ServerAliveCountMax 5" \
@@ -92,4 +100,4 @@ jobs:
           kubectl config view --minify | grep server
 
           echo "Applying k8s,..."
-          k apply -f k8s
+          kubectl apply -k k8s/base

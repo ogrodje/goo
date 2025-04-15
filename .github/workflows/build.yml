@@ -72,6 +72,8 @@ jobs:
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
           ./bin/prod-tunnel.sh &
+          sleep 5
+          export KUBECONFIG=ogrodje-one-config
           echo "$OGRODJE_ONE_CONFIG" > ogrodje-one-config
-          echo "Get pots:"
+          echo "Get pods."
           kubectl get pods -n goo-prod

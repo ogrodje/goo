@@ -17,11 +17,11 @@ sbt run
 - [x] Add [START:UP Slovenija](https://www.startup.si/sl-si/dogodki)
 - [x] Integrate the system into [Ogrodje.si](https://ogrodje.si)
 - [x] Add [Finance IKTInformator](https://www.finance.si/ikt)
+- [x] Improve Sentry integration for better observability
+- [x] Add Sentry for error and release tracking
 - [ ] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
 - [ ] Add [Kompot](https://kompot.si/)
 - [ ] Sent automatic newsletter for weekly/monthly events (via [Postmark](https://postmarkapp.com/))
-- [ ] Add Sentry for error and release tracking
-- [ ] Improve Sentry integration for better observability
 - [ ] Add [GDG Ljubljana](https://gdg.community.dev/gdg-ljubljana/)
 - [ ] Add [SAŠA Inkubator](https://sasainkubator.si/dogodki/)
 - [ ] Add [Kovačnica](https://kovacnica.si/dogodki/)

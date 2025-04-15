@@ -70,7 +70,13 @@ jobs:
 
       - name: "Deploy"
         if: ${{ github.ref == 'refs/heads/master' }}
+        env:
+          OGRODJE_ONE_CONFIG: ${{ secrets.OGRODJE_ONE_CONFIG }}
         run: |
+          # Write kubeconfig file first
+          echo "$OGRODJE_ONE_CONFIG" > ogrodje-one-config
+          export KUBECONFIG=ogrodje-one-config
+    
           ssh -o "ExitOnForwardFailure yes" \
             -o "ServerAliveInterval 60" \
             -o "ServerAliveCountMax 5" \
@@ -81,9 +87,9 @@ jobs:
           
           sleep 5
           
-          export KUBECONFIG=ogrodje-one-config
-          
-          echo "$OGRODJE_ONE_CONFIG" > ogrodje-one-config
-          
+          # Verify kubeconfig content and server address
+          echo "Checking kubeconfig settings..."
+          kubectl config view --minify | grep server
+
           echo "Get pods."
           kubectl get pods -n goo-prod

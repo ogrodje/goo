@@ -71,9 +71,19 @@ jobs:
       - name: "Deploy"
         if: ${{ github.ref == 'refs/heads/master' }}
         run: |
-          ./bin/prod-tunnel.sh &
+          ssh -o "ExitOnForwardFailure yes" \
+            -o "ServerAliveInterval 60" \
+            -o "ServerAliveCountMax 5" \
+            -o "StrictHostKeyChecking no" \
+            -o "UserKnownHostsFile /dev/null" \
+            -N \
+            -L 16443:localhost:16443 oto@ogrodje-one &
+          
           sleep 5
+          
           export KUBECONFIG=ogrodje-one-config
+          
           echo "$OGRODJE_ONE_CONFIG" > ogrodje-one-config
+          
           echo "Get pods."
           kubectl get pods -n goo-prod

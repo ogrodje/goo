@@ -8,7 +8,9 @@ object Dependencies {
     val log4cats: Version      = "2.7.0"
     val scalaTest: Version     = "3.2.19"
     val doobie: Version        = "1.0.0-RC8"
-    val sentryLogback: Version = "8.7.0"
+    val sentry: Version        = "8.8.0"
+    val sentryLogback: Version = sentry
+    val sentryAgent: Version   = sentry
     val ical4j: Version        = "4.1.1"
     val quartz: Version        = "2.5.0"
     val zio: Version           = "2.1.17"

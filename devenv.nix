@@ -2,7 +2,7 @@
 
 {
   name = "goo";
-  env.GOO_ENV = "development";
+  env.GOO_ENVIRONMENT = "Development";
 
   languages.java.jdk.package = pkgs.jdk21_headless;
   languages.scala = {

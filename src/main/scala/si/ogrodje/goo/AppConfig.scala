@@ -1,5 +1,7 @@
 package si.ogrodje.goo
 
+import enumeratum.*
+import io.circe.{Decoder, Encoder, Json}
 import si.ogrodje.goo.models.Source
 import zio.*
 import zio.Config.*
@@ -29,6 +31,13 @@ object SourcesList:
 
     SourcesList(sources = sources)
 
+sealed trait Environment extends EnumEntry
+object Environment       extends Enum[Environment] with CirceEnum[Environment]:
+  case object Test        extends Environment
+  case object Production  extends Environment
+  case object Development extends Environment
+  val values = findValues
+
 type Port = Int
 final case class AppConfig(
   @name("port")
@@ -46,7 +55,9 @@ final case class AppConfig(
   @name("hygraph_endpoint")
   hygraphEndpoint: URL,
   @name("sources")
-  sourcesList: SourcesList
+  sourcesList: SourcesList,
+  @name("goo_environment")
+  environment: Environment
 )
 
 object AppConfig:
@@ -60,3 +71,4 @@ object AppConfig:
   def port: IO[Error, Port]                       = config.map(_.port)
   def portLayer: TaskLayer[Port]                  = ZLayer.fromZIO(port)
   def sourcesList: IO[Error, SourcesList]         = config.map(_.sourcesList)
+  def environment: ZIO[Any, Error, Environment]   = config.map(_.environment)

@@ -5,7 +5,7 @@ import si.ogrodje.goo.clients.HyGraph
 import si.ogrodje.goo.db.DB
 import si.ogrodje.goo.scheduler.Scheduler
 import si.ogrodje.goo.sync.{EventsSync, MeetupsSync}
-import si.ogrodje.goo.{APIServer, AppConfig}
+import si.ogrodje.goo.{APIServer, AppConfig, SentryOps}
 import zio.ZIO.logInfo
 import zio.{ZIOAppDefault, *}
 import zio.http.Client
@@ -18,9 +18,14 @@ object Main extends ZIOAppDefault:
       Runtime.removeDefaultLoggers >>> SLF4J.slf4j
 
   private def program = for
-    port <- AppConfig.port
-    _    <- DB.migrate
-    _    <- logInfo(s"Booting on port $port, version: ${BuildInfo.version}, w/ ${BuildInfo.scalaVersion}")
+    environment <- AppConfig.environment
+    _           <- SentryOps.setup
+    port        <- AppConfig.port
+    _           <- DB.migrate
+    _           <-
+      logInfo(
+        s"Booting on port $port, version: ${BuildInfo.version}, w/ ${BuildInfo.scalaVersion}, environment: $environment"
+      )
 
     meetupsSyncFib <- ZIO.serviceWithZIO[MeetupsSync](_.runScheduled).fork
     eventsSyncFib  <- ZIO.serviceWithZIO[EventsSync](_.runScheduled).fork

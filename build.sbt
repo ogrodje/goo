@@ -9,7 +9,7 @@ ThisBuild / dynverSeparator  := "-"
 ThisBuild / scalaVersion     := scala3Version
 
 lazy val root = project
-  .enablePlugins(BuildInfoPlugin, JavaAppPackaging, LauncherJarPlugin, DockerPlugin)
+  .enablePlugins(BuildInfoPlugin, JavaAgent, JavaAppPackaging, LauncherJarPlugin, DockerPlugin)
   .in(file("."))
   .settings(
     buildInfoKeys    := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
@@ -35,6 +35,9 @@ lazy val root = project
       "-Ximplicit-search-limit:150000",
       "-language:implicitConversions"
     )
+  )
+  .settings(
+    javaAgents += "io.sentry" % "sentry-opentelemetry-agent" % Versions.sentryAgent
   )
   .settings(
     assembly / mainClass             := Some("si.ogrodje.goo.apps.Main"),
@@ -115,14 +118,15 @@ lazy val root = project
           cmd
         )
       case other                   => List(other)
-    },
+    }
+    /*
     dockerEntrypoint         := Seq(
       "java",
       "-XX:+AlwaysPreTouch",
       "-Dfile.encoding=UTF-8",
       "-jar",
       s"/opt/docker/lib/${(packageJavaLauncherJar / artifactPath).value.getName}"
-    )
+    ) */
   )
 
 addCommandAlias("fmt", ";scalafmtAll;scalafmtSbt")

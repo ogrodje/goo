@@ -38,7 +38,6 @@ final case class ICalParser(meetup: Meetup) extends Parser:
   )
 
   override protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]] = for
-    _      <- logInfo("parsing ical events")
     body   <- client.request(Request.get(url)).flatMap(_.body.asString)
     events <- ICalReader.fromRaw(body)
   yield events.map(eventToEvent(url, _))

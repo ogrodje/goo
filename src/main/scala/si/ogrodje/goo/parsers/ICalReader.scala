@@ -16,11 +16,11 @@ import scala.jdk.OptionConverters.*
 import scala.util.Try
 
 object ICalOps:
+  final private val cetZone = ZoneId.of("Europe/Ljubljana")
+
   extension (calendar: Calendar)
     def events(kind: String = Component.VEVENT): List[VEvent] =
       calendar.getComponents(kind).asScala.toList
-
-  private val cetZone = ZoneId.of("Europe/Ljubljana")
 
   extension (event: VEvent)
     def summary: Task[String] = ZIO.attempt(event.getSummary).flatMap(s => ZIO.attempt(s.getValue))
@@ -34,21 +34,24 @@ object ICalOps:
         Try(
           LocalDateTime
             .parse(
-              raw + " 10:00:00", // Faking time for easier parsing.
+              raw + " 23:59:00", // Faking time for easier parsing.
               DateTimeFormatter.ofPattern("yyyyMMdd[ [HH][:mm][:ss][.SSS]]")
             )
-            .atOffset(ZoneOffset.UTC)
+            .minusHours(24L)
+            .atZone(cetZone)
+            .toOffsetDateTime
         ).map(_ -> false).toEither
       else
         Try(
-          LocalDateTime
-            .parse(raw, DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss'Z'"))
-            .atOffset(ZoneOffset.UTC)
+          OffsetDateTime
+            .parse(raw, DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmssX"))
+            .atZoneSameInstant(cetZone)
+            .toOffsetDateTime
         )
           .map(_ -> true)
           .toEither
 
-    def dateTimeStart: ZIO[Any, Throwable, (OffsetDateTime, Boolean)] =
+    def dateTimeStart: ZIO[Any, Throwable, (OffsetDateTime, Boolean)]                       =
       ZIO
         .attempt(event.getDateTimeStart)
         .flatMap(s => ZIO.attempt(s.getValue))

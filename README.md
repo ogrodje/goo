@@ -27,6 +27,7 @@ sbt run
 - [ ] Add [Kovačnica](https://kovacnica.si/dogodki/)
 - [ ] Add [Podjetniški inkubator Perspektiva](https://www.inkubator-perspektiva.si/)
 - [ ] Add [Inkubator Savinjske regije](https://inkubatorsr.si/)
+- [ ] Add [LUI (Ljubljanski univerzitetni inkubator)](https://lui.si/aktualno/)
 - [ ] Allow manual adding of events
 - [ ] Send batch emails via
   Postmark ([API documentation](https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails))

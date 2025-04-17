@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: koofr-watch
+  namespace: goo-prod
+  labels: { app: koofr-watch }
+spec:
+  replicas: 1
+  selector:
+    matchLabels: { app: koofr-watch }
+  template:
+    metadata:
+      labels: { app: koofr-watch }
+    spec:
+      containers:
+        - name: koofr-watch
+          image: ghcr.io/otobrglez/koofr-watch
+          ports: [ { containerPort: 4446 } ]
+          env:
+            - { name: PORT, value: "4446" }
+            - name: KOOFR_PASSWORD
+              valueFrom: { secretKeyRef: { name: koofr-secret, key: koofr_password } }
+            - name: KOOFR_USERNAME
+              valueFrom: { secretKeyRef: { name: koofr-secret, key: koofr_username } }
+            - name: WEBHOOK_URL_1
+              valueFrom: { secretKeyRef: { name: koofr-secret, key: webhook_url_1 } }
+
+          resources:
+            limits:
+              memory: "300Mi"
+            requests:
+              memory: "200Mi"

@@ -8,6 +8,8 @@ import zio.http.codec.*
 import zio.http.codec.PathCodec.*
 import zio.http.endpoint.*
 import zio.http.endpoint.openapi.*
+import si.ogrodje.goo.info.BuildInfo
+import zio.schema.annotation.description
 
 final class APIServer private (
   private val db: DB
@@ -65,7 +67,7 @@ final class APIServer private (
   private val openAPI =
     OpenAPIGen.fromEndpoints(
       title = "Ogrodje Goo",
-      version = "1.0",
+      version = BuildInfo.version,
       getMeetups,
       getMeetupEvents,
       getEvents,

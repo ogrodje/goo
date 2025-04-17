@@ -29,15 +29,18 @@ object ICalOps:
       .flatMap(s => ZIO.fromOption(s.toScala).orElseFail(new RuntimeException("Failed reading uid")))
       .flatMap(s => ZIO.attempt(s.getValue))
 
-    private def parseRawDateTime(raw: String): Either[Throwable, (OffsetDateTime, Boolean)] =
+    private def parseRawDateTime(raw: String, beginning: Boolean = true): Either[Throwable, (OffsetDateTime, Boolean)] =
       if raw.length == 8 then
         Try(
           LocalDateTime
             .parse(
-              raw + " 23:59:00", // Faking time for easier parsing.
+              // Faking time for easier parsing.
+              if beginning then raw + " 00:01:00" else raw + " 23:59:00",
               DateTimeFormatter.ofPattern("yyyyMMdd[ [HH][:mm][:ss][.SSS]]")
             )
-            .minusHours(24L)
+            .minusHours(
+              if beginning then 0 else 24L
+            )
             .atZone(cetZone)
             .toOffsetDateTime
         ).map(_ -> false).toEither
@@ -51,7 +54,7 @@ object ICalOps:
           .map(_ -> true)
           .toEither
 
-    def dateTimeStart: ZIO[Any, Throwable, (OffsetDateTime, Boolean)]                       =
+    def dateTimeStart: ZIO[Any, Throwable, (OffsetDateTime, Boolean)] =
       ZIO
         .attempt(event.getDateTimeStart)
         .flatMap(s => ZIO.attempt(s.getValue))
@@ -62,9 +65,14 @@ object ICalOps:
         .attempt(event.getEndDate(true))
         .map(s => s.toScala.map(_.getValue))
         .flatMap {
-          case Some(p) => ZIO.fromEither(parseRawDateTime(p)).map(v => Some(v._1) -> v._2)
+          case Some(p) => ZIO.fromEither(parseRawDateTime(p, beginning = false)).map(v => Some(v._1) -> v._2)
           case None    => ZIO.succeed((None, false))
         }
+
+    def isSameDayEvent: ZIO[Any, Throwable, Boolean] = for
+      start   <- ZIO.attempt(event.getDateTimeStart).map(_.getValue)
+      endDate <- ZIO.attempt(event.getEndDate(true)).map(s => s.toScala.map(_.getValue))
+    yield endDate.exists(end => start.take(8) == end.take(8))
 
     def url: URIO[Any, Option[URI]] =
       ZIO.fromTry(Try(event.getUrl).map(_.getUri)).option

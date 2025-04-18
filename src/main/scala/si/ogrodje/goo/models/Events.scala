@@ -129,9 +129,20 @@ object Events:
         FROM events e
         LEFT JOIN meetups m ON e.meetup_id = m.id
         WHERE 
-          m.stage = 'PUBLISHED' AND
-          e.start_date_time >= now()
-        ORDER BY e.start_date_time ASC"""
+          m.stage = 'PUBLISHED' 
+          AND (
+            start_date_time >= now() OR
+            (
+                date_trunc('week', now())::date <= start_date_time::date
+                  AND start_date_time::date < (date_trunc('week', now()) + interval '7 days')::date
+                )
+                OR
+            (
+                date_trunc('week', now())::date <= end_date_time::date
+                  AND end_date_time::date < (date_trunc('week', now()) + interval '7 days')::date
+                )
+            )
+        ORDER BY e.start_date_time"""
 
     DB.transact(
       baseQuery

@@ -86,7 +86,7 @@ final class APIServer private (
   yield server
 
 object APIServer:
-  def run = for
+  def run: ZIO[DB, Throwable, Nothing] = for
     db <- ZIO.service[DB]
     r  <- new APIServer(db).run
   yield r

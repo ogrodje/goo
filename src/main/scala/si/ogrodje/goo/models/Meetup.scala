@@ -32,3 +32,6 @@ object Meetup:
     )
 
   given schema: Schema[Meetup] = DeriveSchema.gen
+
+  def make(id: MeetupID, name: String): Meetup =
+    Meetup(id, name, None, None, None, None, None, None, None, None, OffsetDateTime.now, OffsetDateTime.now)

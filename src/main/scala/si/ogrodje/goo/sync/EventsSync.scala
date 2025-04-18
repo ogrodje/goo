@@ -55,7 +55,7 @@ final class EventsSync:
       .mapZIO(events => ZIO.foreachDiscard(events)(Events.upsert))
       .runDrain
 
-  def run = for
+  def run: ZIO[Scope & DB & (Client & Browser), Nothing, Unit] = for
     _ <- logInfo("Syncing events started.")
     // f <- sync.repeat(Schedule.fixed(10.seconds)).forever.fork
     f <- sync.repeat(Schedule.fixed(10.seconds)).forever.fork
@@ -72,4 +72,4 @@ final class EventsSync:
   yield ()
 
 object EventsSync:
-  def live = ZLayer.derive[EventsSync]
+  def live: ZLayer[Any, Nothing, EventsSync] = ZLayer.derive[EventsSync]

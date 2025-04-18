@@ -94,7 +94,7 @@ object Events:
       fr"event_url, end_date_time, has_start_time, has_end_time, updated_at, " ++
       fr"location_name, location_address"
 
-  def all(limit: Int, offset: Int, maybeMeetupID: Option[MeetupID] = None) =
+  def all(limit: Int, offset: Int, maybeMeetupID: Option[MeetupID] = None): RIO[DB, List[Event]] =
     val baseQuery = fr"""SELECT $baseFields FROM events """
 
     val whereFilter = maybeMeetupID match

@@ -8,6 +8,9 @@ ThisBuild / dynverVTagPrefix := false
 ThisBuild / dynverSeparator  := "-"
 ThisBuild / scalaVersion     := scala3Version
 
+ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+
 lazy val root = project
   .enablePlugins(BuildInfoPlugin, JavaAgent, JavaAppPackaging, LauncherJarPlugin, DockerPlugin)
   .in(file("."))

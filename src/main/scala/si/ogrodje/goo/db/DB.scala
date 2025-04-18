@@ -36,7 +36,7 @@ object DB:
         .load()
   yield configuredFlyway
 
-  def migrate = for
+  def migrate: ZIO[Any, Throwable, Unit] = for
     _ <- logInfo("Migrating,...")
     _ <- flyway.map(_.migrate())
   yield ()

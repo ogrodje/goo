@@ -40,7 +40,7 @@ final case class StartupSiParser(meetup: Meetup) extends Parser:
     hashBytes = digest.digest(url.toString.getBytes(StandardCharsets.UTF_8))
     id        = hashBytes.map("%02x".format(_)).mkString
   yield Event(
-    id = s"startup-si-${id}",
+    id = s"startup-si-$id",
     meetupID = meetup.id,
     source = StartupSi,
     sourceURL = rootUrl,

@@ -65,4 +65,4 @@ final class MeetupsSync private (private val hyGraph: HyGraph):
   yield ()
 
 object MeetupsSync:
-  def live = ZLayer.derive[MeetupsSync]
+  def live: ZLayer[HyGraph, Nothing, MeetupsSync] = ZLayer.derive[MeetupsSync]

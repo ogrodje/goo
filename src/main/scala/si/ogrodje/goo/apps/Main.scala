@@ -36,7 +36,7 @@ object Main extends ZIOAppDefault:
     _ <- APIServer.run.forever
   yield ()
 
-  def run = program
+  def run: ZIO[Environment & (ZIOAppArgs & Scope), Any, Any] = program
     .provide(
       Scope.default,
       Scheduler.live,

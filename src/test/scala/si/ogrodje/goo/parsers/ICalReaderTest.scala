@@ -12,9 +12,9 @@ object ICalReaderTest extends ZIOSpecDefault:
   private val after  = OffsetDateTime.of(2025, 4, 10, 0, 0, 0, 0, OffsetDateTime.now().getOffset).minusMonths(2)
   private val before = after.plusMonths(4)
 
-  extension (offsetDateTime: OffsetDateTime) def local: LocalDateTime = offsetDateTime.toLocalDateTime
+  import si.ogrodje.goo.EventOps.{*, given}
 
-  def spec = suite("ICalParserTest") {
+  def spec: Spec[Environment & (TestEnvironment & Scope), Any] = suite("ICalParserTest") {
     test("should parse") {
       for
         ics    <- ZIP.get("/ikt.ics.zip", "ikt.ics")

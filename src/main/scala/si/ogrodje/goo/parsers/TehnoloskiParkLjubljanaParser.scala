@@ -3,9 +3,9 @@ package si.ogrodje.goo.parsers
 import com.microsoft.playwright.Browser
 import io.circe.{parser, Decoder, Json}
 import si.ogrodje.goo.models.{Event, Meetup, Source}
-import zio.ZIO.{attempt, fromOption}
+import zio.ZIO.{attempt, fromOption, logWarning}
 import zio.http.{Client, Request, URL}
-import zio.{Scope, ZIO}
+import zio.{durationInt, Scope, ZIO}
 
 import java.time.{LocalDate, OffsetDateTime, ZoneId}
 
@@ -48,10 +48,35 @@ final case class TehnoloskiParkLjubljanaParser(meetup: Meetup) extends Parser:
 
     if errors.nonEmpty then ZIO.fail(errors.head) else ZIO.succeed(values)
 
+  private def fetchMoreDetailsForEvent(
+    client: Client,
+    event: Event
+  ): ZIO[Scope, Throwable, Event] = {
+    for
+      document      <- client.request(Request.get(event.eventURL.get)).flatMap(_.body.asDocument)
+      maybeDuration <-
+        document
+          .queryFirst("p.eventDate")
+          .map(_.map(_.text().replace("Datum dogodka: ", "").trim))
+      rawDuration   <- fromOption(maybeDuration).orElseFail(new RuntimeException("No duration found."))
+
+      ((startDateTime, hasStartTime), (endDateTime, hasEndTime)) <-
+        ZIO.fromTry(TehnoloskiParkLjubljanaDurationParser.parse(rawDuration))
+    yield event.copy(
+      startDateTime = startDateTime,
+      hasStartTime = hasStartTime,
+      endDateTime = Some(endDateTime),
+      hasEndTime = hasEndTime
+    )
+  }.orElse(
+    logWarning(s"Failed getting duration details from ${event.eventURL.get}").as(event)
+  )
+
   override protected def parse(
     client: Client,
     url: URL
   ): ZIO[Scope & Browser, Throwable, List[Event]] = for
+    now            <- zio.Clock.instant
     eventsURL      <- ZIO.succeed(url.addPath("/sl/koledar-dogodkov"))
     response       <- client.request(Request.get(eventsURL))
     document       <- response.body.asDocument
@@ -63,8 +88,13 @@ final case class TehnoloskiParkLjubljanaParser(meetup: Meetup) extends Parser:
       fromOption("dogodkiJSON = (.*);\\n".r.findFirstMatchIn(scriptTag).map(_.group(1)))
         .orElseFail(new NoSuchElementException("No dogodkiJSON payload found in script."))
     dogodkiJson    <- attempt(parser.parse(dogodkiJsonRaw).getOrElse(Json.obj()))
-    events         <- collectEventsFromJson(url, eventsURL, dogodkiJson)
 
-    timeAgo        = OffsetDateTime.now(cetZone).minusMonths(2)
-    filteredEvents = events.filter(_.startDateTime.isAfter(timeAgo))
-  yield filteredEvents
+    // Initial dogodkiJSON does NOT have detailed enough events additional request is needed
+    previewEvents <- collectEventsFromJson(url, eventsURL, dogodkiJson)
+
+    events <-
+      ZIO
+        .foreachPar(
+          previewEvents.filter(_.startDateTime.isAfter(now.atZone(cetZone).minusMonths(1).toOffsetDateTime))
+        )(e => fetchMoreDetailsForEvent(client, e).delay(1.second))
+  yield events

@@ -19,7 +19,7 @@ object Dependencies {
     val zioConfig: Version     = "4.0.4"
     val zioMetrics: Version    = "2.3.1"
     val postgresql: Version    = "42.7.5"
-    val flyway: Version        = "11.7.0"
+    val flyway: Version        = "11.7.2"
     val circe: Version         = "0.14.12"
   }
 
@@ -48,7 +48,7 @@ object Dependencies {
     "dev.zio" %% "zio-metrics-connectors",
     "dev.zio" %% "zio-metrics-connectors-prometheus"
   ).map(_ % Versions.zioMetrics) ++ Seq(
-    "dev.zio" %% "zio-json-yaml" % "0.7.39"
+    "dev.zio" %% "zio-json-yaml" % "0.7.42"
   ) ++ Seq(
     "eu.timepit" %% "refined" % "0.11.3"
   ) ++ Seq(

@@ -1,13 +1,11 @@
 package si.ogrodje.goo
 
 import enumeratum.*
-import io.circe.{Decoder, Encoder, Json}
 import si.ogrodje.goo.models.Source
 import zio.*
 import zio.Config.*
 import zio.config.*
 import zio.config.magnolia.*
-import zio.config.refined.*
 import zio.http.URL
 import zio.prelude.NonEmptyList
 

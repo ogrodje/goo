@@ -9,7 +9,6 @@ import zio.http.codec.PathCodec.*
 import zio.http.endpoint.*
 import zio.http.endpoint.openapi.*
 import si.ogrodje.goo.info.BuildInfo
-import zio.schema.annotation.description
 
 final class APIServer private (
   private val db: DB

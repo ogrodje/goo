@@ -4,7 +4,6 @@ import com.microsoft.playwright.Browser
 import si.ogrodje.goo.models.*
 import si.ogrodje.goo.models.Source.StartupSi
 import zio.{Scope, ZIO}
-import zio.ZIO.logInfo
 import zio.http.{Client, Request, URL}
 
 import java.nio.charset.StandardCharsets
@@ -13,7 +12,7 @@ import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
 
 final case class StartupSiParser(meetup: Meetup) extends Parser:
-  import DocumentOps.{*, given}
+  import DocumentOps.*
 
   private val formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm")
   private val cetZone   = ZoneId.of("Europe/Paris")

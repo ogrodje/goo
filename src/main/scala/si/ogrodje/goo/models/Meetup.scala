@@ -3,7 +3,6 @@ package si.ogrodje.goo.models
 import zio.http.URL
 import zio.schema.{DeriveSchema, Schema}
 import zio.http.codec.PathCodec.*
-import zio.http.codec.*
 import java.time.OffsetDateTime
 
 type MeetupID = String

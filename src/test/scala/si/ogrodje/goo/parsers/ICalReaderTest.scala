@@ -2,17 +2,16 @@ package si.ogrodje.goo.parsers
 
 import zio.*
 import zio.test.*
-import zio.test.Assertion.*
 import si.ogrodje.goo.ZIP
 
-import java.time.{LocalDateTime, OffsetDateTime, ZoneId}
+import java.time.OffsetDateTime
 import scala.io.AnsiColor.*
 
 object ICalReaderTest extends ZIOSpecDefault:
   private val after  = OffsetDateTime.of(2025, 4, 10, 0, 0, 0, 0, OffsetDateTime.now().getOffset).minusMonths(2)
   private val before = after.plusMonths(4)
 
-  import si.ogrodje.goo.EventOps.{*, given}
+  import si.ogrodje.goo.EventOps.*
 
   def spec: Spec[Environment & (TestEnvironment & Scope), Any] = suite("ICalParserTest") {
     test("should parse") {

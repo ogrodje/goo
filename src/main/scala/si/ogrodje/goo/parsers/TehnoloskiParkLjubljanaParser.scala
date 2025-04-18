@@ -10,7 +10,7 @@ import zio.{durationInt, Scope, ZIO}
 import java.time.{LocalDate, OffsetDateTime, ZoneId}
 
 final case class TehnoloskiParkLjubljanaParser(meetup: Meetup) extends Parser:
-  import DocumentOps.{*, given}
+  import DocumentOps.*
 
   private val cetZone = ZoneId.of("Europe/Ljubljana")
 

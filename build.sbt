@@ -36,7 +36,8 @@ lazy val root = project
       "-Yretain-trees",
       "-Xmax-inlines:100",
       "-Ximplicit-search-limit:150000",
-      "-language:implicitConversions"
+      "-language:implicitConversions",
+      "-Wunused:all"
     )
   )
   .settings(
@@ -133,3 +134,4 @@ lazy val root = project
   )
 
 addCommandAlias("fmt", ";scalafmtAll;scalafmtSbt")
+addCommandAlias("fix", ";scalafixAll")

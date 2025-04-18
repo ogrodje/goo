@@ -1,23 +1,19 @@
 package si.ogrodje.goo.parsers
 import zio.*
-import si.ogrodje.goo.{VCR, ZIP}
+import si.ogrodje.goo.ZIP
 import si.ogrodje.goo.browser.PWright
 import si.ogrodje.goo.models.Meetup
-import zio.ZIO.logInfo
 import zio.test.{assertCompletes, TestAspect, ZIOSpecDefault}
 import zio.http.*
-import zio.logging.backend.SLF4J
 
 import java.time.OffsetDateTime
 import zio.test.Spec
 import zio.test.TestEnvironment
 
 object TehnoloskiParkLjubljanaParserTest extends ZIOSpecDefault:
-  import si.ogrodje.goo.EventOps.{*, given}
+  import si.ogrodje.goo.EventOps.*
 
   def spec: Spec[Environment & (TestEnvironment & Scope), Any] = suite("TehnoloskiParkLjubljanaParserTest") {
-
-    val now = OffsetDateTime.now()
 
     test("should parse") {
       for

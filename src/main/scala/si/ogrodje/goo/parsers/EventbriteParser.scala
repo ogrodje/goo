@@ -1,13 +1,12 @@
 package si.ogrodje.goo.parsers
 
 import com.microsoft.playwright.Browser
-import doobie.syntax.OptionPutOps
 import io.circe.{Decoder, DecodingFailure, Json}
 import si.ogrodje.goo.models.Source.Eventbrite
 import si.ogrodje.goo.models.{Event, Meetup, Source}
-import zio.ZIO.{fromOption, logInfo}
+import zio.ZIO.fromOption
 import zio.http.{Client, Request, URL}
-import zio.{Scope, Task, ZIO}
+import zio.{Scope, ZIO}
 
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter

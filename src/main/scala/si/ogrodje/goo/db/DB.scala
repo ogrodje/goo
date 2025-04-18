@@ -4,7 +4,7 @@ import org.flywaydb.core.Flyway
 import si.ogrodje.goo.AppConfig
 import zio.*
 import zio.ZIO.logInfo
-import zio.{durationInt as _, *}
+import zio.durationInt as _
 import zio.interop.catz.*
 import doobie.*
 import doobie.implicits.*
@@ -20,7 +20,6 @@ object DBOps:
   given source: Meta[Source] = Meta[String].imap(raw => Source.withName(raw))(_.entryName)
 
 object DB:
-  import DBOps.given
 
   private def flyway: Task[Flyway] = for
     db              <- AppConfig.config.map(_.postgresDb)

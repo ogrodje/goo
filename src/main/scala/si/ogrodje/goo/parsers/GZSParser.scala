@@ -1,14 +1,10 @@
 package si.ogrodje.goo.parsers
 
-import com.microsoft.playwright.Page.ClickOptions
-import com.microsoft.playwright.assertions.PlaywrightAssertions
-import com.microsoft.playwright.{Browser, Page}
-import org.jsoup.nodes.Document
+import com.microsoft.playwright.Browser
 import si.ogrodje.goo.models.*
-import zio.ZIO.{logInfo, *}
-import zio.http.{Client, Request, URL}
-import zio.{Scope, Task, ZIO}
-import com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat
+import zio.ZIO.*
+import zio.http.{Client, URL}
+import zio.{Scope, ZIO}
 import org.jsoup.Jsoup
 
 import scala.jdk.CollectionConverters.*

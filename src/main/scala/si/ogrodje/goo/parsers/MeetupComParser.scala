@@ -1,7 +1,7 @@
 package si.ogrodje.goo.parsers
 
 import com.microsoft.playwright.Browser
-import io.circe.{Decoder, DecodingFailure, Json}
+import io.circe.{Decoder, Json}
 import si.ogrodje.goo.models.{Event, Meetup, Source}
 import zio.ZIO.{fromOption, logInfo}
 import zio.http.{Client, Request, URL}

@@ -3,7 +3,7 @@ package si.ogrodje.goo.sync
 import si.ogrodje.goo.models.*
 import zio.*
 import zio.http.*
-import zio.stream.{Stream, ZStream}
+import zio.stream.ZStream
 import ZIO.logInfo
 import com.microsoft.playwright.Browser
 import si.ogrodje.goo.AppConfig

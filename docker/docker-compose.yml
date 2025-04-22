@@ -24,6 +24,25 @@ services:
     volumes:
       - playwright-cache:/root/.cache/ms-playwright
 
+
+  keycloak:
+    image: quay.io/keycloak/keycloak:26.2
+    ports:
+      - "0.0.0.0:8080:8080"
+    environment:
+      - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
+      - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_BOOTSTRAP_ADMIN_USERNAME=${KEYCLOAK_ADMIN}
+      - KC_BOOTSTRAP_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
+      - KC_DB=postgres
+      - KC_DB_URL=jdbc:postgresql://pg:5432/${KEYCLOAK_DB}
+      - KC_DB_USERNAME=${POSTGRES_USER}
+      - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - KEYCLOAK_LOGLEVEL=INFO
+    command: 'start-dev'
+    depends_on:
+      - pg
+
   pg:
     image: postgres:17-alpine
     ports:
@@ -32,6 +51,8 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
+
+
 
 volumes:
   playwright-cache:

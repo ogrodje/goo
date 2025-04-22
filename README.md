@@ -1,7 +1,7 @@
 ## goo the Ogrodje Operating System
 
 [![Ogrodje Site Build](https://github.com/ogrodje/goo/actions/workflows/build.yml/badge.svg)](https://github.com/ogrodje/goo/actions/workflows/build.yml)
-[![OpenAPI Documentation](https://img.shields.io/badge/OpenAPI_Documentation-📕-blue)]([https://docs.browser-use.com](https://goo.ogrodje.si/docs/openapi))
+[![OpenAPI Documentation](https://img.shields.io/badge/OpenAPI_Documentation-📕-blue)](https://goo.ogrodje.si/docs/openapi)
 
 Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 

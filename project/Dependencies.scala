@@ -8,7 +8,7 @@ object Dependencies {
     val log4cats: Version      = "2.7.0"
     val scalaTest: Version     = "3.2.19"
     val doobie: Version        = "1.0.0-RC8"
-    val sentry: Version        = "8.8.0"
+    val sentry: Version        = "8.9.0"
     val sentryLogback: Version = sentry
     val sentryAgent: Version   = sentry
     val ical4j: Version        = "4.1.1"
@@ -20,7 +20,7 @@ object Dependencies {
     val zioMetrics: Version    = "2.3.1"
     val postgresql: Version    = "42.7.5"
     val flyway: Version        = "11.7.2"
-    val circe: Version         = "0.14.12"
+    val circe: Version         = "0.14.13"
   }
 
   lazy val zio: Modules = Seq(
@@ -31,7 +31,7 @@ object Dependencies {
     "dev.zio" %% "zio-test-sbt",
     "dev.zio" %% "zio-test-magnolia"
   ).map(_ % Versions.zio % Test) ++ Seq(
-    "dev.zio" %% "zio-prelude" % "1.0.0-RC39",
+    "dev.zio" %% "zio-prelude" % "1.0.0-RC40",
     "dev.zio" %% "zio-cli"     % "0.7.1"
   ) ++ Seq(
     "dev.zio" %% "zio-logging",

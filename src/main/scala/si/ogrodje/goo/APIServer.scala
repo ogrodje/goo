@@ -9,14 +9,16 @@ import zio.http.codec.PathCodec.*
 import zio.http.endpoint.*
 import zio.http.endpoint.openapi.*
 import si.ogrodje.goo.info.BuildInfo
+import zio.http.Header.AccessControlAllowOrigin
+import zio.http.Middleware.{cors, CorsConfig}
 
 final class APIServer private (
   private val db: DB
 ):
-  private val dbLayer = ZLayer.succeed(db)
-
+  private val dbLayer          = ZLayer.succeed(db)
   private val ogrodjeHome: URL = URL.decode("https://ogrodje.si?from=goo").toOption.get
 
+  private val corsConfig: CorsConfig        = CorsConfig(allowedOrigin = _ => Some(AccessControlAllowOrigin.All))
   private val routes: Routes[Any, Response] = Routes(
     Method.GET / Root -> handler(Response.redirect(ogrodjeHome, isPermanent = true))
   )
@@ -75,12 +77,16 @@ final class APIServer private (
 
   private val swaggerRoutes = SwaggerUI.routes("docs" / "openapi", openAPI)
 
-  private def run = for
+  private def run: ZIO[Any, Throwable, Nothing] = for
     port   <- AppConfig.port
     _      <- logInfo(s"Starting server on port $port")
     server <-
       Server
-        .serve(routes ++ Routes(meetupsRoute, eventsRoute, meetupEventsRoute, timelineRoute) ++ swaggerRoutes)
+        .serve(
+          routes ++ Routes(meetupsRoute, eventsRoute, meetupEventsRoute, timelineRoute) @@ cors(
+            corsConfig
+          ) ++ swaggerRoutes
+        )
         .provide(dbLayer, Server.defaultWith(_.port(port)))
   yield server
 

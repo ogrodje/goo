@@ -4,7 +4,6 @@ import org.flywaydb.core.Flyway
 import si.ogrodje.goo.AppConfig
 import zio.*
 import zio.ZIO.logInfo
-import zio.durationInt as _
 import zio.interop.catz.*
 import doobie.*
 import doobie.implicits.*

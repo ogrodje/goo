@@ -50,19 +50,24 @@ final case class EventbriteParser(meetup: Meetup) extends Parser:
               url                                      <- cursor.get[URL]("url")
               description                              <- cursor.get[Option[String]]("description")
               (maybeLocationName, maybeLocationAddress) = locationFromEvent(json)
-            yield Event(
-              id = url.path.toString.split("-").lastOption.map(r => s"eventbrite-$r").get,
-              meetupID = meetup.id,
-              source = Eventbrite,
-              sourceURL = sourceURL,
-              title = name,
-              description = description,
-              eventURL = Some(url),
-              startDateTime = startDate,
-              endDateTime = endDate,
-              locationName = maybeLocationName,
-              locationAddress = maybeLocationAddress
-            )
+              eventID                                   =
+                url.path.toString.split("-").lastOption.map(r => s"eventbrite-$r").get
+            yield Event
+              .empty(
+                id = eventID,
+                meetupID = meetup.id,
+                source = Eventbrite,
+                sourceURL = sourceURL,
+                title = name,
+                startDateTime = startDate
+              )
+              .copy(
+                description = description,
+                eventURL = Some(url),
+                endDateTime = endDate,
+                locationName = maybeLocationName,
+                locationAddress = maybeLocationAddress
+              )
           }
           .collect { case Right(event) => event }
     yield events

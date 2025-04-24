@@ -38,21 +38,22 @@ final case class StartupSiParser(meetup: Meetup) extends Parser:
 
     hashBytes = digest.digest(url.toString.getBytes(StandardCharsets.UTF_8))
     id        = hashBytes.map("%02x".format(_)).mkString
-  yield Event(
-    id = s"startup-si-$id",
-    meetupID = meetup.id,
-    source = StartupSi,
-    sourceURL = rootUrl,
-    title = title,
-    startDateTime = maybeStart.get,
-    description = None,
-    eventURL = Some(url),
-    endDateTime = maybeEnd,
-    hasStartTime = true,
-    hasEndTime = true,
-    locationName = Some(locationName),
-    locationAddress = None
-  )
+  yield Event
+    .empty(
+      id = s"startup-si-$id",
+      meetupID = meetup.id,
+      source = StartupSi,
+      sourceURL = rootUrl,
+      title = title,
+      startDateTime = maybeStart.get
+    )
+    .copy(
+      description = None,
+      eventURL = Some(url),
+      endDateTime = maybeEnd,
+      locationName = Some(locationName),
+      locationAddress = None
+    )
 
   override protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]] = for
     rootUrl    <- ZIO.succeed(url.path("/sl-si/dogodki"))

@@ -37,6 +37,10 @@ final class APIServer private (
     .query(HttpCodec.query[Int]("limit").optional ++ HttpCodec.query[Int]("offset").optional)
     .out[List[Event]]
 
+  private val createEvent = Endpoint(RoutePattern.POST / "events" ?? Doc.p("Create an event"))
+    .in[CreateEvent]
+    .out[Event]
+
   private val getTimeline = Endpoint(RoutePattern.GET / "timeline" ?? Doc.p("Events timeline"))
     .out[List[TimelineEvent]]
 
@@ -59,6 +63,10 @@ final class APIServer private (
       .tapError(err => ZIO.logErrorCause("Error in events route", Cause.fail(err)))
       .orDie
 
+  private def createEventRoute = createEvent.implement: createEvent =>
+    logInfo(s"Creating event w/ ${createEvent}")
+      .as(createEvent.toDBEvent)
+
   private def timelineRoute = getTimeline.implement: _ =>
     Events
       .timeline(100, 0)
@@ -72,6 +80,7 @@ final class APIServer private (
       getMeetups,
       getMeetupEvents,
       getEvents,
+      createEvent,
       getTimeline
     )
 
@@ -83,7 +92,7 @@ final class APIServer private (
     server <-
       Server
         .serve(
-          routes ++ Routes(meetupsRoute, eventsRoute, meetupEventsRoute, timelineRoute) @@ cors(
+          routes ++ Routes(meetupsRoute, eventsRoute, meetupEventsRoute, timelineRoute, createEventRoute) @@ cors(
             corsConfig
           ) ++ swaggerRoutes
         )

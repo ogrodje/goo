@@ -7,7 +7,7 @@ with [OpenAPI Docs here](https://goo.ogrodje.si/docs/openapi).
 sbt run
 ```
 
-## Supported platforms and partners
+## TODO
 
 - [x] Add Eventbrite parser
 - [x] Add Meetup.com parser

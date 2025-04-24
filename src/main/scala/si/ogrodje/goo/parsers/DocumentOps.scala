@@ -41,8 +41,3 @@ object DocumentOps:
       readText <- ZIO.attempt(element.data())
       json     <- ZIO.fromEither(parse(readText))
     yield json
-
-  extension (cursor: HCursor)
-    def downFields(field: String*): ACursor =
-      val (head, tail) = field.toList.splitAt(1)
-      tail.foldLeft(cursor.downField(head.head))(_.downField(_))

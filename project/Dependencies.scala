@@ -7,7 +7,7 @@ object Dependencies {
   object Versions {
     val log4cats: Version      = "2.7.0"
     val scalaTest: Version     = "3.2.19"
-    val doobie: Version        = "1.0.0-RC8"
+    val doobie: Version        = "1.0.0-RC9"
     val sentry: Version        = "8.9.0"
     val sentryLogback: Version = sentry
     val sentryAgent: Version   = sentry

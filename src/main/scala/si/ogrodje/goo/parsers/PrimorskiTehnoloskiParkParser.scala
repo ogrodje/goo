@@ -28,19 +28,22 @@ final case class PrimorskiTehnoloskiParkParser(meetup: Meetup) extends Parser:
       startDateTime <- cursor.get[OffsetDateTime]("startDate")
       endDate       <- cursor.get[Option[OffsetDateTime]]("endDate")
       description   <- cursor.get[Option[String]]("description")
-    yield Event(
-      id = s"ptp-${id}",
-      meetupID = meetup.id,
-      source = PrimorskiTehnoloskiPark,
-      sourceURL = url,
-      title = title,
-      startDateTime = startDateTime,
-      description = description,
-      eventURL = Some(url),
-      endDateTime = endDate,
-      hasStartTime = true,
-      hasEndTime = true
-    )
+    yield Event
+      .empty(
+        id = s"ptp-$id",
+        meetupID = meetup.id,
+        source = PrimorskiTehnoloskiPark,
+        sourceURL = url,
+        title = title,
+        startDateTime = startDateTime
+      )
+      .copy(
+        description = description,
+        eventURL = Some(url),
+        endDateTime = endDate,
+        hasStartTime = true,
+        hasEndTime = true
+      )
 
     parsed.left.map(err => err.getMessage)
   }

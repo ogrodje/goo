@@ -18,31 +18,10 @@ object EventGrouping       extends Enum[EventGrouping] with CirceEnum[EventGroup
   case object Month extends EventGrouping
   val values = findValues
 
-final case class TimelineEvent(
-  id: String,
-  meetupID: String,
-  source: Source,
-  sourceURL: URL,
-  title: String,
-  meetupName: String,
-  description: Option[String],
-  eventURL: Option[URL],
-  locationName: Option[String],
-  locationAddress: Option[String],
-  startDateTime: OffsetDateTime,
-  hasStartTime: Boolean,
-  endDateTime: OffsetDateTime,
-  hasEndTime: Boolean
-)
 
-object TimelineEvent:
-  given Schema[URL] =
-    Schema.primitive[String].transform(str => URL.decode(str).toOption.get, _.encode)
-
-  given schema: Schema[TimelineEvent] = DeriveSchema.gen
 
 object Events:
-  import DBOps.given
+  import DBOps.{*, given}
 
   def upsert(event: Event): RIO[DB, Int] = DB.transact:
     sql"""
@@ -89,10 +68,39 @@ object Events:
           updated_at = now()
         """.updateWithLabel("upsert-event").run
 
+  def create(event: Event): RIO[DB, Int] = DB.transact:
+    sql"""
+          INSERT INTO events (
+            id,
+            meetup_id,
+            source,
+            source_url,
+            title,
+            start_date_time,
+            end_date_time,
+            description,
+            location_name,
+            location_address,
+            updated_at
+          ) VALUES (
+            ${event.id},
+            ${event.meetupID},
+            ${event.source.entryName},
+            ${event.sourceURL},
+            ${event.title},
+            ${event.startDateTime},
+            ${event.endDateTime},
+            ${event.description},
+            ${event.locationName},
+            ${event.locationAddress},
+            now()
+          )
+    """.updateWithLabel("create-event").run
+
   private val baseFields: Fragment =
     fr"id, meetup_id, source, source_url, title, start_date_time, description, " ++
       fr"event_url, end_date_time, has_start_time, has_end_time, updated_at, " ++
-      fr"location_name, location_address"
+      fr"location_name, location_address, hidden_at, promoted_at"
 
   def all(limit: Int, offset: Int, maybeMeetupID: Option[MeetupID] = None): RIO[DB, List[Event]] =
     val baseQuery = fr"""SELECT $baseFields FROM events """
@@ -125,11 +133,14 @@ object Events:
              e.start_date_time,
              e.has_start_time,
              e.end_date_time,
-             e.has_end_time
+             e.has_end_time,
+             e.hidden_at,
+             e.promoted_at
         FROM events e
         LEFT JOIN meetups m ON e.meetup_id = m.id
-        WHERE 
-          m.stage = 'PUBLISHED' 
+        WHERE
+          m.stage = 'PUBLISHED'
+          AND e.hidden_at IS NULL
           AND (
             start_date_time >= now() OR
             (
@@ -144,8 +155,4 @@ object Events:
             )
         ORDER BY e.start_date_time"""
 
-    DB.transact(
-      baseQuery
-        .queryWithLabel[TimelineEvent]("events-timeline")
-        .to[List]
-    )
+    DB.transact(baseQuery.queryWithLabel[TimelineEvent]("events-timeline").to[List])

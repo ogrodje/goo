@@ -80,12 +80,11 @@ final class APIServer private (
 
   private def createEventRoute = createEvent.implement: createEvent =>
     (for
-      event <- ZIO.attempt(createEvent.toDBEvent)
-      saved <- Events.create(event)
-      _     <- logInfo(s"Created event: ${event.id} result: $saved")
+      (event, result) <- ZIO.attempt(createEvent.toDBEvent).flatMap(e => Events.create(e).map(r => e -> r))
+      _               <- logInfo(s"Created event: ${event.id} result: $result")
     yield event).orDie
 
-  private def updateEventRoute = updateEvent.implement: (eventId, createEvent) =>
+  private def updateEventRoute() = updateEvent.implement: (eventId, createEvent) =>
     (for
       dbEvent     <- Events.find(eventId)
       updatedEvent = createEvent.toDBEvent
@@ -136,7 +135,7 @@ final class APIServer private (
         meetupEventsRoute,
         timelineRoute,
         createEventRoute,
-        updateEventRoute
+        updateEventRoute()
       ) @@ cors(
         corsConfig
       ) ++ swaggerRoutes

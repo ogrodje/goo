@@ -20,15 +20,27 @@ object Meetups:
          |$allFields
          |FROM meetups""".stripMargin.queryWithLabel[Meetup]("all-meetups").to[List]
 
-  def public(limit: Int, offset: Int): RIO[DB, List[Meetup]] = DB.transact:
-    sql"""
-         |SELECT
-         |$allFields
-         |FROM meetups
-         |WHERE meetups.stage = 'PUBLISHED'
-         |ORDER BY name
-         |LIMIT $limit OFFSET $offset
-         |""".stripMargin.queryWithLabel[Meetup]("all-meetups").to[List]
+  def public(limit: Int, offset: Int, maybeQuery: Option[String]): RIO[DB, List[Meetup]] = DB.transact:
+    val query = maybeQuery match
+      case Some(webQuery) =>
+        sql"""
+             |SELECT
+             |$allFields, ts_rank_cd(name_vec, query) AS rank
+             |FROM meetups, websearch_to_tsquery('english', $webQuery) query
+             |WHERE name_vec @@ query
+             |ORDER BY rank DESC
+             |LIMIT $limit OFFSET $offset
+             |""".stripMargin
+      case None           =>
+        sql"""
+             |SELECT
+             |$allFields
+             |FROM meetups
+             |ORDER BY name
+             |LIMIT $limit OFFSET $offset
+             |""".stripMargin
+
+    query.queryWithLabel[Meetup]("all-meetups").to[List]
 
   def insert(meetups: Meetup*): RIO[DB, Unit] = ZIO.foreachDiscard(meetups.toSeq): meetup =>
     DB.transact:

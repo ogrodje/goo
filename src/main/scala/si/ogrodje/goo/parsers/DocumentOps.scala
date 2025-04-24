@@ -1,6 +1,6 @@
 package si.ogrodje.goo.parsers
 
-import io.circe.{ACursor, Decoder, HCursor, Json}
+import io.circe.{Decoder, Json}
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.parser.Parser
 import zio.{Task, ZIO}

@@ -1,13 +1,12 @@
 package si.ogrodje.goo.models
 
-import enumeratum.*
 import doobie.*
 import doobie.implicits.*
 import doobie.postgres.implicits.*
+import enumeratum.*
 import si.ogrodje.goo.db.{DB, DBOps}
-import zio.RIO
 import zio.http.URL
-import zio.schema.{DeriveSchema, Schema}
+import zio.{RIO, ZIO}
 
 import java.time.OffsetDateTime
 
@@ -17,8 +16,6 @@ object EventGrouping       extends Enum[EventGrouping] with CirceEnum[EventGroup
   case object Week  extends EventGrouping
   case object Month extends EventGrouping
   val values = findValues
-
-
 
 object Events:
   import DBOps.{*, given}
@@ -68,41 +65,46 @@ object Events:
           updated_at = now()
         """.updateWithLabel("upsert-event").run
 
-  def create(event: Event): RIO[DB, Int] = DB.transact:
-    sql"""
-          INSERT INTO events (
-            id,
-            meetup_id,
-            source,
-            source_url,
-            title,
-            start_date_time,
-            end_date_time,
-            description,
-            location_name,
-            location_address,
-            updated_at
-          ) VALUES (
-            ${event.id},
-            ${event.meetupID},
-            ${event.source.entryName},
-            ${event.sourceURL},
-            ${event.title},
-            ${event.startDateTime},
-            ${event.endDateTime},
-            ${event.description},
-            ${event.locationName},
-            ${event.locationAddress},
-            now()
-          )
-    """.updateWithLabel("create-event").run
+  def create(event: Event): RIO[DB, Int] = for
+    _      <- ZIO.fromOption(event.eventURL).orElseFail(new Exception("Event URL is required"))
+    result <- DB.transact:
+                sql"""
+            INSERT INTO events (
+              id,
+              meetup_id,
+              source,
+              source_url,
+              event_url,
+              title,
+              start_date_time,
+              end_date_time,
+              description,
+              location_name,
+              location_address,
+              updated_at
+            ) VALUES (
+              ${event.id},
+              ${event.meetupID},
+              ${event.source.entryName},
+              ${event.sourceURL},
+              ${event.eventURL},
+              ${event.title},
+              ${event.startDateTime},
+              ${event.endDateTime},
+              ${event.description},
+              ${event.locationName},
+              ${event.locationAddress},
+              now()
+            )
+      """.updateWithLabel("create-event").run
+  yield result
 
   private val baseFields: Fragment =
     fr"id, meetup_id, source, source_url, title, start_date_time, description, " ++
       fr"event_url, end_date_time, has_start_time, has_end_time, updated_at, " ++
       fr"location_name, location_address, hidden_at, promoted_at"
 
-  def all(limit: Int, offset: Int, maybeMeetupID: Option[MeetupID] = None): RIO[DB, List[Event]] =
+  def public(limit: Int, offset: Int, maybeMeetupID: Option[MeetupID] = None): RIO[DB, List[Event]] =
     val baseQuery = fr"""SELECT $baseFields FROM events """
 
     val whereFilter = maybeMeetupID match

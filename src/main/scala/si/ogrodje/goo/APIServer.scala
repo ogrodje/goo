@@ -25,16 +25,25 @@ final class APIServer private (
 
   // Endpoints
   private val getMeetups = Endpoint(RoutePattern.GET / "meetups" ?? Doc.p("All meetups"))
-    .query(HttpCodec.query[Int]("limit").optional ++ HttpCodec.query[Int]("offset").optional)
+    .query(
+      HttpCodec.query[Int]("limit").optional ++
+        HttpCodec.query[Int]("offset").optional ++
+        HttpCodec.query[String]("query").optional
+    )
     .out[List[Meetup]]
 
   private val getMeetupEvents = Endpoint(
     RoutePattern.GET / "meetups" / PathCodec.string("meetup_id") / "events" ?? Doc.p("All events for a meetup")
-  ).query(HttpCodec.query[Int]("limit").optional ++ HttpCodec.query[Int]("offset").optional)
-    .out[List[Event]]
+  ).query(
+    HttpCodec.query[Int]("limit").optional ++
+      HttpCodec.query[Int]("offset").optional
+  ).out[List[Event]]
 
   private val getEvents = Endpoint(RoutePattern.GET / "events" ?? Doc.p("All Events"))
-    .query(HttpCodec.query[Int]("limit").optional ++ HttpCodec.query[Int]("offset").optional)
+    .query(
+      HttpCodec.query[Int]("limit").optional ++
+        HttpCodec.query[Int]("offset").optional
+    )
     .out[List[Event]]
 
   private val createEvent = Endpoint(RoutePattern.POST / "events" ?? Doc.p("Create an event"))
@@ -45,27 +54,30 @@ final class APIServer private (
     .out[List[TimelineEvent]]
 
   // Routes
-  private def meetupsRoute = getMeetups.implement: (maybeLimit, maybeOffset) =>
+  private def meetupsRoute = getMeetups.implement: (maybeLimit, maybeOffset, maybeQuery) =>
     Meetups
-      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0))
+      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeQuery.filterNot(_.isEmpty))
       .tapError(err => ZIO.logErrorCause("Error in events route", Cause.fail(err)))
       .orDie
 
   private def meetupEventsRoute = getMeetupEvents.implement: (meetupId, maybeLimit, maybeOffset) =>
     Events
-      .all(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeMeetupID = Some(meetupId))
+      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeMeetupID = Some(meetupId))
       .tapError(err => ZIO.logErrorCause("Error in events route", Cause.fail(err)))
       .orDie
 
   private def eventsRoute = getEvents.implement: (maybeLimit, maybeOffset) =>
     Events
-      .all(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0))
+      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0))
       .tapError(err => ZIO.logErrorCause("Error in events route", Cause.fail(err)))
       .orDie
 
   private def createEventRoute = createEvent.implement: createEvent =>
-    logInfo(s"Creating event w/ ${createEvent}")
-      .as(createEvent.toDBEvent)
+    (for
+      event <- ZIO.attempt(createEvent.toDBEvent)
+      saved <- Events.create(event)
+      _     <- logInfo(s"Created event: ${event.id} w/ ${saved}")
+    yield event).orDie
 
   private def timelineRoute = getTimeline.implement: _ =>
     Events

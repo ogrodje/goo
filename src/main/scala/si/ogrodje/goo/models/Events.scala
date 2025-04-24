@@ -99,21 +99,62 @@ object Events:
       """.updateWithLabel("create-event").run
   yield result
 
+  def update(event: Event): RIO[DB, Int] = DB.transact:
+    sql"""
+          UPDATE events SET
+            meetup_id = ${event.meetupID},
+            title = ${event.title},
+            event_url = ${event.eventURL},
+            start_date_time = ${event.startDateTime},
+            end_date_time = ${event.endDateTime},
+            description = ${event.description},
+            location_name = ${event.locationName},
+            location_address = ${event.locationAddress},
+            hidden_at = ${event.hiddenAt},
+            promoted_at = ${event.promotedAt},
+            updated_at = now()
+          WHERE events.id = ${event.id}
+    """.stripMargin.updateWithLabel("update-event").run
+
   private val baseFields: Fragment =
-    fr"id, meetup_id, source, source_url, title, start_date_time, description, " ++
-      fr"event_url, end_date_time, has_start_time, has_end_time, updated_at, " ++
+    fr"e.id, meetup_id, source, source_url, title, start_date_time, description, " ++
+      fr"event_url, end_date_time, has_start_time, has_end_time, e.updated_at, " ++
       fr"location_name, location_address, hidden_at, promoted_at"
 
-  def public(limit: Int, offset: Int, maybeMeetupID: Option[MeetupID] = None): RIO[DB, List[Event]] =
-    val baseQuery = fr"""SELECT $baseFields FROM events """
+  def public(
+    limit: Int,
+    offset: Int,
+    maybeMeetupID: Option[MeetupID] = None,
+    maybeQuery: Option[String] = None
+  ): RIO[DB, List[Event]] =
+    val baseQuery = maybeQuery match
+      case Some(searchQuery) =>
+        fr"""
+            SELECT $baseFields, m.name AS meetup_name,
+            (ts_rank_cd(e.title_vec, query) * 2 + ts_rank_cd(m.name_vec, query)) *
+            (1 + 1.0/(extract(epoch from (e.start_date_time - CURRENT_DATE))/86400 + 1)) AS rank
+            FROM events e
+              LEFT JOIN meetups m ON e.meetup_id = m.id,
+              websearch_to_tsquery($searchQuery) query
+        """
+      case None              => fr"""SELECT $baseFields FROM events e """
 
-    val whereFilter = maybeMeetupID match
-      case Some(meetupID) => fr"WHERE meetup_id = $meetupID"
-      case None           => fr""
+    val whereFilter = maybeMeetupID -> maybeQuery match
+      case (Some(meetupID), _) => fr"WHERE meetup_id = $meetupID"
+      case (_, Some(_))        => fr"WHERE query @@ e.title_vec OR query @@ m.name_vec"
+      case _                   => fr""
 
-    val orderAndLimit = fr"ORDER BY start_date_time DESC LIMIT $limit OFFSET $offset"
+    val orderAndLimit = maybeQuery match
+      case Some(value) => fr"ORDER BY rank DESC LIMIT $limit OFFSET $offset"
+      case None        => fr"ORDER BY start_date_time DESC LIMIT $limit OFFSET $offset"
 
     DB.transact((baseQuery ++ whereFilter ++ orderAndLimit).queryWithLabel[Event]("read-events").to[List])
+
+  def find(eventID: EventID): RIO[DB, Event] =
+    val baseQuery = fr"""SELECT $baseFields FROM events WHERE events.id = $eventID LIMIT 1"""
+
+    DB.transact(baseQuery.queryWithLabel[Event]("read-event").option)
+      .map(_.getOrElse(throw new Exception("Event not found")))
 
   def timeline(
     limit: Int,

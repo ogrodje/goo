@@ -42,12 +42,18 @@ final class APIServer private (
   private val getEvents = Endpoint(RoutePattern.GET / "events" ?? Doc.p("All Events"))
     .query(
       HttpCodec.query[Int]("limit").optional ++
-        HttpCodec.query[Int]("offset").optional
+        HttpCodec.query[Int]("offset").optional ++
+        HttpCodec.query[String]("query").optional
     )
     .out[List[Event]]
 
   private val createEvent = Endpoint(RoutePattern.POST / "events" ?? Doc.p("Create an event"))
     .in[CreateEvent]
+    .out[Event]
+
+  private val updateEvent = Endpoint(
+    RoutePattern.PUT / "events" / PathCodec.string("event_id") ?? Doc.p("Update an event")
+  ).in[CreateEvent]
     .out[Event]
 
   private val getTimeline = Endpoint(RoutePattern.GET / "timeline" ?? Doc.p("Events timeline"))
@@ -62,13 +68,13 @@ final class APIServer private (
 
   private def meetupEventsRoute = getMeetupEvents.implement: (meetupId, maybeLimit, maybeOffset) =>
     Events
-      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeMeetupID = Some(meetupId))
+      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeMeetupID = Some(meetupId), maybeQuery = None)
       .tapError(err => ZIO.logErrorCause("Error in events route", Cause.fail(err)))
       .orDie
 
-  private def eventsRoute = getEvents.implement: (maybeLimit, maybeOffset) =>
+  private def eventsRoute = getEvents.implement: (maybeLimit, maybeOffset, maybeQuery) =>
     Events
-      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0))
+      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeQuery = maybeQuery.filterNot(_.isEmpty))
       .tapError(err => ZIO.logErrorCause("Error in events route", Cause.fail(err)))
       .orDie
 
@@ -76,8 +82,29 @@ final class APIServer private (
     (for
       event <- ZIO.attempt(createEvent.toDBEvent)
       saved <- Events.create(event)
-      _     <- logInfo(s"Created event: ${event.id} w/ ${saved}")
+      _     <- logInfo(s"Created event: ${event.id} result: $saved")
     yield event).orDie
+
+  private def updateEventRoute = updateEvent.implement: (eventId, createEvent) =>
+    (for
+      dbEvent     <- Events.find(eventId)
+      updatedEvent = createEvent.toDBEvent
+      event        = dbEvent.copy(
+                       meetupID = updatedEvent.meetupID,
+                       title = updatedEvent.title,
+                       eventURL = updatedEvent.eventURL,
+                       startDateTime = updatedEvent.startDateTime,
+                       endDateTime = updatedEvent.endDateTime,
+                       description = updatedEvent.description,
+                       locationName = updatedEvent.locationName,
+                       locationAddress = updatedEvent.locationAddress,
+                       hiddenAt = updatedEvent.hiddenAt,
+                       promotedAt = updatedEvent.promotedAt
+                     )
+      saved       <- Events.update(event)
+      _           <- logInfo(s"Updated event: ${event.id} result: $saved")
+      refreshed   <- Events.find(eventId)
+    yield refreshed).orDie
 
   private def timelineRoute = getTimeline.implement: _ =>
     Events
@@ -93,6 +120,7 @@ final class APIServer private (
       getMeetupEvents,
       getEvents,
       createEvent,
+      updateEvent,
       getTimeline
     )
 
@@ -101,13 +129,20 @@ final class APIServer private (
   private def run: ZIO[Any, Throwable, Nothing] = for
     port   <- AppConfig.port
     _      <- logInfo(s"Starting server on port $port")
+    serving =
+      routes ++ Routes(
+        meetupsRoute,
+        eventsRoute,
+        meetupEventsRoute,
+        timelineRoute,
+        createEventRoute,
+        updateEventRoute
+      ) @@ cors(
+        corsConfig
+      ) ++ swaggerRoutes
     server <-
       Server
-        .serve(
-          routes ++ Routes(meetupsRoute, eventsRoute, meetupEventsRoute, timelineRoute, createEventRoute) @@ cors(
-            corsConfig
-          ) ++ swaggerRoutes
-        )
+        .serve(serving)
         .provide(dbLayer, Server.defaultWith(_.port(port)))
   yield server
 

@@ -43,6 +43,5 @@ final case class CreateEvent(
   )
 
 object CreateEvent:
-  given Schema[URL]                 =
-    Schema.primitive[String].transform(str => URL.decode(str).toOption.get, _.encode)
+  given Schema[URL]                 = Schema.primitive[String].transform(str => URL.decode(str).toOption.get, _.encode)
   given schema: Schema[CreateEvent] = DeriveSchema.gen

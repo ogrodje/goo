@@ -1,0 +1,68 @@
+### GET timeline
+GET {{goo_endpoint}}/timeline
+
+### GET events
+GET {{goo_endpoint}}/events
+
+### GET meetups (query: ruby)
+GET {{goo_endpoint}}/meetups?query=ruby
+
+### GET events
+@query = "Ruby"
+
+GET {{goo_endpoint}}/events?query={{query}}&limit=1
+
+
+### Authentication w/ keycloak
+# @name Authentication
+POST {{keycloak_endpoint}}/realms/{{keycloak_realm}}/protocol/openid-connect/token
+Content-Type: application/x-www-form-urlencoded
+
+grant_type = password &
+client_id = {{keycloak_client_id}} &
+client_secret = {{keycloak_client_secret}} &
+username = {{user_one_username}} &
+password = {{user_one_password}}
+
+> {%
+    console.log(`Setting access token to ${response.body.access_token}`)
+    client.global.set("access_token", response.body.access_token);
+%}
+
+### Find Ogrodje event
+GET {{goo_endpoint}}/meetups?query=Ogrodje
+
+> {%
+    const ogrodje_meetup_id = response.body[0].id
+    console.log(`Ogrodje id is ${ogrodje_meetup_id}`)
+    client.global.set("ogrodje_meetup_id", ogrodje_meetup_id);
+%}
+
+### Create event
+# @name CreateEvent
+< {%
+    let today = new Date();
+    let futureDate = new Date(today);
+    futureDate.setDate(today.getDate() + 7);
+    request.variables.set("startDateTime", futureDate.toISOString());
+    request.variables.set("endDateTime", futureDate.toISOString());
+%}
+POST {{goo_endpoint}}/events
+Accept: application/json
+Content-Type: application/json
+
+{
+  "meetupID": "{{ogrodje_meetup_id}}",
+  "startDateTime": "{{startDateTime}}",
+  "eventURL": "https://ogrodje.si",
+  "locationAddress": "Dunajska 5, 1000 Ljubljana",
+  "title": "My demo event from IntelliJ IDEA",
+  "locationName": "Ogrodje HQ",
+  "description": "Demo event",
+  "endDateTime": "{{endDateTime}}"
+}
+
+> {%
+    let last_event_id = response.body.id
+    console.log(`Event created with is ${last_event_id}`)
+%}

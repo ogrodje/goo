@@ -22,6 +22,8 @@ sbt run
 - [x] Add [Finance IKTInformator](https://www.finance.si/ikt)
 - [x] Improve Sentry integration for better observability
 - [x] Add Sentry for error and release tracking
+- [ ] Add [FRI Dogodki](https://www.fri.uni-lj.si/sl/koledar-dogodkov)
+- [ ] Add [FERI Dogodki](https://feri.um.si/dogodki/)
 - [ ] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
 - [ ] Add [Kompot](https://kompot.si/)
 - [ ] Sent automatic newsletter for weekly/monthly events (via [Postmark](https://postmarkapp.com/))

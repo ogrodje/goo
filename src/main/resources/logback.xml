@@ -23,6 +23,7 @@
 
     <logger name="si.ogrodje.goo" level="DEBUG"/>
     <logger name="io.netty" level="INFO"/>
+    <logger name="org.quartz" level="WARN"/>
 
     <root level="${APP_LOG_LEVEL:-INFO}">
         <appender-ref ref="STDOUT"/>

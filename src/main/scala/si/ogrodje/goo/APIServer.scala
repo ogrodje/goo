@@ -78,32 +78,8 @@ final class APIServer private (
       .tapError(err => ZIO.logErrorCause("Error in events route", Cause.fail(err)))
       .orDie
 
-  private def createEventRoute = createEvent.implement: createEvent =>
-    (for
-      (event, result) <- ZIO.attempt(createEvent.toDBEvent).flatMap(e => Events.create(e).map(r => e -> r))
-      _               <- logInfo(s"Created event: ${event.id} result: $result")
-    yield event).orDie
-
-  private def updateEventRoute() = updateEvent.implement: (eventId, createEvent) =>
-    (for
-      dbEvent     <- Events.find(eventId)
-      updatedEvent = createEvent.toDBEvent
-      event        = dbEvent.copy(
-                       meetupID = updatedEvent.meetupID,
-                       title = updatedEvent.title,
-                       eventURL = updatedEvent.eventURL,
-                       startDateTime = updatedEvent.startDateTime,
-                       endDateTime = updatedEvent.endDateTime,
-                       description = updatedEvent.description,
-                       locationName = updatedEvent.locationName,
-                       locationAddress = updatedEvent.locationAddress,
-                       hiddenAt = updatedEvent.hiddenAt,
-                       promotedAt = updatedEvent.promotedAt
-                     )
-      saved       <- Events.update(event)
-      _           <- logInfo(s"Updated event: ${event.id} result: $saved")
-      refreshed   <- Events.find(eventId)
-    yield refreshed).orDie
+  private def createEventRoute   = createEvent.implement(CreateEvent.mutate)
+  private def updateEventRoute() = updateEvent.implement(UpdateEvent.mutate)
 
   private def timelineRoute = getTimeline.implement: _ =>
     Events

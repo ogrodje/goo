@@ -64,5 +64,32 @@ Content-Type: application/json
 
 > {%
     let last_event_id = response.body.id
+    client.global.set("last_event_id", last_event_id);
     console.log(`Event created with is ${last_event_id}`)
 %}
+
+### Update event
+< {%
+    let today = new Date();
+    let futureDate = new Date(today);
+    futureDate.setDate(today.getDate() + 7);
+    request.variables.set("startDateTime", futureDate.toISOString());
+    request.variables.set("endDateTime", futureDate.toISOString());
+    let last_event_id = client.global.get("last_event_id");
+    request.variables.set("last_event_id", last_event_id);
+
+%}
+PUT {{goo_endpoint}}/events/{{last_event_id}}
+Accept: application/json
+Content-Type: application/json
+
+{
+  "meetupID": "{{ogrodje_meetup_id}}",
+  "startDateTime": "{{startDateTime}}",
+  "eventURL": "https://ogrodje.si",
+  "locationAddress": "Dunajska 5, 1000 Ljubljana",
+  "title": "My demo event from IntelliJ IDEA",
+  "locationName": "Ogrodje HQ",
+  "description": "Demo event updated 2",
+  "endDateTime": "{{endDateTime}}"
+}

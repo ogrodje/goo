@@ -2,6 +2,9 @@ package si.ogrodje.goo.models
 
 import zio.http.URL
 import zio.schema.{DeriveSchema, Schema}
+import zio.{URIO, ZIO}
+import ZIO.logInfo
+import si.ogrodje.goo.db.DB
 
 import java.time.OffsetDateTime
 import zio.schema.annotation.optionalField
@@ -45,3 +48,9 @@ final case class CreateEvent(
 object CreateEvent:
   given Schema[URL]                 = Schema.primitive[String].transform(str => URL.decode(str).toOption.get, _.encode)
   given schema: Schema[CreateEvent] = DeriveSchema.gen
+  
+  def mutate(createEvent: CreateEvent): URIO[DB, Event] =
+    (for
+      (event, result) <- ZIO.attempt(createEvent.toDBEvent).flatMap(e => Events.create(e).map(r => e -> r))
+      _               <- logInfo(s"Created event: ${event.id} result: $result")
+    yield event).orDie

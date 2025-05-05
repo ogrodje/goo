@@ -151,7 +151,7 @@ object Events:
     DB.transact((baseQuery ++ whereFilter ++ orderAndLimit).queryWithLabel[Event]("read-events").to[List])
 
   def find(eventID: EventID): RIO[DB, Event] =
-    val baseQuery = fr"""SELECT $baseFields FROM events WHERE events.id = $eventID LIMIT 1"""
+    val baseQuery = fr"""SELECT $baseFields FROM events e WHERE e.id = $eventID LIMIT 1"""
 
     DB.transact(baseQuery.queryWithLabel[Event]("read-event").option)
       .map(_.getOrElse(throw new Exception("Event not found")))

@@ -7,7 +7,6 @@ import zio.ZIO.logInfo
 import zio.interop.catz.*
 import doobie.*
 import doobie.implicits.*
-import doobie.util.transactor
 import si.ogrodje.goo.models.Source
 import zio.http.URL
 

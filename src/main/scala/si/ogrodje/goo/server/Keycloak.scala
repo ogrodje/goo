@@ -52,8 +52,8 @@ object Keycloak:
   private given Decoder[Key]   = deriveDecoder[Key]
   private given Decoder[Certs] = deriveDecoder[Certs]
 
-  def certs    = serviceWithZIO[Keycloak](_.certs)
-  def rs256Key = serviceWithZIO[Keycloak](_.rs256Key)
+  def certs: ZIO[Keycloak, Nothing, Certs]          = serviceWithZIO[Keycloak](_.certs)
+  def rs256Key: ZIO[Keycloak, Throwable, PublicKey] = serviceWithZIO[Keycloak](_.rs256Key)
 
   private def collectCerts(client: Client) = for
     response <- client.request(Request.get("/protocol/openid-connect/certs"))

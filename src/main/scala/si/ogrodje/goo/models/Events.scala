@@ -5,20 +5,17 @@ import doobie.implicits.*
 import doobie.postgres.implicits.*
 import enumeratum.*
 import si.ogrodje.goo.db.{DB, DBOps}
-import zio.http.URL
 import zio.{RIO, ZIO}
-
-import java.time.OffsetDateTime
 
 sealed trait EventGrouping extends EnumEntry
 object EventGrouping       extends Enum[EventGrouping] with CirceEnum[EventGrouping]:
   case object Day   extends EventGrouping
   case object Week  extends EventGrouping
   case object Month extends EventGrouping
-  val values = findValues
+  val values: IndexedSeq[EventGrouping] = findValues
 
 object Events:
-  import DBOps.{*, given}
+  import DBOps.given
 
   def upsert(event: Event): RIO[DB, Int] = DB.transact:
     sql"""

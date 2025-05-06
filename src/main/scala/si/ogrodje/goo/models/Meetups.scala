@@ -7,7 +7,6 @@ import doobie.implicits.*
 import doobie.postgres.implicits.*
 
 object Meetups:
-  import DBOps.*
   import DBOps.given
 
   private val allFields: Fragment =

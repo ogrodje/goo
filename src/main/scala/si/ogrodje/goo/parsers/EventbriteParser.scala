@@ -1,9 +1,9 @@
 package si.ogrodje.goo.parsers
 
 import com.microsoft.playwright.Browser
-import io.circe.{Decoder, DecodingFailure, Json}
+import io.circe.{Decoder, Json}
 import si.ogrodje.goo.models.Source.Eventbrite
-import si.ogrodje.goo.models.{Event, Meetup, Source}
+import si.ogrodje.goo.models.{Event, Meetup}
 import zio.ZIO.fromOption
 import zio.http.{Client, Request, URL}
 import zio.{Scope, ZIO}

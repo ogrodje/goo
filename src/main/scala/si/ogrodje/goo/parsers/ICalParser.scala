@@ -6,8 +6,7 @@ import si.ogrodje.goo.models.Source.ICal
 import zio.http.{Client, Request, URL}
 import zio.{Scope, ZIO}
 
-import java.time.{OffsetDateTime, ZoneId}
-import scala.jdk.CollectionConverters.*
+import java.time.ZoneId
 
 final case class ICalParser(meetup: Meetup) extends Parser:
   ZoneId.of("Europe/Ljubljana")

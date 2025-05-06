@@ -34,7 +34,7 @@ object Environment       extends Enum[Environment] with CirceEnum[Environment]:
   case object Test        extends Environment
   case object Production  extends Environment
   case object Development extends Environment
-  val values = findValues
+  val values: IndexedSeq[Environment] = findValues
 
 type Port = Int
 final case class AppConfig(

@@ -1,6 +1,5 @@
 package si.ogrodje.goo
-import si.ogrodje.goo.server.{Authentication, Keycloak}
-import si.ogrodje.goo.server.Authentication.AuthUser
+import si.ogrodje.goo.server.{AuthUser, Authentication, Keycloak}
 import si.ogrodje.goo.BaseError.{AppError, AuthenticationError}
 import si.ogrodje.goo.db.DB
 import si.ogrodje.goo.info.BuildInfo
@@ -35,14 +34,14 @@ object AppError:
 
 final class APIServer private (
   private val db: DB,
-  private val keycloakClient: Keycloak
+  private val keycloak: Keycloak
 ):
   private given Schema[AppError]            = DeriveSchema.gen
   private given Schema[AuthenticationError] = DeriveSchema.gen
 
-  private val dbLayer             = ZLayer.succeed(db)
-  private val keycloakClientLayer = ZLayer.succeed(keycloakClient)
-  private val ogrodjeHome: URL    = URL.decode("https://ogrodje.si?from=goo").toOption.get
+  private val dbLayer          = ZLayer.succeed(db)
+  private val keycloakLayer    = ZLayer.succeed(keycloak)
+  private val ogrodjeHome: URL = URL.decode("https://ogrodje.si?from=goo").toOption.get
 
   private val corsConfig: CorsConfig        = CorsConfig(allowedOrigin = _ => Some(AccessControlAllowOrigin.All))
   private val routes: Routes[Any, Response] = Routes(
@@ -52,7 +51,7 @@ final class APIServer private (
   // Endpoints
   private val getMe = Endpoint(RoutePattern.GET / "me" ?? Doc.p("Me"))
     .auth(AuthType.Bearer)
-    .out[String]
+    .out[AuthUser]
     .outErrors[BaseError](
       HttpCodec.error[AppError](Status.BadRequest),
       HttpCodec.error[AuthenticationError](Status.Unauthorized)
@@ -105,7 +104,7 @@ final class APIServer private (
 
   // Routes
   private def getMeRoute = getMe.implement: (_: Unit) =>
-    withContext((authUser: AuthUser) => s"Ok - $authUser")
+    withContext((authUser: AuthUser) => authUser)
 
   private def meetupsRoute = getMeetups.implement: (maybeLimit, maybeOffset, maybeQuery) =>
     Meetups
@@ -163,13 +162,13 @@ final class APIServer private (
       routes ++ publicRoutes ++ authRoutes @@ cors(corsConfig) ++ swaggerRoutes
     server <-
       Server
-        .serve(serving)
-        .provide(dbLayer, keycloakClientLayer, Server.defaultWith(_.port(port)))
+        .serve(routes = serving)
+        .provide(dbLayer, keycloakLayer, Server.defaultWith(_.port(port)))
   yield server
 
 object APIServer:
   def run: ZIO[DB & Keycloak, Throwable, Nothing] = for
-    db             <- ZIO.service[DB]
-    keycloakClient <- ZIO.service[Keycloak]
-    server         <- new APIServer(db, keycloakClient).run
+    db       <- ZIO.service[DB]
+    keycloak <- ZIO.service[Keycloak]
+    server   <- new APIServer(db, keycloak).run
   yield server

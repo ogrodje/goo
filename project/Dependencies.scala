@@ -114,8 +114,9 @@ object Dependencies {
   ).map(_ % Versions.circe)
 
   lazy val jwt: Modules = Seq(
-    "com.github.jwt-scala" %% "jwt-core" % "10.0.4"
-  )
+    "com.github.jwt-scala" %% "jwt-core",
+    "com.github.jwt-scala" %% "jwt-circe"
+  ).map(_ % "10.0.4")
 
   lazy val projectResolvers: Seq[MavenRepository] = Seq(
     // Resolver.sonatypeOssRepos("snapshots"),

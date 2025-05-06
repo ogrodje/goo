@@ -3,15 +3,14 @@ package si.ogrodje.goo.server
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import si.ogrodje.goo.AppConfig
-import zio.ZIO.logInfo
-import zio.{Ref, ZIO, ZLayer}
+import zio.ZIO.{logInfo, serviceWith, serviceWithZIO}
+import zio.{Duration, Ref, Schedule, Scope, Task, UIO, ZIO, ZLayer}
 import zio.http.{Client, Request}
 
 import java.math.BigInteger
 import java.security.{KeyFactory, PublicKey}
 import java.security.spec.RSAPublicKeySpec
 import java.util.Base64
-import zio.{Duration, Schedule, Scope}
 
 final case class Key(
   kid: String,
@@ -35,22 +34,26 @@ final case class Keycloak private (
   private val client: Client,
   private val currentCerts: Ref[Certs]
 ):
-  def certs = currentCerts.get
-
   private val base64UrlDecode: String => Array[Byte] = Base64.getUrlDecoder.decode
 
-  def rs256Key: ZIO[Any, Nothing, PublicKey] = certs
+  private def certs: UIO[Certs] = currentCerts.get
+
+  private def rs256Key: Task[PublicKey] = certs
     .map(_.keys.find(_.alg == "RS256").get)
-    .map: key =>
-      val spec = new RSAPublicKeySpec(
-        new BigInteger(1, base64UrlDecode(key.n)),
-        new BigInteger(1, base64UrlDecode(key.e))
-      )
-      KeyFactory.getInstance("RSA").generatePublic(spec)
+    .flatMap: key =>
+      ZIO.attempt:
+        val spec = new RSAPublicKeySpec(
+          new BigInteger(1, base64UrlDecode(key.n)),
+          new BigInteger(1, base64UrlDecode(key.e))
+        )
+        KeyFactory.getInstance("RSA").generatePublic(spec)
 
 object Keycloak:
   private given Decoder[Key]   = deriveDecoder[Key]
   private given Decoder[Certs] = deriveDecoder[Certs]
+
+  def certs    = serviceWithZIO[Keycloak](_.certs)
+  def rs256Key = serviceWithZIO[Keycloak](_.rs256Key)
 
   private def collectCerts(client: Client) = for
     response <- client.request(Request.get("/protocol/openid-connect/certs"))
@@ -62,7 +65,7 @@ object Keycloak:
   def live: ZLayer[Client, Throwable, Keycloak] = ZLayer.scoped:
     for
       (endpoint, realm) <- AppConfig.keycloakConfig
-      client            <- ZIO.serviceWith[Client](_.url(endpoint.addPath(s"/realms/$realm")))
+      client            <- serviceWith[Client](_.url(endpoint.addPath(s"/realms/$realm")))
       certsRef          <- Ref.make(Certs.empty)
       reloadFib         <-
         collectCerts(client)

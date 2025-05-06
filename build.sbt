@@ -23,7 +23,7 @@ lazy val root = project
     scalaVersion := scala3Version,
     libraryDependencies ++= {
       zio ++ logging ++ db ++ scheduler ++
-        json ++ jsoup ++ ical4j ++ enumeratum ++ playwright
+        json ++ jwt ++ jsoup ++ ical4j ++ enumeratum ++ playwright
     },
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     scalacOptions ++= Seq(

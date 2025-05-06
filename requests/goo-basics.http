@@ -29,6 +29,12 @@ password = {{user_one_password}}
     client.global.set("access_token", response.body.access_token);
 %}
 
+### Ge me
+GET {{goo_endpoint}}/me
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
 ### Find Ogrodje event
 GET {{goo_endpoint}}/meetups?query=Ogrodje
 
@@ -50,6 +56,7 @@ GET {{goo_endpoint}}/meetups?query=Ogrodje
 POST {{goo_endpoint}}/events
 Accept: application/json
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "meetupID": "{{ogrodje_meetup_id}}",
@@ -82,6 +89,7 @@ Content-Type: application/json
 PUT {{goo_endpoint}}/events/{{last_event_id}}
 Accept: application/json
 Content-Type: application/json
+Authorization: Bearer {{access_token}}
 
 {
   "meetupID": "{{ogrodje_meetup_id}}",

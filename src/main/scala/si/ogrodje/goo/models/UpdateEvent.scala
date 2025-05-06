@@ -1,12 +1,13 @@
 package si.ogrodje.goo.models
 
+import si.ogrodje.goo.{AppError, BaseError}
 import si.ogrodje.goo.db.DB
-import zio.URIO
-import zio.ZIO.{logError, logInfo}
+import zio.ZIO
+import zio.ZIO.logInfo
 
 object UpdateEvent:
 
-  def mutate(eventId: String, createEvent: CreateEvent): URIO[DB, Event] = (for
+  def mutate(eventId: String, createEvent: CreateEvent): ZIO[DB, BaseError, Event] = (for
     _           <- logInfo(s"Updating event: $eventId")
     dbEvent     <- Events.find(eventId)
     updatedEvent = createEvent.toDBEvent
@@ -25,4 +26,4 @@ object UpdateEvent:
     saved       <- Events.update(event)
     _           <- logInfo(s"Updated event: ${event.id} result: $saved")
     refreshed   <- Events.find(eventId)
-  yield refreshed).tapError(th => logError(s"boom - ${th}")).orDie
+  yield refreshed).mapError(AppError.fromThrowable)

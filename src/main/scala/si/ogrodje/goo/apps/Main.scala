@@ -11,6 +11,7 @@ import zio.{ZIOAppDefault, *}
 import zio.http.Client
 import zio.logging.backend.SLF4J
 import si.ogrodje.goo.info.BuildInfo
+import si.ogrodje.goo.server.Keycloak
 
 object Main extends ZIOAppDefault:
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
@@ -20,11 +21,10 @@ object Main extends ZIOAppDefault:
   private def program = for
     environment <- AppConfig.environment
     _           <- SentryOps.setup
-    port        <- AppConfig.port
     _           <- DB.migrate
     _           <-
       logInfo(
-        s"Booting on port $port, version: ${BuildInfo.version}, w/ ${BuildInfo.scalaVersion}, environment: $environment"
+        s"Booting version: ${BuildInfo.version}, w/ ${BuildInfo.scalaVersion}, environment: $environment"
       )
 
     meetupsSyncFib <- ZIO.serviceWithZIO[MeetupsSync](_.runScheduled).fork
@@ -46,5 +46,6 @@ object Main extends ZIOAppDefault:
       EventsSync.live,
       DB.transactorLayer,
       PWright.livePlaywright,
-      PWright.liveBrowser
+      PWright.liveBrowser,
+      Keycloak.live
     )

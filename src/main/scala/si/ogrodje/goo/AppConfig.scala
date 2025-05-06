@@ -55,7 +55,11 @@ final case class AppConfig(
   @name("sources")
   sourcesList: SourcesList,
   @name("goo_environment")
-  environment: Environment
+  environment: Environment,
+  @name("keycloak_realm")
+  keycloakRealm: String,
+  @name("keycloak_endpoint")
+  keycloakEndpoint: URL
 )
 
 object AppConfig:
@@ -70,3 +74,4 @@ object AppConfig:
   def portLayer: TaskLayer[Port]                  = ZLayer.fromZIO(port)
   def sourcesList: IO[Error, SourcesList]         = config.map(_.sourcesList)
   def environment: ZIO[Any, Error, Environment]   = config.map(_.environment)
+  def keycloakConfig: IO[Error, (URL, String)]    = config.map(cfg => (cfg.keycloakEndpoint, cfg.keycloakRealm))

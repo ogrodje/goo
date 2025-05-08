@@ -4,7 +4,7 @@ import com.microsoft.playwright.Browser
 import si.ogrodje.goo.models.{Event, Meetup}
 import zio.*
 import zio.ZIO.{logError, logInfo}
-import zio.http.{Body, Client, URL}
+import zio.http.{Client, URL}
 
 trait Parser:
   def meetup: Meetup

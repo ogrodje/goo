@@ -7,8 +7,8 @@ object Dependencies {
   object Versions {
     val log4cats: Version      = "2.7.0"
     val scalaTest: Version     = "3.2.19"
-    val doobie: Version        = "1.0.0-RC8"
-    val sentry: Version        = "8.8.0"
+    val doobie: Version        = "1.0.0-RC9"
+    val sentry: Version        = "8.11.1"
     val sentryLogback: Version = sentry
     val sentryAgent: Version   = sentry
     val ical4j: Version        = "4.1.1"
@@ -18,9 +18,10 @@ object Dependencies {
     val zioHttp: Version       = "3.2.0"
     val zioConfig: Version     = "4.0.4"
     val zioMetrics: Version    = "2.3.1"
+    val zioSchema: Version     = "1.7.0"
     val postgresql: Version    = "42.7.5"
-    val flyway: Version        = "11.7.2"
-    val circe: Version         = "0.14.12"
+    val flyway: Version        = "11.8.0"
+    val circe: Version         = "0.14.13"
   }
 
   lazy val zio: Modules = Seq(
@@ -31,7 +32,7 @@ object Dependencies {
     "dev.zio" %% "zio-test-sbt",
     "dev.zio" %% "zio-test-magnolia"
   ).map(_ % Versions.zio % Test) ++ Seq(
-    "dev.zio" %% "zio-prelude" % "1.0.0-RC39",
+    "dev.zio" %% "zio-prelude" % "1.0.0-RC40",
     "dev.zio" %% "zio-cli"     % "0.7.1"
   ) ++ Seq(
     "dev.zio" %% "zio-logging",
@@ -44,7 +45,7 @@ object Dependencies {
     "dev.zio" %% "zio-schema-zio-test",
     "dev.zio" %% "zio-schema-derivation"
     // "org.scala-lang" % "scala-reflect"  % scalaVersion.value % "provided" // Needed ?
-  ).map(_ % "1.6.6") ++ Seq(
+  ).map(_ % Versions.zioSchema) ++ Seq(
     "dev.zio" %% "zio-metrics-connectors",
     "dev.zio" %% "zio-metrics-connectors-prometheus"
   ).map(_ % Versions.zioMetrics) ++ Seq(
@@ -95,7 +96,7 @@ object Dependencies {
   ).map(_ % "1.7.5")
 
   lazy val jsoup: Modules = Seq(
-    "org.jsoup" % "jsoup" % "1.19.1"
+    "org.jsoup" % "jsoup" % "1.20.1"
   )
 
   lazy val ical4j: Modules = Seq(
@@ -103,7 +104,7 @@ object Dependencies {
   )
 
   lazy val playwright: Modules = Seq(
-    "com.microsoft.playwright" % "playwright" % "1.51.0"
+    "com.microsoft.playwright" % "playwright" % "1.52.0"
   )
 
   lazy val json: Modules = Seq(
@@ -111,6 +112,11 @@ object Dependencies {
     "io.circe" %% "circe-generic",
     "io.circe" %% "circe-parser"
   ).map(_ % Versions.circe)
+
+  lazy val jwt: Modules = Seq(
+    "com.github.jwt-scala" %% "jwt-core",
+    "com.github.jwt-scala" %% "jwt-circe"
+  ).map(_ % "10.0.4")
 
   lazy val projectResolvers: Seq[MavenRepository] = Seq(
     // Resolver.sonatypeOssRepos("snapshots"),

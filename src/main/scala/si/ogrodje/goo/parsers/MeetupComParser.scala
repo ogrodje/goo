@@ -30,19 +30,22 @@ final case class MeetupComParser(meetup: Meetup) extends Parser:
       startDateTime <- cursor.get[OffsetDateTime]("dateTime")
       endDateTime   <- cursor.get[Option[OffsetDateTime]]("endTime")
       maybeVenueID   = venueIDFromEvent(json)
-    yield Event(
-      id = s"meetup-$eventID",
-      meetupID = meetup.id,
-      source = Source.Meetup,
-      sourceURL = sourceURL,
-      title = title,
-      description = description,
-      eventURL = eventURL,
-      startDateTime = startDateTime,
-      endDateTime = endDateTime,
-      locationName = None,
-      locationAddress = None
-    ) -> maybeVenueID
+    yield Event
+      .empty(
+        id = s"meetup-$eventID",
+        meetupID = meetup.id,
+        source = Source.Meetup,
+        sourceURL = sourceURL,
+        title = title,
+        startDateTime = startDateTime
+      )
+      .copy(
+        description = description,
+        eventURL = eventURL,
+        endDateTime = endDateTime,
+        locationName = None,
+        locationAddress = None
+      ) -> maybeVenueID
 
     parsed.toOption
 

@@ -10,7 +10,7 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 sbt run
 ```
 
-## Supported platforms and partners
+## TODO
 
 - [x] Add Eventbrite parser
 - [x] Add Meetup.com parser

@@ -1,6 +1,6 @@
 package si.ogrodje.goo.parsers
 
-import io.circe.{ACursor, Decoder, HCursor, Json}
+import io.circe.{Decoder, Json}
 import org.jsoup.nodes.{Document, Element}
 import org.jsoup.parser.Parser
 import zio.{Task, ZIO}
@@ -12,8 +12,7 @@ import io.circe.parser.parse
 object DocumentOps:
   private type Query = String
 
-  given urlDecoder: Decoder[URL] =
-    Decoder.decodeString.emap(raw => URL.decode(raw).left.map(err => err.getMessage))
+  given urlDecoder: Decoder[URL] = Decoder.decodeString.emap(raw => URL.decode(raw).left.map(_.getMessage))
 
   extension (body: Body)
     def asDocument: Task[Document] = for
@@ -33,16 +32,11 @@ object DocumentOps:
 
   extension (element: Element)
     def textAsJson: Task[Json] = for
-      readText <- ZIO.attempt(element.text())
+      readText <- ZIO.attempt(element.text)
       json     <- ZIO.fromEither(parse(readText))
     yield json
 
     def dataAsJson: Task[Json] = for
-      readText <- ZIO.attempt(element.data())
+      readText <- ZIO.attempt(element.data)
       json     <- ZIO.fromEither(parse(readText))
     yield json
-
-  extension (cursor: HCursor)
-    def downFields(field: String*): ACursor =
-      val (head, tail) = field.toList.splitAt(1)
-      tail.foldLeft(cursor.downField(head.head))(_.downField(_))

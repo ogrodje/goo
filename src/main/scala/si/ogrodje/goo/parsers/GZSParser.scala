@@ -42,19 +42,20 @@ final case class GZSParser(meetup: Meetup) extends Parser:
           val locationName                 = element.select("#kraj span").text().trim()
           val (startDateTime, endDateTime) = parseDates(datum)
 
-          Event(
-            id = s"gzs-${id}",
-            meetupID = meetup.id,
-            source = Source.GZS,
-            sourceURL = startUrl,
-            title = title,
-            startDateTime = startDateTime,
-            description = Some(description),
-            eventURL = URL.decode(eventUrl).toOption,
-            endDateTime = Some(endDateTime),
-            hasStartTime = true,
-            hasEndTime = true,
-            locationName = Some(locationName)
-          )
+          Event
+            .empty(
+              id = s"gzs-$id",
+              meetupID = meetup.id,
+              source = Source.GZS,
+              sourceURL = startUrl,
+              title = title,
+              startDateTime = startDateTime
+            )
+            .copy(
+              description = Some(description),
+              eventURL = URL.decode(eventUrl).toOption,
+              endDateTime = Some(endDateTime),
+              locationName = Some(locationName)
+            )
         }
   yield events

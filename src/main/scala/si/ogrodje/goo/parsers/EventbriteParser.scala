@@ -1,9 +1,9 @@
 package si.ogrodje.goo.parsers
 
 import com.microsoft.playwright.Browser
-import io.circe.{Decoder, DecodingFailure, Json}
+import io.circe.{Decoder, Json}
 import si.ogrodje.goo.models.Source.Eventbrite
-import si.ogrodje.goo.models.{Event, Meetup, Source}
+import si.ogrodje.goo.models.{Event, Meetup}
 import zio.ZIO.fromOption
 import zio.http.{Client, Request, URL}
 import zio.{Scope, ZIO}
@@ -50,19 +50,24 @@ final case class EventbriteParser(meetup: Meetup) extends Parser:
               url                                      <- cursor.get[URL]("url")
               description                              <- cursor.get[Option[String]]("description")
               (maybeLocationName, maybeLocationAddress) = locationFromEvent(json)
-            yield Event(
-              id = url.path.toString.split("-").lastOption.map(r => s"eventbrite-$r").get,
-              meetupID = meetup.id,
-              source = Eventbrite,
-              sourceURL = sourceURL,
-              title = name,
-              description = description,
-              eventURL = Some(url),
-              startDateTime = startDate,
-              endDateTime = endDate,
-              locationName = maybeLocationName,
-              locationAddress = maybeLocationAddress
-            )
+              eventID                                   =
+                url.path.toString.split("-").lastOption.map(r => s"eventbrite-$r").get
+            yield Event
+              .empty(
+                id = eventID,
+                meetupID = meetup.id,
+                source = Eventbrite,
+                sourceURL = sourceURL,
+                title = name,
+                startDateTime = startDate
+              )
+              .copy(
+                description = description,
+                eventURL = Some(url),
+                endDateTime = endDate,
+                locationName = maybeLocationName,
+                locationAddress = maybeLocationAddress
+              )
           }
           .collect { case Right(event) => event }
     yield events

@@ -6,7 +6,6 @@ import si.ogrodje.goo.models.Meetup
 import zio.test.{assertCompletes, TestAspect, ZIOSpecDefault}
 import zio.http.*
 
-import java.time.OffsetDateTime
 import zio.test.Spec
 import zio.test.TestEnvironment
 

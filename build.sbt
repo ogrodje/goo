@@ -2,7 +2,7 @@ import Dependencies.*
 import com.typesafe.sbt.packager.docker.{Cmd, DockerPermissionStrategy}
 import sbtassembly.AssemblyKeys.assembly
 import sbtassembly.{MergeStrategy, PathList}
-val scala3Version = "3.6.4"
+val scala3Version = "3.7.0"
 
 ThisBuild / dynverVTagPrefix := false
 ThisBuild / dynverSeparator  := "-"
@@ -23,7 +23,7 @@ lazy val root = project
     scalaVersion := scala3Version,
     libraryDependencies ++= {
       zio ++ logging ++ db ++ scheduler ++
-        json ++ jsoup ++ ical4j ++ enumeratum ++ playwright
+        json ++ jwt ++ jsoup ++ ical4j ++ enumeratum ++ playwright
     },
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     scalacOptions ++= Seq(

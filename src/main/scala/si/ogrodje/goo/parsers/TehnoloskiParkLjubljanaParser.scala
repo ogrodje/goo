@@ -28,21 +28,24 @@ final case class TehnoloskiParkLjubljanaParser(meetup: Meetup) extends Parser:
           endDateTime   <- r.hcursor.get[LocalDate]("end")
           title         <- r.hcursor.get[String]("title")
           eventURL      <- r.hcursor.get[String]("link").map(baseURL.addPath)
-        yield Event(
-          id = s"tp-$id",
-          meetupID = meetup.id,
-          source = Source.TehnoloskiParkLjubljana,
-          sourceURL = sourceURL,
-          title = title,
-          description = None,
-          eventURL = Some(eventURL),
-          startDateTime = localDateToCETOffsetDateTime(startDateTime),
-          endDateTime = Some(localDateToCETOffsetDateTime(endDateTime)),
-          locationName = None,
-          locationAddress = None,
-          hasStartTime = false,
-          hasEndTime = false
-        )
+        yield Event
+          .empty(
+            id = s"tp-$id",
+            meetupID = meetup.id,
+            source = Source.TehnoloskiParkLjubljana,
+            sourceURL = sourceURL,
+            title = title,
+            startDateTime = localDateToCETOffsetDateTime(startDateTime)
+          )
+          .copy(
+            description = None,
+            eventURL = Some(eventURL),
+            endDateTime = Some(localDateToCETOffsetDateTime(endDateTime)),
+            locationName = None,
+            locationAddress = None,
+            hasStartTime = false,
+            hasEndTime = false
+          )
       }.toList)
       .partitionMap(identity)
 

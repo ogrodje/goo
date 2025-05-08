@@ -7,14 +7,12 @@ import org.quartz.TriggerBuilder.newTrigger
 import org.quartz.impl.StdSchedulerFactory
 import org.quartz.{
   CronScheduleBuilder,
-  JobBuilder,
   JobDataMap,
   JobExecutionContext,
   ScheduleBuilder,
   Scheduler as QScheduler,
   SimpleScheduleBuilder,
-  Trigger,
-  TriggerBuilder
+  Trigger
 }
 import zio.*
 import zio.ZIO.logInfo

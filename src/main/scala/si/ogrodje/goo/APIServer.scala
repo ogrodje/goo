@@ -99,7 +99,7 @@ final class APIServer private (
     )
 
   private val getTimeline = Endpoint(RoutePattern.GET / "timeline" ?? Doc.p("Events timeline"))
-    .out[List[TimelineEvent]]
+    .out[List[Event]]
     .outError[AppError](Status.BadRequest)
 
   // Routes
@@ -121,8 +121,13 @@ final class APIServer private (
       .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeQuery = maybeQuery.filterNot(_.isEmpty))
       .mapError(AppError.fromThrowable)
 
-  private def createEventRoute = createEvent.implement(CreateEvent.mutate)
-  private def updateEventRoute = updateEvent.implement(UpdateEvent.mutate)
+  private def createEventRoute = createEvent.implement: event =>
+    withContext((u: AuthUser) => Events.authedCreate(event)(u))
+      .mapError(AppError.fromThrowable)
+
+  private def updateEventRoute = updateEvent.implement: (id, event) =>
+    withContext((u: AuthUser) => Events.authedUpdate(id, event)(u))
+      .mapError(AppError.fromThrowable)
 
   private def timelineRoute = getTimeline.implement: _ =>
     Events.timeline(100, 0).mapError(AppError.fromThrowable)
@@ -159,7 +164,7 @@ final class APIServer private (
     port   <- AppConfig.port
     _      <- logInfo(s"Starting server on port $port")
     serving =
-      routes ++ publicRoutes ++ authRoutes @@ cors(corsConfig) ++ swaggerRoutes
+      (routes ++ publicRoutes ++ authRoutes) @@ cors(corsConfig) ++ swaggerRoutes
     server <-
       Server
         .serve(routes = serving)

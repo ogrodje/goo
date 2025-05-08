@@ -11,7 +11,7 @@ services:
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_HOST=pg
-      - POSTGRES_PORT=5432
+      - POSTGRES_PORT=5433
       - HYGRAPH_ENDPOINT=${HYGRAPH_ENDPOINT}
       - SOURCES=All
       - GOO_ENVIRONMENT=${GOO_ENVIRONMENT}
@@ -46,13 +46,11 @@ services:
   pg:
     image: postgres:17-alpine
     ports:
-      - "5432:5432"
+      - "5433:5432"
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
-
-
 
 volumes:
   playwright-cache:

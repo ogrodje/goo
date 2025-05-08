@@ -7,15 +7,17 @@ import zio.ZIO.logInfo
 import zio.interop.catz.*
 import doobie.*
 import doobie.implicits.*
+import io.circe.Json
 import si.ogrodje.goo.models.Source
 import zio.http.URL
-
+import io.circe.parser.parse
 final class DB private (private val transactor: Transactor[Task]):
   def call: Transactor[Task] = transactor
 
 object DBOps:
   given urlMeta: Meta[URL]   = Meta[String].imap(raw => URL.decode(raw).toTry.get)(_.toString)
   given source: Meta[Source] = Meta[String].imap(raw => Source.withName(raw))(_.entryName)
+  given json: Meta[Json]     = Meta[String].tiemap(r => parse(r).left.map(_.getMessage))(_.noSpaces)
 
 object DB:
 

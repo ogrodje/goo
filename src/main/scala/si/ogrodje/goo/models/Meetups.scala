@@ -14,10 +14,13 @@ object Meetups:
       fr"linkedin_url, kompot_url, eventbrite_url, ical_url, created_at, updated_at"
 
   def all: RIO[DB, List[Meetup]] = DB.transact:
-    sql"""
-         |SELECT
-         |$allFields
-         |FROM meetups""".stripMargin.queryWithLabel[Meetup]("all-meetups").to[List]
+    sql"""SELECT $allFields FROM meetups""".stripMargin.queryWithLabel[Meetup]("all-meetups").to[List]
+
+  def find(id: MeetupID): RIO[DB, Meetup] = DB.transact:
+    sql"""SELECT $allFields FROM meetups WHERE meetups.id = $id LIMIT 1""".stripMargin
+      .queryWithLabel[Meetup]("find-meetup")
+      .option
+      .map(_.getOrElse(throw new Exception("Meetup not found")))
 
   def public(limit: Int, offset: Int, maybeQuery: Option[String]): RIO[DB, List[Meetup]] = DB.transact:
     val query = maybeQuery match

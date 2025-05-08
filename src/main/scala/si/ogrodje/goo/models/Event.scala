@@ -22,7 +22,10 @@ final case class Event(
   locationName: Option[String],
   locationAddress: Option[String],
   hiddenAt: Option[OffsetDateTime],
-  promotedAt: Option[OffsetDateTime]
+  promotedAt: Option[OffsetDateTime],
+  rank: Option[Double] = None,
+  meetupName: Option[String] = None,
+  meetup: Option[Meetup] = None
 )
 
 object Event:

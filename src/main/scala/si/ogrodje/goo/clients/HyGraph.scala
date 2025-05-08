@@ -18,6 +18,7 @@ final class HyGraph private (private val client: Client):
       id            <- cursor.get[String]("id")
       name          <- cursor.get[String]("name")
       stage         <- cursor.get[Option[String]]("stage")
+      hidden        <- cursor.get[Boolean]("hidden")
       homepageUrl   <- cursor.get[Option[URL]]("homePageUrl")
       meetupUrl     <- cursor.get[Option[URL]]("meetupUrl")
       discordUrl    <- cursor.get[Option[URL]]("discordUrl")
@@ -31,6 +32,7 @@ final class HyGraph private (private val client: Client):
       id = id,
       name = name,
       stage = stage,
+      hidden = hidden,
       homepageUrl = homepageUrl,
       meetupUrl = meetupUrl,
       discordUrl = discordUrl,
@@ -48,7 +50,7 @@ final class HyGraph private (private val client: Client):
   private def readFromGraph(
     query: String,
     variables: (String, Json)*
-  ): ZIO[Scope, Throwable, Json] = for
+  ): RIO[Scope, Json] = for
     json         <- ZIO.succeed:
                       Json
                         .fromFields(
@@ -75,6 +77,7 @@ final class HyGraph private (private val client: Client):
       |   id 
       |   name
       |   stage
+      |   hidden
       |   homePageUrl 
       |   meetupUrl
       |   discordUrl

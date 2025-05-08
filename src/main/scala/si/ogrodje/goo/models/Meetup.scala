@@ -12,6 +12,7 @@ type MeetupID = String
 final case class Meetup(
   id: MeetupID,
   name: String,
+  hidden: Boolean,
   stage: Option[String],
   homepageUrl: Option[URL],
   meetupUrl: Option[URL],
@@ -37,4 +38,4 @@ object Meetup:
   given jsonDecoder: Decoder[Meetup] = deriveDecoder[Meetup]
 
   def make(id: MeetupID, name: String): Meetup =
-    Meetup(id, name, None, None, None, None, None, None, None, None, OffsetDateTime.now, OffsetDateTime.now)
+    Meetup(id, name, false, None, None, None, None, None, None, None, None, OffsetDateTime.now, OffsetDateTime.now)

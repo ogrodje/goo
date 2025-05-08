@@ -151,7 +151,7 @@ object Events:
       fr"location_name, location_address, hidden_at, promoted_at"
 
   private val meetupToJson: Fragment =
-    fr"json_build_object('id', m.id,  'name', m.name, " ++
+    fr"json_build_object('id', m.id,  'name', m.name, 'hidden', m.hidden, " ++
       fr"'createdAt', m.created_at, 'updatedAt', m.updated_at) as meetup"
 
   private given Meta[Meetup] = Meta[Json].tiemap(json => json.as[Meetup].left.map(_.getMessage))(pom =>
@@ -219,8 +219,9 @@ object Events:
         FROM events e
         LEFT JOIN meetups m ON e.meetup_id = m.id
         WHERE
-          m.stage = 'PUBLISHED'
-          AND e.hidden_at IS NULL
+          m.stage = 'PUBLISHED' AND
+          m.hidden IS false AND
+          e.hidden_at IS NULL
           AND (
             start_date_time >= now() OR
             (

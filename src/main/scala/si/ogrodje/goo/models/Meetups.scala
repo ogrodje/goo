@@ -10,7 +10,7 @@ object Meetups:
   import DBOps.given
 
   private val allFields: Fragment =
-    fr"id, name, stage, homepage_url, meetup_url, discord_url, " ++
+    fr"id, name, hidden, stage, homepage_url, meetup_url, discord_url, " ++
       fr"linkedin_url, kompot_url, eventbrite_url, ical_url, created_at, updated_at"
 
   def all: RIO[DB, List[Meetup]] = DB.transact:
@@ -48,12 +48,13 @@ object Meetups:
     DB.transact:
       sql"""
            |INSERT INTO meetups ( $allFields ) VALUES (
-           |${meetup.id}, ${meetup.name}, ${meetup.stage}, ${meetup.homepageUrl},
+           |${meetup.id}, ${meetup.name}, ${meetup.hidden}, ${meetup.stage}, ${meetup.homepageUrl},
            |${meetup.meetupUrl}, ${meetup.discordUrl}, ${meetup.linkedinUrl}, ${meetup.kompotUrl},
            |${meetup.eventbriteUrl}, ${meetup.icalUrl}, ${meetup.createdAt}, ${meetup.updatedAt}
            |)
            |ON CONFLICT (id) DO UPDATE SET
            |name = ${meetup.name},
+           |hidden = ${meetup.hidden},
            |stage = ${meetup.stage},
            |homepage_url = ${meetup.homepageUrl},
            |meetup_url = ${meetup.meetupUrl},
@@ -68,10 +69,10 @@ object Meetups:
     DB.transact:
       sql"""
            UPDATE meetups SET (
-            name, stage, homepage_url, meetup_url, discord_url, linkedin_url, kompot_url, 
+            name, hidden, stage, homepage_url, meetup_url, discord_url, linkedin_url, kompot_url,
             eventbrite_url, ical_url, updated_at
            ) = (
-            ${meetup.name}, ${meetup.stage}, ${meetup.homepageUrl}, ${meetup.meetupUrl}, 
+            ${meetup.name}, ${meetup.hidden}, ${meetup.stage}, ${meetup.homepageUrl}, ${meetup.meetupUrl},
             ${meetup.discordUrl}, ${meetup.linkedinUrl}, 
             ${meetup.kompotUrl}, ${meetup.eventbriteUrl}, ${meetup.icalUrl},
             ${meetup.updatedAt}

@@ -46,7 +46,7 @@ final class EventsSync:
       else ZStream.empty
   yield events
 
-  private def sync: ZIO[Scope & DB & Client & Browser, Throwable, Unit] =
+  private def sync: RIO[Scope & DB & Client & Browser, Unit] =
     ZStream
       .fromZIO(Meetups.all)
       .flatMap(meetups => ZStream.fromIterable(meetups))
@@ -62,7 +62,7 @@ final class EventsSync:
     _ <- Scope.addFinalizer(f.interrupt <* logInfo("Syncing events stopped."))
   yield ()
 
-  def runScheduled: ZIO[Scope & DB & Scheduler & Client & Browser, Throwable, Unit] = for
+  def runScheduled: RIO[Scope & DB & Scheduler & Client & Browser, Unit] = for
     _  <- logInfo("Syncing events started.")
     _  <- sync
     f1 <-

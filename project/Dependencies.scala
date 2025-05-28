@@ -5,23 +5,24 @@ object Dependencies {
   type Modules = Seq[ModuleID]
 
   object Versions {
-    val log4cats: Version      = "2.7.0"
-    val scalaTest: Version     = "3.2.19"
-    val doobie: Version        = "1.0.0-RC9"
-    val sentry: Version        = "8.11.1"
-    val sentryLogback: Version = sentry
-    val sentryAgent: Version   = sentry
-    val ical4j: Version        = "4.1.1"
-    val quartz: Version        = "2.5.0"
-    val zio: Version           = "2.1.17"
-    val zioLogging: Version    = "2.5.0"
-    val zioHttp: Version       = "3.2.0"
-    val zioConfig: Version     = "4.0.4"
-    val zioMetrics: Version    = "2.3.1"
-    val zioSchema: Version     = "1.7.0"
-    val postgresql: Version    = "42.7.5"
-    val flyway: Version        = "11.8.0"
     val circe: Version         = "0.14.13"
+    val doobie: Version        = "1.0.0-RC9"
+    val flyway: Version        = "11.8.2"
+    val ical4j: Version        = "4.1.1"
+    val log4cats: Version      = "2.7.1"
+    val postgresql: Version    = "42.7.5"
+    val quartz: Version        = "2.5.0"
+    val scalaTest: Version     = "3.2.19"
+    val sentry: Version        = "8.13.2"
+    val sentryAgent: Version   = sentry
+    val sentryLogback: Version = sentry
+    val zio: Version           = "2.1.18"
+    val zioConfig: Version     = "4.0.4"
+    val zioHttp: Version       = "3.3.1"
+    val zioLogging: Version    = "2.5.0"
+    val zioMetrics: Version    = "2.3.1"
+    val zioPrelude: Version    = "1.0.0-RC40+6-91127e50-SNAPSHOT"
+    val zioSchema: Version     = "1.7.2"
   }
 
   lazy val zio: Modules = Seq(
@@ -32,13 +33,14 @@ object Dependencies {
     "dev.zio" %% "zio-test-sbt",
     "dev.zio" %% "zio-test-magnolia"
   ).map(_ % Versions.zio % Test) ++ Seq(
-    "dev.zio" %% "zio-prelude" % "1.0.0-RC40",
-    "dev.zio" %% "zio-cli"     % "0.7.1"
+    "dev.zio" %% "zio-prelude" % Versions.zioPrelude,
+    "dev.zio" %% "zio-cli"     % "0.7.2"
   ) ++ Seq(
     "dev.zio" %% "zio-logging",
     "dev.zio" %% "zio-logging-slf4j2"
   ).map(_ % Versions.zioLogging) ++ Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.18"
+    "ch.qos.logback" % "logback-classic" % "1.5.18",
+    "io.sentry"      % "sentry-logback"  % Versions.sentryLogback
   ) ++ Seq(
     "dev.zio" %% "zio-schema",
     "dev.zio" %% "zio-schema-json",
@@ -49,7 +51,7 @@ object Dependencies {
     "dev.zio" %% "zio-metrics-connectors",
     "dev.zio" %% "zio-metrics-connectors-prometheus"
   ).map(_ % Versions.zioMetrics) ++ Seq(
-    "dev.zio" %% "zio-json-yaml" % "0.7.42"
+    "dev.zio" %% "zio-json-yaml" % "0.7.43"
   ) ++ Seq(
     "eu.timepit" %% "refined" % "0.11.3"
   ) ++ Seq(
@@ -61,15 +63,6 @@ object Dependencies {
     "dev.zio" %% "zio-config-typesafe",
     "dev.zio" %% "zio-config-refined"
   ).map(_ % Versions.zioConfig)
-
-  lazy val logging: Modules = Seq(
-    "ch.qos.logback" % "logback-classic" % "1.5.18"
-  ) ++ Seq(
-    "org.typelevel" %% "log4cats-core",
-    "org.typelevel" %% "log4cats-slf4j"
-  ).map(_ % Versions.log4cats) ++ Seq(
-    "io.sentry" % "sentry-logback" % Versions.sentryLogback
-  )
 
   lazy val db: Modules = Seq(
     "org.tpolecat" %% "doobie-core",
@@ -93,7 +86,7 @@ object Dependencies {
   lazy val enumeratum: Modules = Seq(
     "com.beachape" %% "enumeratum",
     "com.beachape" %% "enumeratum-circe"
-  ).map(_ % "1.7.5")
+  ).map(_ % "1.9.0")
 
   lazy val jsoup: Modules = Seq(
     "org.jsoup" % "jsoup" % "1.20.1"
@@ -119,7 +112,7 @@ object Dependencies {
   ).map(_ % "10.0.4")
 
   lazy val projectResolvers: Seq[MavenRepository] = Seq(
-    // Resolver.sonatypeOssRepos("snapshots"),
+    "Maven Central" at "https://repo1.maven.org/maven2/",
     "Sonatype releases" at "https://oss.sonatype.org/content/repositories/releases",
     "Sonatype snapshots" at "https://oss.sonatype.org/content/repositories/snapshots",
     "Sonatype staging" at "https://oss.sonatype.org/content/repositories/staging",

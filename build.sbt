@@ -4,12 +4,12 @@ import sbtassembly.AssemblyKeys.assembly
 import sbtassembly.{MergeStrategy, PathList}
 val scala3Version = "3.7.0"
 
-ThisBuild / dynverVTagPrefix := false
-ThisBuild / dynverSeparator  := "-"
-ThisBuild / scalaVersion     := scala3Version
-
+ThisBuild / dynverVTagPrefix  := false
+ThisBuild / dynverSeparator   := "-"
+ThisBuild / scalaVersion      := scala3Version
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / resolvers ++= Dependencies.projectResolvers
 
 lazy val root = project
   .enablePlugins(BuildInfoPlugin, JavaAgent, JavaAppPackaging, LauncherJarPlugin, DockerPlugin)
@@ -22,7 +22,7 @@ lazy val root = project
     name         := "goo",
     scalaVersion := scala3Version,
     libraryDependencies ++= {
-      zio ++ logging ++ db ++ scheduler ++
+      zio ++ db ++ scheduler ++
         json ++ jwt ++ jsoup ++ ical4j ++ enumeratum ++ playwright
     },
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),

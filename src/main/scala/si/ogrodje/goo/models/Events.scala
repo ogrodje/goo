@@ -154,6 +154,7 @@ object Events:
     fr"json_build_object('id', m.id,  'name', m.name, 'hidden', m.hidden, " ++
       fr"'createdAt', m.created_at, 'updatedAt', m.updated_at) as meetup"
 
+  // TODO: Remove this if it is not needed.
   private given Meta[Meetup] = Meta[Json].tiemap(json => json.as[Meetup].left.map(_.getMessage))(pom =>
     Json.obj("id" -> Json.fromString("x"), "name" -> Json.fromString("x"), "stage" -> Json.fromString("x"))
   )

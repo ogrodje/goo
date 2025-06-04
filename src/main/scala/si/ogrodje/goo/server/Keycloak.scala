@@ -8,6 +8,7 @@ import zio.{Duration, Ref, Schedule, Scope, Task, UIO, ZIO, ZLayer}
 import zio.http.{Client, Request}
 
 import java.math.BigInteger
+import java.net.URI
 import java.security.{KeyFactory, PublicKey}
 import java.security.spec.RSAPublicKeySpec
 import java.util.Base64
@@ -64,14 +65,17 @@ object Keycloak:
 
   def live: ZLayer[Client, Throwable, Keycloak] = ZLayer.scoped:
     for
-      (endpoint, realm) <- AppConfig.keycloakConfig
-      client            <- serviceWith[Client](_.url(endpoint.addPath(s"/realms/$realm")))
-      certsRef          <- Ref.make(Certs.empty)
-      reloadFib         <-
+      keycloakConfig @ (endpoint, realm) <- AppConfig.keycloakConfig
+      _                                  <- logInfo(s"Connecting with config: $keycloakConfig")
+      client                             <- serviceWith[Client](_.url(endpoint.addPath(s"/realms/$realm")))
+      certsRef                           <- Ref.make(Certs.empty)
+      _                                  <- collectCerts(client).flatMap(certsRef.set)
+
+      reloadFib <-
         collectCerts(client)
           .flatMap(certsRef.set)
           .repeat(Schedule.fixed(Duration.fromSeconds(4 * 60L))) // Every 4 minutes
           .fork
-      _                 <-
+      _         <-
         Scope.addFinalizer(reloadFib.interrupt <* logInfo("Keycloak client refreshing stopped."))
     yield Keycloak(client, certsRef)

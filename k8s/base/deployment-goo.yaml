@@ -28,6 +28,9 @@ spec:
             - { name: POSTGRES_USER, value: "goo" }
             - { name: SOURCES, value: "All" }
 
+            - { name: KEYCLOAK_ENDPOINT, value: "https://keycloak.ogrodje.si" }
+            - { name: KEYCLOAK_REALM, value: "Ogrodje" }
+
             - name: SENTRY_AUTH_TOKEN
               valueFrom:
                 secretKeyRef: { name: goo-secret, key: sentry_auth_token }

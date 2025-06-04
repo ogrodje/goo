@@ -43,7 +43,11 @@ final class APIServer private (
   private val keycloakLayer    = ZLayer.succeed(keycloak)
   private val ogrodjeHome: URL = URL.decode("https://ogrodje.si?from=goo").toOption.get
 
-  private val corsConfig: CorsConfig        = CorsConfig(allowedOrigin = _ => Some(AccessControlAllowOrigin.All))
+  private val corsConfig: CorsConfig = CorsConfig(
+    allowedOrigin = _ => Some(AccessControlAllowOrigin.All),
+    allowedMethods = Header.AccessControlAllowMethods.All
+  )
+
   private val routes: Routes[Any, Response] = Routes(
     Method.GET / Root -> handler(Response.redirect(ogrodjeHome, isPermanent = true))
   )
@@ -164,7 +168,7 @@ final class APIServer private (
     port   <- AppConfig.port
     _      <- logInfo(s"Starting server on port $port")
     serving =
-      (routes ++ publicRoutes ++ authRoutes) @@ cors(corsConfig) ++ swaggerRoutes
+      (routes ++ publicRoutes ++ authRoutes ++ swaggerRoutes) @@ cors(corsConfig)
     server <-
       Server
         .serve(routes = serving)

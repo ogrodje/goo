@@ -1,3 +1,4 @@
+.metals/
 *.sql
 
 requests/http-client.private.env.json

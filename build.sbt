@@ -76,19 +76,13 @@ lazy val root = project
       case cmd @ Cmd("WORKDIR", _) =>
         List(
           Cmd("LABEL", "maintainer=\"Oto Brglez <otobrglez@gmail.com>\""),
-          Cmd(
-            "LABEL",
-            "org.opencontainers.image.url=https://github.com/ogrodje/goo"
-          ),
-          Cmd(
-            "LABEL",
-            "org.opencontainers.image.source=https://github.com/ogrodje/goo"
-          ),
+          Cmd("LABEL", "org.opencontainers.image.url=https://github.com/ogrodje/goo"),
+          Cmd("LABEL", "org.opencontainers.image.source=https://github.com/ogrodje/goo"),
           Cmd("ENV", "PORT=7777"),
           Cmd("ENV", s"GOO_VERSION=${version.value}"),
           Cmd(
             "RUN",
-            """apt-get update -yyq && apt-get install libglib2.0-0\
+            """apt-get update -yyqq && apt-get install -yyqq libglib2.0-0\
               |	libnss3\
               |	libnspr4\
               |	libdbus-1-3\
@@ -113,21 +107,12 @@ lazy val root = project
               | libgtk-3-0\
               | libpangocairo-1.0-0\
               | libcairo-gobject2\
-              | libgdk-pixbuf-2.0-0 \
-              | -yyq""".stripMargin
+              | libgdk-pixbuf-2.0-0""".stripMargin
           ),
           cmd
         )
       case other                   => List(other)
     }
-    /*
-    dockerEntrypoint         := Seq(
-      "java",
-      "-XX:+AlwaysPreTouch",
-      "-Dfile.encoding=UTF-8",
-      "-jar",
-      s"/opt/docker/lib/${(packageJavaLauncherJar / artifactPath).value.getName}"
-    ) */
   )
 
 addCommandAlias("fmt", ";scalafmtAll;scalafmtSbt")

@@ -4,9 +4,20 @@ metadata:
   name: goo-service
   namespace: goo-prod
 spec:
-  selector:
-    app: goo
+  selector: { app: goo }
   ports:
     - port: 80
       targetPort: 7777
+  type: ClusterIP
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-service
+  namespace: goo-prod
+spec:
+  selector: { app: keycloak }
+  ports:
+    - port: 80
+      targetPort: 8080
   type: ClusterIP

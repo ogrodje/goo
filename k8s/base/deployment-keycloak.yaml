@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  namespace: goo-prod
+  labels: { app: keycloak }
+spec:
+  replicas: 1
+  selector: { matchLabels: { app: keycloak } }
+  template:
+    metadata: { labels: { app: keycloak } }
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak
+          ports: [ { containerPort: 8080 } ]
+          args: [
+            "start",
+            "--metrics-enabled=true",
+            "--proxy-headers=xforwarded",
+            "--hostname-strict=false",
+            "--http-enabled=true",
+            "--hostname-debug=true",
+            "--health-enabled=true",
+          ]
+
+          env:
+            - { name: KEYCLOAK_LOGLEVEL, value: "INFO" }
+            - { name: KC_DB, value: "postgres" }
+
+            - name: KEYCLOAK_ADMIN
+              valueFrom: { secretKeyRef: { name: keycloak-secret, key: keycloak_admin } }
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: keycloak-secret, key: keycloak_admin_password } }
+            - name: KC_BOOTSTRAP_ADMIN_USERNAME
+              valueFrom: { secretKeyRef: { name: keycloak-secret, key: keycloak_admin } }
+            - name: KC_BOOTSTRAP_ADMIN_PASSWORD
+              valueFrom: { secretKeyRef: { name: keycloak-secret, key: keycloak_admin_password } }
+            - name: KC_DB_URL
+              valueFrom: { secretKeyRef: { name: keycloak-secret, key: kc_db_url } }
+            - name: KC_DB_USERNAME
+              valueFrom: { secretKeyRef: { name: keycloak-secret, key: kc_db_username } }
+            - name: KC_DB_PASSWORD
+              valueFrom: { secretKeyRef: { name: keycloak-secret, key: kc_db_password } }
+
+#           livenessProbe:
+#             httpGet:
+#               path: /
+#               port: 7777
+#             initialDelaySeconds: 45
+#             periodSeconds: 10
+#           readinessProbe:
+#             httpGet:
+#               path: /
+#               port: 7777
+#             initialDelaySeconds: 20
+#             periodSeconds: 50

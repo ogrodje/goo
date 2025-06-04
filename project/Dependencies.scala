@@ -7,18 +7,19 @@ object Dependencies {
   object Versions {
     val circe: Version         = "0.14.13"
     val doobie: Version        = "1.0.0-RC9"
-    val flyway: Version        = "11.8.2"
+    val flyway: Version        = "11.9.0"
     val ical4j: Version        = "4.1.1"
     val log4cats: Version      = "2.7.1"
-    val postgresql: Version    = "42.7.5"
+    val postgresql: Version    = "42.7.6"
     val quartz: Version        = "2.5.0"
     val scalaTest: Version     = "3.2.19"
     val sentry: Version        = "8.13.2"
     val sentryAgent: Version   = sentry
     val sentryLogback: Version = sentry
-    val zio: Version           = "2.1.18"
+    val zio: Version           = "2.1.19"
+    val zioCli: Version        = "0.7.2"
     val zioConfig: Version     = "4.0.4"
-    val zioHttp: Version       = "3.3.1"
+    val zioHttp: Version       = "3.3.3"
     val zioLogging: Version    = "2.5.0"
     val zioMetrics: Version    = "2.3.1"
     val zioPrelude: Version    = "1.0.0-RC40+6-91127e50-SNAPSHOT"
@@ -34,7 +35,7 @@ object Dependencies {
     "dev.zio" %% "zio-test-magnolia"
   ).map(_ % Versions.zio % Test) ++ Seq(
     "dev.zio" %% "zio-prelude" % Versions.zioPrelude,
-    "dev.zio" %% "zio-cli"     % "0.7.2"
+    "dev.zio" %% "zio-cli"     % Versions.zioCli
   ) ++ Seq(
     "dev.zio" %% "zio-logging",
     "dev.zio" %% "zio-logging-slf4j2"
@@ -46,7 +47,6 @@ object Dependencies {
     "dev.zio" %% "zio-schema-json",
     "dev.zio" %% "zio-schema-zio-test",
     "dev.zio" %% "zio-schema-derivation"
-    // "org.scala-lang" % "scala-reflect"  % scalaVersion.value % "provided" // Needed ?
   ).map(_ % Versions.zioSchema) ++ Seq(
     "dev.zio" %% "zio-metrics-connectors",
     "dev.zio" %% "zio-metrics-connectors-prometheus"
@@ -66,9 +66,8 @@ object Dependencies {
 
   lazy val db: Modules = Seq(
     "org.tpolecat" %% "doobie-core",
-    "org.tpolecat" %% "doobie-hikari",  // HikariCP transactor.
-    "org.tpolecat" %% "doobie-postgres" // Postgres driver
-    // "org.tpolecat" %% "doobie-postgres-circe"
+    "org.tpolecat" %% "doobie-hikari",
+    "org.tpolecat" %% "doobie-postgres"
   ).map(_ % Versions.doobie) ++ Seq(
     "org.postgresql" % "postgresql" % Versions.postgresql
   ) ++ Seq(

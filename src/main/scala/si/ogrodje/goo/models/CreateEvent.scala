@@ -19,7 +19,11 @@ final case class CreateEvent(
   @optionalField
   locationName: Option[String],
   @optionalField
-  locationAddress: Option[String]
+  locationAddress: Option[String],
+  @optionalField
+  promotedAt: Option[OffsetDateTime],
+  @optionalField
+  hiddenAt: Option[OffsetDateTime]
 ):
 
   def toDBEvent: Event = Event(
@@ -37,8 +41,8 @@ final case class CreateEvent(
     updatedAt = None,
     locationName = locationName,
     locationAddress = locationAddress,
-    hiddenAt = None,
-    promotedAt = None
+    hiddenAt = hiddenAt,
+    promotedAt = promotedAt
   )
 
 object CreateEvent:

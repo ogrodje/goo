@@ -62,14 +62,11 @@ lazy val root = project
     }
   )
   .settings(
-    // dockerAlias              := dockerAlias.value.withTag(Some(version.value + "-lzo")),
     dockerExposedPorts ++= Seq(7778),
     dockerExposedUdpPorts    := Seq.empty[Int],
     dockerUsername           := Some("ogrodje"),
     dockerUpdateLatest       := true,
     dockerRepository         := Some("ghcr.io"),
-    // dockerBaseImage          := "gcr.io/distroless/java21-debian12",
-    // dockerBaseImage          := "azul/zulu-openjdk-alpine:21-latest",
     dockerBaseImage          := "azul/zulu-openjdk:21-jre-headless-latest",
     Docker / daemonUserUid   := None,
     Docker / daemonUser      := "root",

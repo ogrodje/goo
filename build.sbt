@@ -2,14 +2,14 @@ import Dependencies.*
 import com.typesafe.sbt.packager.docker.{Cmd, DockerPermissionStrategy}
 import sbtassembly.AssemblyKeys.assembly
 import sbtassembly.{MergeStrategy, PathList}
-val scala3Version = "3.6.4"
+val scala3Version = "3.7.0"
 
-ThisBuild / dynverVTagPrefix := false
-ThisBuild / dynverSeparator  := "-"
-ThisBuild / scalaVersion     := scala3Version
-
+ThisBuild / dynverVTagPrefix  := false
+ThisBuild / dynverSeparator   := "-"
+ThisBuild / scalaVersion      := scala3Version
 ThisBuild / semanticdbEnabled := true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
+ThisBuild / resolvers ++= Dependencies.projectResolvers
 
 lazy val root = project
   .enablePlugins(BuildInfoPlugin, JavaAgent, JavaAppPackaging, LauncherJarPlugin, DockerPlugin)
@@ -22,8 +22,8 @@ lazy val root = project
     name         := "goo",
     scalaVersion := scala3Version,
     libraryDependencies ++= {
-      zio ++ logging ++ db ++ scheduler ++
-        json ++ jsoup ++ ical4j ++ enumeratum ++ playwright
+      zio ++ db ++ scheduler ++
+        json ++ jwt ++ jsoup ++ ical4j ++ enumeratum ++ playwright
     },
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     scalacOptions ++= Seq(
@@ -62,14 +62,11 @@ lazy val root = project
     }
   )
   .settings(
-    // dockerAlias              := dockerAlias.value.withTag(Some(version.value + "-lzo")),
     dockerExposedPorts ++= Seq(7778),
     dockerExposedUdpPorts    := Seq.empty[Int],
     dockerUsername           := Some("ogrodje"),
     dockerUpdateLatest       := true,
     dockerRepository         := Some("ghcr.io"),
-    // dockerBaseImage          := "gcr.io/distroless/java21-debian12",
-    // dockerBaseImage          := "azul/zulu-openjdk-alpine:21-latest",
     dockerBaseImage          := "azul/zulu-openjdk:21-jre-headless-latest",
     Docker / daemonUserUid   := None,
     Docker / daemonUser      := "root",

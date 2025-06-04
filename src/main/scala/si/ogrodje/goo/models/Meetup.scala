@@ -1,8 +1,10 @@
 package si.ogrodje.goo.models
 
+import io.circe.Decoder
+import io.circe.generic.semiauto.deriveDecoder
 import zio.http.URL
 import zio.schema.{DeriveSchema, Schema}
-import zio.http.codec.PathCodec.*
+
 import java.time.OffsetDateTime
 
 type MeetupID = String
@@ -10,6 +12,7 @@ type MeetupID = String
 final case class Meetup(
   id: MeetupID,
   name: String,
+  hidden: Boolean,
   stage: Option[String],
   homepageUrl: Option[URL],
   meetupUrl: Option[URL],
@@ -30,7 +33,9 @@ object Meetup:
       _.encode
     )
 
-  given schema: Schema[Meetup] = DeriveSchema.gen
+  given schema: Schema[Meetup]       = DeriveSchema.gen
+  private given Decoder[URL]         = Decoder[String].emap(raw => URL.decode(raw).left.map(_.getMessage))
+  given jsonDecoder: Decoder[Meetup] = deriveDecoder[Meetup]
 
   def make(id: MeetupID, name: String): Meetup =
-    Meetup(id, name, None, None, None, None, None, None, None, None, OffsetDateTime.now, OffsetDateTime.now)
+    Meetup(id, name, false, None, None, None, None, None, None, None, None, OffsetDateTime.now, OffsetDateTime.now)

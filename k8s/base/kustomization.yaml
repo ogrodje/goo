@@ -1,11 +1,14 @@
 resources:
   - setup.yml
   - deployment-goo.yaml
+  - deployment-keycloak.yaml
   - deployment-koofr-watch.yaml
   - service.yaml
   - ingress.yaml
 images:
   - name: ghcr.io/ogrodje/goo
-    newTag: '0.0.13'
+    newTag: '0.1.1'
   - name: ghcr.io/otobrglez/koofr-watch
     newTag: '0.0.2'
+  - name: quay.io/keycloak/keycloak
+    newTag: '26.2.5'

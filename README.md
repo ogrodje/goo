@@ -6,11 +6,7 @@
 Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 
 
-```bash
-sbt run
-```
-
-## Supported platforms and partners
+## TODO
 
 - [x] Add Eventbrite parser
 - [x] Add Meetup.com parser
@@ -41,3 +37,20 @@ sbt run
 - [ ] Expose the data via iCal format/feed
 - [ ] Add parser for Facebook Events
 - [ ] Add parser for LinkedIn Events
+
+## Development
+
+Make sure you have [devenv] installed and ready (read [devenv.nix](./devenv.nix)) then use `docker compose` and `sbt` to
+bootup the service.
+
+```bash
+docker compose -f docker/docker-compose.yml up pg keycloak
+sbt run
+```
+
+The application follows cloud-native principles with the [twelve-factor app methodology][12f]. Configuration can be
+extrapolated via [AppConfig.scala](./src/main/scala/si/ogrodje/goo/AppConfig.scala).
+
+[12f]: https://12factor.net/
+
+[devenv]: https://devenv.sh/

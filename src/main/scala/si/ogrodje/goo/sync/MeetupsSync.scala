@@ -35,7 +35,7 @@ final class MeetupsSync private (private val hyGraph: HyGraph):
     _ <- Meetups.update(toUpdate*)
   yield ()
 
-  def run: ZIO[Scope & DB, Throwable, Unit] = for
+  def run: RIO[Scope & DB, Unit] = for
     f <-
       sync
         .retryOrElse(
@@ -48,7 +48,7 @@ final class MeetupsSync private (private val hyGraph: HyGraph):
     _ <- Scope.addFinalizer(f.interrupt <* logInfo("Syncing meetups stopped."))
   yield ()
 
-  def runScheduled: ZIO[Scope & DB & Scheduler, Throwable, Unit] = for
+  def runScheduled: RIO[Scope & DB & Scheduler, Unit] = for
     _  <- logInfo("Syncing meetups started.")
     _  <- sync
     f1 <-

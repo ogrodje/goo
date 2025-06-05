@@ -10,7 +10,7 @@ import java.nio.charset.Charset
 import java.time.OffsetDateTime
 
 final class HyGraph private (private val client: Client):
-  private given Decoder[URL] = Decoder[String].emap(raw => URL.decode(raw).left.map(_.getMessage))
+  private given urlDecoder: Decoder[URL] = Decoder[String].emap(raw => URL.decode(raw).left.map(_.getMessage))
 
   private given Decoder[Meetup] = Decoder[Json].emap { json =>
     val cursor = json.hcursor
@@ -26,6 +26,7 @@ final class HyGraph private (private val client: Client):
       kompotUrl     <- cursor.get[Option[URL]]("kompotUrl")
       eventbriteUrl <- cursor.get[Option[URL]]("eventbriteUrl")
       icalUrl       <- cursor.get[Option[URL]]("icalUrl")
+      logoImage      = cursor.downFields("logoImage", "url").focus.flatMap(_.as[Option[URL]].toOption).flatten
       updatedAt     <- cursor.get[OffsetDateTime]("updatedAt")
       createdAt     <- cursor.get[OffsetDateTime]("createdAt")
     yield Meetup(
@@ -40,6 +41,8 @@ final class HyGraph private (private val client: Client):
       kompotUrl = kompotUrl,
       eventbriteUrl = eventbriteUrl,
       icalUrl = icalUrl,
+      logoImage = logoImage,
+      mainColor = None,
       createdAt = createdAt,
       updatedAt = updatedAt
     )
@@ -71,7 +74,7 @@ final class HyGraph private (private val client: Client):
     dataPart     <- ZIO.fromOption(json).orElseFail(new Exception("No \"data\" part in JSON GraphQL response."))
   yield dataPart
 
-  def allMeetups: ZIO[Scope, Throwable, List[Meetup]] = readFromGraph(
+  def allMeetups: RIO[Scope, List[Meetup]] = readFromGraph(
     """query AllMeetups($size: Int) {
       | meetups(first: $size) { 
       |   id 
@@ -87,6 +90,15 @@ final class HyGraph private (private val client: Client):
       |   icalUrl
       |   updatedAt
       |   createdAt
+      |   mainColor { css }
+      |   logoImage {
+      |     url(
+      |      transformation: {
+      |        document: {output: {format: jpg}},
+      |        image: { resize: { width: 100, height: 100, fit: clip } }
+      |      }
+      |    ) 
+      |   }
       | }
       |}""".stripMargin,
     "size" -> Json.fromInt(255)

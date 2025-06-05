@@ -152,7 +152,8 @@ object Events:
 
   private val meetupToJson: Fragment =
     fr"json_build_object('id', m.id,  'name', m.name, 'hidden', m.hidden, " ++
-      fr"'createdAt', m.created_at, 'updatedAt', m.updated_at) as meetup"
+      fr"'createdAt', m.created_at, 'updatedAt', m.updated_at, " ++
+      fr"'logoImage', m.logo_image) as meetup"
 
   // TODO: Remove this if it is not needed.
   private given Meta[Meetup] = Meta[Json].tiemap(json => json.as[Meetup].left.map(_.getMessage))(pom =>

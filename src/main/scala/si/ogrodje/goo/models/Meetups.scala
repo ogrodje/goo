@@ -11,7 +11,7 @@ object Meetups:
 
   private val allFields: Fragment =
     fr"id, name, hidden, stage, homepage_url, meetup_url, discord_url, " ++
-      fr"linkedin_url, kompot_url, eventbrite_url, ical_url, created_at, updated_at"
+      fr"linkedin_url, kompot_url, eventbrite_url, ical_url, logo_image, main_color, created_at, updated_at"
 
   def all: RIO[DB, List[Meetup]] = DB.transact:
     sql"""SELECT $allFields FROM meetups""".stripMargin.queryWithLabel[Meetup]("all-meetups").to[List]
@@ -63,6 +63,8 @@ object Meetups:
            |kompot_url = ${meetup.kompotUrl},
            |eventbrite_url = ${meetup.eventbriteUrl},
            |ical_url = ${meetup.icalUrl}
+           |logo_image = ${meetup.logoImage}
+           |main_color = ${meetup.mainColor}
            """.stripMargin.update.run
 
   def update(meetups: Meetup*): RIO[DB, Unit] = ZIO.foreachDiscard(meetups.toSeq): meetup =>
@@ -70,10 +72,11 @@ object Meetups:
       sql"""
            UPDATE meetups SET (
             name, hidden, stage, homepage_url, meetup_url, discord_url, linkedin_url, kompot_url,
-            eventbrite_url, ical_url, updated_at
+            eventbrite_url, ical_url, logo_image, main_color, updated_at
            ) = (
             ${meetup.name}, ${meetup.hidden}, ${meetup.stage}, ${meetup.homepageUrl}, ${meetup.meetupUrl},
             ${meetup.discordUrl}, ${meetup.linkedinUrl}, 
             ${meetup.kompotUrl}, ${meetup.eventbriteUrl}, ${meetup.icalUrl},
+            ${meetup.logoImage}, ${meetup.mainColor},
             ${meetup.updatedAt}
          ) WHERE id = ${meetup.id}""".update.run

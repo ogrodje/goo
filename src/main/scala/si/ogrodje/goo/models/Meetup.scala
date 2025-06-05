@@ -21,6 +21,8 @@ final case class Meetup(
   kompotUrl: Option[URL],
   eventbriteUrl: Option[URL],
   icalUrl: Option[URL],
+  logoImage: Option[URL],
+  mainColor: Option[String],
   createdAt: OffsetDateTime,
   updatedAt: OffsetDateTime
 )
@@ -38,4 +40,20 @@ object Meetup:
   given jsonDecoder: Decoder[Meetup] = deriveDecoder[Meetup]
 
   def make(id: MeetupID, name: String): Meetup =
-    Meetup(id, name, false, None, None, None, None, None, None, None, None, OffsetDateTime.now, OffsetDateTime.now)
+    Meetup(
+      id,
+      name,
+      false,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      None,
+      OffsetDateTime.now,
+      OffsetDateTime.now
+    )

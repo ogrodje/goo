@@ -1,7 +1,10 @@
 package si.ogrodje.goo
+import caliban.*
+import caliban.quick.*
 import si.ogrodje.goo.server.{AuthUser, Authentication, Keycloak}
 import si.ogrodje.goo.BaseError.{AppError, AuthenticationError}
 import si.ogrodje.goo.db.DB
+import si.ogrodje.goo.graphql.GraphQLAPI
 import si.ogrodje.goo.info.BuildInfo
 import si.ogrodje.goo.models.*
 import zio.*
@@ -165,10 +168,20 @@ final class APIServer private (
   ) @@ Authentication.Authenticated @@ Middleware.debug
 
   private def run: ZIO[Any, Throwable, Nothing] = for
-    port   <- AppConfig.port
-    _      <- logInfo(s"Starting server on port $port")
+    port <- AppConfig.port
+    _    <- logInfo(s"Starting server on port $port")
+
+    handlers <- GraphQLAPI.api.handlers
+
+    graphqlRoutes =
+      Routes(
+        Method.ANY / "api" / "graphql"     -> handlers.api,
+        Method.GET / "graphiql"            -> GraphiQLHandler.handler(apiPath = "/api/graphql"),
+        Method.POST / "upload" / "graphql" -> handlers.upload
+      )
+
     serving =
-      (routes ++ publicRoutes ++ authRoutes ++ swaggerRoutes) @@ cors(corsConfig)
+      (routes ++ publicRoutes ++ authRoutes ++ swaggerRoutes ++ graphqlRoutes) @@ cors(corsConfig)
     server <-
       Server
         .serve(routes = serving)

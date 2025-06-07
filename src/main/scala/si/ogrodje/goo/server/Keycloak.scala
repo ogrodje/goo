@@ -65,11 +65,11 @@ object Keycloak:
 
   def live: ZLayer[Client, Throwable, Keycloak] = ZLayer.scoped:
     for
-      keycloakConfig @ (endpoint, realm) <- AppConfig.keycloakConfig
-      _                                  <- logInfo(s"Connecting with config: $keycloakConfig")
-      client                             <- serviceWith[Client](_.url(endpoint.addPath(s"/realms/$realm")))
-      certsRef                           <- Ref.make(Certs.empty)
-      _                                  <- collectCerts(client).flatMap(certsRef.set)
+      (endpoint, realm) <- AppConfig.keycloakConfig
+      _                 <- logInfo(s"Connecting to keycloak $endpoint with realm $realm")
+      client            <- serviceWith[Client](_.url(endpoint.addPath(s"/realms/$realm")))
+      certsRef          <- Ref.make(Certs.empty)
+      _                 <- collectCerts(client).flatMap(certsRef.set)
 
       reloadFib <-
         collectCerts(client)

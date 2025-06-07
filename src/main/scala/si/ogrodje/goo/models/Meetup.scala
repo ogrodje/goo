@@ -28,7 +28,7 @@ final case class Meetup(
 )
 
 object Meetup:
-  given Schema[URL] = Schema
+  given urlSchema: Schema[URL] = Schema
     .primitive[String]
     .transform(
       str => URL.decode(str).toOption.get,

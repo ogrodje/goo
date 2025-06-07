@@ -7,7 +7,7 @@ object Dependencies {
   object Versions {
     val circe: Version         = "0.14.13"
     val doobie: Version        = "1.0.0-RC9"
-    val flyway: Version        = "11.9.0"
+    val flyway: Version        = "11.9.1"
     val ical4j: Version        = "4.1.1"
     val log4cats: Version      = "2.7.1"
     val postgresql: Version    = "42.7.6"
@@ -24,6 +24,7 @@ object Dependencies {
     val zioMetrics: Version    = "2.3.1"
     val zioPrelude: Version    = "1.0.0-RC40+6-91127e50-SNAPSHOT"
     val zioSchema: Version     = "1.7.2"
+    val caliban: Version       = "2.10.0"
   }
 
   lazy val zio: Modules = Seq(
@@ -98,6 +99,13 @@ object Dependencies {
   lazy val playwright: Modules = Seq(
     "com.microsoft.playwright" % "playwright" % "1.52.0"
   )
+
+  lazy val caliban: Modules = Seq(
+    "com.github.ghostdogpr" %% "caliban",
+    "com.github.ghostdogpr" %% "caliban-tracing",
+    "com.github.ghostdogpr" %% "caliban-quick",
+    "com.github.ghostdogpr" %% "caliban-zio-http"
+  ).map(_ % Versions.caliban)
 
   lazy val json: Modules = Seq(
     "io.circe" %% "circe-core",

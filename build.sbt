@@ -7,9 +7,12 @@ val scala3Version = "3.7.0"
 ThisBuild / dynverVTagPrefix  := false
 ThisBuild / dynverSeparator   := "-"
 ThisBuild / scalaVersion      := scala3Version
-ThisBuild / semanticdbEnabled := true
+ThisBuild / semanticdbEnabled := !true
 ThisBuild / semanticdbVersion := scalafixSemanticdb.revision
 ThisBuild / resolvers ++= Dependencies.projectResolvers
+
+logLevel := Level.Debug
+
 
 lazy val root = project
   .enablePlugins(BuildInfoPlugin, JavaAgent, JavaAppPackaging, LauncherJarPlugin, DockerPlugin)
@@ -23,7 +26,7 @@ lazy val root = project
     scalaVersion := scala3Version,
     libraryDependencies ++= {
       zio ++ db ++ scheduler ++
-        json ++ jwt ++ jsoup ++ ical4j ++ enumeratum ++ playwright
+        json ++ jwt ++ jsoup ++ ical4j ++ enumeratum ++ playwright ++ caliban
     },
     testFrameworks += new TestFramework("zio.test.sbt.ZTestFramework"),
     scalacOptions ++= Seq(

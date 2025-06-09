@@ -23,6 +23,7 @@ final case class Meetup(
   icalUrl: Option[URL],
   logoImage: Option[URL],
   mainColor: Option[String],
+  backgroundColor: Option[String],
   createdAt: OffsetDateTime,
   updatedAt: OffsetDateTime
 )
@@ -44,6 +45,7 @@ object Meetup:
       id,
       name,
       false,
+      None,
       None,
       None,
       None,

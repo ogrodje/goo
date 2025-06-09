@@ -15,20 +15,22 @@ final class HyGraph private (private val client: Client):
   private given Decoder[Meetup] = Decoder[Json].emap { json =>
     val cursor = json.hcursor
     val parsed = for
-      id            <- cursor.get[String]("id")
-      name          <- cursor.get[String]("name")
-      stage         <- cursor.get[Option[String]]("stage")
-      hidden        <- cursor.get[Boolean]("hidden")
-      homepageUrl   <- cursor.get[Option[URL]]("homePageUrl")
-      meetupUrl     <- cursor.get[Option[URL]]("meetupUrl")
-      discordUrl    <- cursor.get[Option[URL]]("discordUrl")
-      linkedinUrl   <- cursor.get[Option[URL]]("linkedinUrl")
-      kompotUrl     <- cursor.get[Option[URL]]("kompotUrl")
-      eventbriteUrl <- cursor.get[Option[URL]]("eventbriteUrl")
-      icalUrl       <- cursor.get[Option[URL]]("icalUrl")
-      logoImage      = cursor.downFields("logoImage", "url").focus.flatMap(_.as[Option[URL]].toOption).flatten
-      updatedAt     <- cursor.get[OffsetDateTime]("updatedAt")
-      createdAt     <- cursor.get[OffsetDateTime]("createdAt")
+      id             <- cursor.get[String]("id")
+      name           <- cursor.get[String]("name")
+      stage          <- cursor.get[Option[String]]("stage")
+      hidden         <- cursor.get[Boolean]("hidden")
+      homepageUrl    <- cursor.get[Option[URL]]("homePageUrl")
+      meetupUrl      <- cursor.get[Option[URL]]("meetupUrl")
+      discordUrl     <- cursor.get[Option[URL]]("discordUrl")
+      linkedinUrl    <- cursor.get[Option[URL]]("linkedinUrl")
+      kompotUrl      <- cursor.get[Option[URL]]("kompotUrl")
+      eventbriteUrl  <- cursor.get[Option[URL]]("eventbriteUrl")
+      icalUrl        <- cursor.get[Option[URL]]("icalUrl")
+      logoImage       = cursor.downFields("logoImage", "url").focus.flatMap(_.as[Option[URL]].toOption).flatten
+      mainColor       = cursor.downFields("mainColor", "hex").focus.flatMap(_.as[Option[String]].toOption).flatten
+      backgroundColor = cursor.downFields("backgroundColor", "hex").focus.flatMap(_.as[Option[String]].toOption).flatten
+      updatedAt      <- cursor.get[OffsetDateTime]("updatedAt")
+      createdAt      <- cursor.get[OffsetDateTime]("createdAt")
     yield Meetup(
       id = id,
       name = name,
@@ -42,7 +44,8 @@ final class HyGraph private (private val client: Client):
       eventbriteUrl = eventbriteUrl,
       icalUrl = icalUrl,
       logoImage = logoImage,
-      mainColor = None,
+      mainColor = mainColor,
+      backgroundColor = backgroundColor,
       createdAt = createdAt,
       updatedAt = updatedAt
     )
@@ -90,7 +93,8 @@ final class HyGraph private (private val client: Client):
       |   icalUrl
       |   updatedAt
       |   createdAt
-      |   mainColor { css }
+      |   mainColor { hex }
+      |   backgroundColor { hex }
       |   logoImage {
       |     url(
       |      transformation: {

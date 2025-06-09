@@ -18,7 +18,7 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 - [x] Add [Finance IKTInformator](https://www.finance.si/ikt)
 - [x] Improve Sentry integration for better observability
 - [x] Add Sentry for error and release tracking
-- [ ] Add [FRI Dogodki](https://www.fri.uni-lj.si/sl/koledar-dogodkov)
+- [x] Add [FRI Dogodki](https://www.fri.uni-lj.si/sl/koledar-dogodkov)
 - [ ] Add [FERI Dogodki](https://feri.um.si/dogodki/)
 - [ ] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
 - [ ] Add [Kompot](https://kompot.si/)
@@ -40,15 +40,14 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 
 ## Development
 
-Make sure you have [devenv] installed and ready (read [devenv.nix](./devenv.nix)) then use `docker compose` and `sbt` to
-bootup the service.
+Ensure you have [devenv] installed and ready (see [devenv.nix](./devenv.nix)). Then, use `docker compose` and `sbt` to start the service.
 
 ```bash
 docker compose -f docker/docker-compose.yml up pg keycloak
 sbt run
 ```
 
-The application follows cloud-native principles with the [twelve-factor app methodology][12f]. Configuration can be
+The application adheres to cloud-native principles, utilising the [Twelve-Factor App methodology][12f]. Configuration can be
 extrapolated via [AppConfig.scala](./src/main/scala/si/ogrodje/goo/AppConfig.scala).
 
 [12f]: https://12factor.net/

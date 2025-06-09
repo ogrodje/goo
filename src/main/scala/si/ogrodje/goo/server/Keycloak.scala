@@ -8,7 +8,6 @@ import zio.{Duration, Ref, Schedule, Scope, Task, UIO, ZIO, ZLayer}
 import zio.http.{Client, Request}
 
 import java.math.BigInteger
-import java.net.URI
 import java.security.{KeyFactory, PublicKey}
 import java.security.spec.RSAPublicKeySpec
 import java.util.Base64

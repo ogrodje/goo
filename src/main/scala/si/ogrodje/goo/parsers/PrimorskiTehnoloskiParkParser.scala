@@ -21,7 +21,7 @@ final case class PrimorskiTehnoloskiParkParser(meetup: Meetup) extends Parser:
       title <- cursor.get[String]("name")
       url   <- cursor.get[URL]("url")
 
-      // This is not optimal but it works.
+      // This is not optimal, but it works.
       hashBytes = digest.digest(url.toString.getBytes(StandardCharsets.UTF_8))
       id        = hashBytes.map("%02x".format(_)).mkString
 
@@ -45,7 +45,7 @@ final case class PrimorskiTehnoloskiParkParser(meetup: Meetup) extends Parser:
         hasEndTime = true
       )
 
-    parsed.left.map(err => err.getMessage)
+    parsed.left.map(_.getMessage)
   }
 
   override protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]] = for

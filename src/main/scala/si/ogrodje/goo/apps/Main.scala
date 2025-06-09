@@ -20,11 +20,15 @@ object Main extends ZIOAppDefault:
 
   private def program = for
     environment <- AppConfig.environment
+    sourcesList <- AppConfig.sourcesList.map(_._1.toList)
     _           <- SentryOps.setup
     _           <- DB.migrate
-    _           <-
+
+    _ <-
       logInfo(
-        s"Booting version: ${BuildInfo.version}, w/ ${BuildInfo.scalaVersion}, environment: $environment"
+        s"Booting version: ${BuildInfo.version}, w/ ${BuildInfo.scalaVersion}, " +
+          s"environment: $environment, " +
+          s"sources: ${sourcesList.mkString(", ")}"
       )
 
     meetupsSyncFib <- ZIO.serviceWithZIO[MeetupsSync](_.runScheduled).fork

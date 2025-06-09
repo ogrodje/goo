@@ -50,7 +50,8 @@ object Meetups:
            |INSERT INTO meetups ( $allFields ) VALUES (
            |${meetup.id}, ${meetup.name}, ${meetup.hidden}, ${meetup.stage}, ${meetup.homepageUrl},
            |${meetup.meetupUrl}, ${meetup.discordUrl}, ${meetup.linkedinUrl}, ${meetup.kompotUrl},
-           |${meetup.eventbriteUrl}, ${meetup.icalUrl}, ${meetup.createdAt}, ${meetup.updatedAt}
+           |${meetup.eventbriteUrl}, ${meetup.icalUrl}, ${meetup.logoImage}, ${meetup.mainColor},
+           |${meetup.createdAt}, ${meetup.updatedAt}
            |)
            |ON CONFLICT (id) DO UPDATE SET
            |name = ${meetup.name},
@@ -62,8 +63,8 @@ object Meetups:
            |linkedin_url = ${meetup.linkedinUrl},
            |kompot_url = ${meetup.kompotUrl},
            |eventbrite_url = ${meetup.eventbriteUrl},
-           |ical_url = ${meetup.icalUrl}
-           |logo_image = ${meetup.logoImage}
+           |ical_url = ${meetup.icalUrl},
+           |logo_image = ${meetup.logoImage},
            |main_color = ${meetup.mainColor}
            """.stripMargin.update.run
 

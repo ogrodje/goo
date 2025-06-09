@@ -8,7 +8,15 @@ import ZIO.logInfo
 import com.microsoft.playwright.Browser
 import si.ogrodje.goo.AppConfig
 import si.ogrodje.goo.db.DB
-import si.ogrodje.goo.models.Source.{Eventbrite, GZS, ICal, PrimorskiTehnoloskiPark, StartupSi, TehnoloskiParkLjubljana}
+import si.ogrodje.goo.models.Source.{
+  Eventbrite,
+  FRI,
+  GZS,
+  ICal,
+  PrimorskiTehnoloskiPark,
+  StartupSi,
+  TehnoloskiParkLjubljana
+}
 import si.ogrodje.goo.parsers.*
 import si.ogrodje.goo.scheduler.ScheduleOps.*
 import si.ogrodje.goo.scheduler.Scheduler
@@ -43,6 +51,8 @@ final class EventsSync:
         ZStream.fromZIO(StartupSiParser(meetup).parseWithClient(url))
       else if sourcesList.enabled(ICal) && fieldName == "icalUrl" && url.host.exists(_.contains("google.com")) then
         ZStream.fromZIO(ICalParser(meetup).parseWithClient(url))
+      else if sourcesList.enabled(FRI) && url.host.exists(_.contains("fri.uni-lj.si")) then
+        ZStream.fromZIO(FRIParser(meetup).parseWithClient(url))
       else ZStream.empty
   yield events
 

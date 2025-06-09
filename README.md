@@ -19,7 +19,7 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 - [x] Improve Sentry integration for better observability
 - [x] Add Sentry for error and release tracking
 - [x] Add [FRI Dogodki](https://www.fri.uni-lj.si/sl/koledar-dogodkov)
-- [ ] Add [FERI Dogodki](https://feri.um.si/dogodki/)
+- [ ] Add [FERI Dogodki](https://feri.um.si/dogodki/) (RSS? - `https://feri.um.si/dogodki/rss/`)
 - [ ] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
 - [ ] Add [Kompot](https://kompot.si/)
 - [ ] Sent automatic newsletter for weekly/monthly events (via [Postmark](https://postmarkapp.com/))

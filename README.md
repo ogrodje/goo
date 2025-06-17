@@ -5,7 +5,6 @@
 
 Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 
-
 ## TODO
 
 - [x] Add Eventbrite parser

@@ -5,15 +5,15 @@ object Dependencies {
   type Modules = Seq[ModuleID]
 
   object Versions {
-    val circe: Version         = "0.14.13"
+    val circe: Version         = "0.14.14"
     val doobie: Version        = "1.0.0-RC9"
-    val flyway: Version        = "11.9.0"
+    val flyway: Version        = "11.9.1"
     val ical4j: Version        = "4.1.1"
     val log4cats: Version      = "2.7.1"
-    val postgresql: Version    = "42.7.6"
+    val postgresql: Version    = "42.7.7"
     val quartz: Version        = "2.5.0"
     val scalaTest: Version     = "3.2.19"
-    val sentry: Version        = "8.13.2"
+    val sentry: Version        = "8.13.3"
     val sentryAgent: Version   = sentry
     val sentryLogback: Version = sentry
     val zio: Version           = "2.1.19"
@@ -22,7 +22,7 @@ object Dependencies {
     val zioHttp: Version       = "3.3.3"
     val zioLogging: Version    = "2.5.0"
     val zioMetrics: Version    = "2.3.1"
-    val zioPrelude: Version    = "1.0.0-RC40+6-91127e50-SNAPSHOT"
+    val zioPrelude: Version    = "1.0.0-RC41"
     val zioSchema: Version     = "1.7.2"
   }
 

@@ -2,7 +2,7 @@ import Dependencies.*
 import com.typesafe.sbt.packager.docker.{Cmd, DockerPermissionStrategy}
 import sbtassembly.AssemblyKeys.assembly
 import sbtassembly.{MergeStrategy, PathList}
-val scala3Version = "3.7.0"
+val scala3Version = "3.7.1"
 
 ThisBuild / dynverVTagPrefix  := false
 ThisBuild / dynverSeparator   := "-"
@@ -40,9 +40,7 @@ lazy val root = project
       "-Wunused:all"
     )
   )
-  .settings(
-    javaAgents += "io.sentry" % "sentry-opentelemetry-agent" % Versions.sentryAgent
-  )
+  .settings(javaAgents += "io.sentry" % "sentry-opentelemetry-agent" % Versions.sentryAgent)
   .settings(
     assembly / mainClass             := Some("si.ogrodje.goo.apps.Main"),
     assembly / assemblyJarName       := "goo.jar",

@@ -3,15 +3,13 @@ services:
     image: ghcr.io/ogrodje/goo:latest
     ports:
       - "0.0.0.0:7778:7777"
-    depends_on:
-      - pg
     environment:
       - PORT=7777
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_HOST=pg
-      - POSTGRES_PORT=5433
+      - POSTGRES_PORT=5432
       - HYGRAPH_ENDPOINT=${HYGRAPH_ENDPOINT}
       - SOURCES=All
       - GOO_ENVIRONMENT=${GOO_ENVIRONMENT}
@@ -21,12 +19,20 @@ services:
       - OTEL_TRACES_EXPORTER=none
       - OTEL_METRICS_EXPORTER=none
       - OTEL_LOGS_EXPORTER=none
+      - KEYCLOAK_REALM=${KEYCLOAK_REALM}
+      - KEYCLOAK_ENDPOINT=http://keycloak:8080
     volumes:
       - playwright-cache:/root/.cache/ms-playwright
-
+    
+    depends_on:
+      keycloak:
+        condition: service_healthy
+      pg:
+        condition: service_started
 
   keycloak:
-    image: quay.io/keycloak/keycloak:26.2.3
+    build:
+      dockerfile: keycloak.Dockerfile
     ports:
       - "0.0.0.0:8080:8080"
     environment:
@@ -38,10 +44,19 @@ services:
       - KC_DB_URL=jdbc:postgresql://pg:5432/${KEYCLOAK_DB}
       - KC_DB_USERNAME=${POSTGRES_USER}
       - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
+      - KC_HEALTH_ENABLED=true
+      - KC_METRICS_ENABLED=true
       - KEYCLOAK_LOGLEVEL=INFO
     command: 'start-dev'
     depends_on:
       - pg
+
+    healthcheck:
+      test: [ "CMD", "curl", "--head", "-fsS","http://localhost:9000/health/ready" ]
+      interval: 10s
+      timeout: 5s
+      retries: 20
+      start_period: 60s
 
   pg:
     image: postgres:17.5-alpine

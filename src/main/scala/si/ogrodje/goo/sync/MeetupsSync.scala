@@ -8,7 +8,7 @@ import zio.ZIO.{logInfo, logWarning}
 import si.ogrodje.goo.scheduler.ScheduleOps.*
 import si.ogrodje.goo.scheduler.Scheduler
 
-final class MeetupsSync private (private val hyGraph: HyGraph):
+final class MeetupsSync private (private val hyGraph: HyGraph) extends SyncService[Scope & DB & Scheduler]:
   private val syncSchedule = Schedule.fixed(10.minutes)
 
   private def partitionMeetups(
@@ -26,33 +26,28 @@ final class MeetupsSync private (private val hyGraph: HyGraph):
           case Some(dbMeetup)                                                                                 =>
             (newAcc, updateAcc, dbMeetup :: unchangedAcc)
 
-  private def sync = for
+  def sync(
+    before: UIO[Unit] = ZIO.unit,
+    after: UIO[Unit] = ZIO.unit
+  ) = for
+    _                           <- before
     (graphMeetups, dbMeetups)   <- hyGraph.allMeetups <&> Meetups.all
     (toAdd, toUpdate, unchanged) = partitionMeetups(dbMeetups, graphMeetups)
 
     _ <- logInfo(s"New: ${toAdd.size}, Updated: ${toUpdate.size}, Unchanged: ${unchanged.size}")
     _ <- Meetups.insert(toAdd*)
     _ <- Meetups.update(toUpdate*)
+    _ <- after
   yield ()
 
-  def run: RIO[Scope & DB, Unit] = for
-    f <-
-      sync
-        .retryOrElse(
-          policy = Schedule.exponential(10.seconds) && Schedule.recurs(3),
-          orElse = (err, _) => logWarning(s"Retry failed with ${err.getMessage}")
-        )
-        .repeat(syncSchedule)
-        .forever
-        .fork
-    _ <- Scope.addFinalizer(f.interrupt <* logInfo("Syncing meetups stopped."))
-  yield ()
-
-  def runScheduled: RIO[Scope & DB & Scheduler, Unit] = for
+  def runScheduled(
+    beforeSync: UIO[Unit] = ZIO.unit,
+    afterSync: UIO[Unit] = ZIO.unit
+  ) = for
     _  <- logInfo("Syncing meetups started.")
-    _  <- sync
+    _  <- sync(beforeSync, afterSync)
     f1 <-
-      sync
+      sync(beforeSync, afterSync)
         .retryOrElse(
           policy = Schedule.exponential(10.seconds) && Schedule.recurs(3),
           orElse = (err, _) => logWarning(s"Retry failed with ${err.getMessage}")

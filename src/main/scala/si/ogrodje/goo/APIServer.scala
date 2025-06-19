@@ -4,6 +4,7 @@ import si.ogrodje.goo.BaseError.{AppError, AuthenticationError}
 import si.ogrodje.goo.db.DB
 import si.ogrodje.goo.info.BuildInfo
 import si.ogrodje.goo.models.*
+import si.ogrodje.goo.sync.SyncEngine
 import zio.*
 import zio.ZIO.logInfo
 import zio.http.*
@@ -35,12 +36,15 @@ object AppError:
 final class APIServer private (
   private val db: DB,
   private val keycloak: Keycloak
+  // private val syncEngine: SyncEngine
 ):
   private given Schema[AppError]            = DeriveSchema.gen
   private given Schema[AuthenticationError] = DeriveSchema.gen
 
-  private val dbLayer          = ZLayer.succeed(db)
-  private val keycloakLayer    = ZLayer.succeed(keycloak)
+  private val dbLayer       = ZLayer.succeed(db)
+  private val keycloakLayer = ZLayer.succeed(keycloak)
+  // private val syncEngineLayer = ZLayer.succeed(syncEngine)
+
   private val ogrodjeHome: URL = URL.decode("https://ogrodje.si?from=goo").toOption.get
 
   private val corsConfig: CorsConfig = CorsConfig(
@@ -60,6 +64,16 @@ final class APIServer private (
       HttpCodec.error[AppError](Status.BadRequest),
       HttpCodec.error[AuthenticationError](Status.Unauthorized)
     )
+
+  /*
+  private val syncAll = Endpoint(RoutePattern.POST / "sync" ?? Doc.p("Sync all"))
+    .auth(AuthType.Bearer)
+    .out[String]
+    .outErrors[BaseError](
+      HttpCodec.error[AppError](Status.BadRequest),
+      HttpCodec.error[AuthenticationError](Status.Unauthorized)
+    )
+  */
 
   private val getMeetups = Endpoint(RoutePattern.GET / "meetups" ?? Doc.p("All meetups"))
     .query(
@@ -110,6 +124,19 @@ final class APIServer private (
   private def getMeRoute = getMe.implement: (_: Unit) =>
     withContext((authUser: AuthUser) => authUser)
 
+  /*
+  private def syncAllRoute(syncEngine: SyncEngine) = syncAll.implement: (_: Unit) =>
+    withContext { (authUser: AuthUser) =>
+      {
+        for
+          _ <- logInfo("Starting sync....")
+          _ <- syncEngine.runMeetupsSync
+        // _ <- ZIO.serviceWithZIO[SyncEngine](_.runMeetupsSync)
+        yield "Syncing..."
+      }.mapError(AppError.fromThrowable)
+    } // .mapError(AppError.fromThrowable)
+  */
+
   private def meetupsRoute = getMeetups.implement: (maybeLimit, maybeOffset, maybeQuery) =>
     Meetups
       .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeQuery.filterNot(_.isEmpty))
@@ -141,6 +168,7 @@ final class APIServer private (
       title = "Ogrodje Goo",
       version = BuildInfo.version,
       getMe,
+      // syncAll,
       getMeetups,
       getMeetupEvents,
       getEvents,
@@ -158,13 +186,14 @@ final class APIServer private (
     timelineRoute
   )
 
-  private val authRoutes = Routes(
+  private def authRoutes = Routes(
     getMeRoute,
+    // syncAllRoute,
     createEventRoute,
     updateEventRoute
   ) @@ Authentication.Authenticated @@ Middleware.debug
 
-  private def run: ZIO[Any, Throwable, Nothing] = for
+  private def run = for
     port   <- AppConfig.port
     _      <- logInfo(s"Starting server on port $port")
     serving =
@@ -176,8 +205,9 @@ final class APIServer private (
   yield server
 
 object APIServer:
-  def run: ZIO[DB & Keycloak, Throwable, Nothing] = for
-    db       <- ZIO.service[DB]
-    keycloak <- ZIO.service[Keycloak]
-    server   <- new APIServer(db, keycloak).run
+  def run /* ZIO[Scope & DB & Keycloak & SyncEngine & scheduler.Scheduler, Throwable, Nothing] */ = for
+    db         <- ZIO.service[DB]
+    keycloak   <- ZIO.service[Keycloak]
+    // syncEngine <- ZIO.service[SyncEngine]
+    server     <- new APIServer(db, keycloak).run
   yield server

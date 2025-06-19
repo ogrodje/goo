@@ -4,7 +4,7 @@ import si.ogrodje.goo.browser.PWright
 import si.ogrodje.goo.clients.HyGraph
 import si.ogrodje.goo.db.DB
 import si.ogrodje.goo.scheduler.Scheduler
-import si.ogrodje.goo.sync.{EventsSync, MeetupsSync}
+import si.ogrodje.goo.sync.{EventsSync, MeetupsSync, SyncEngine}
 import si.ogrodje.goo.{APIServer, AppConfig, SentryOps}
 import zio.ZIO.logInfo
 import zio.{ZIOAppDefault, *}
@@ -12,11 +12,11 @@ import zio.http.Client
 import zio.logging.backend.SLF4J
 import si.ogrodje.goo.info.BuildInfo
 import si.ogrodje.goo.server.Keycloak
+import zio.Runtime.{removeDefaultLoggers, setConfigProvider}
 
 object Main extends ZIOAppDefault:
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
-    Runtime.setConfigProvider(ConfigProvider.envProvider) >>>
-      Runtime.removeDefaultLoggers >>> SLF4J.slf4j
+    setConfigProvider(ConfigProvider.envProvider) >>> removeDefaultLoggers >>> SLF4J.slf4j
 
   private def program = for
     environment <- AppConfig.environment
@@ -31,13 +31,11 @@ object Main extends ZIOAppDefault:
           s"sources: ${sourcesList.mkString(", ")}"
       )
 
-    meetupsSyncFib <- ZIO.serviceWithZIO[MeetupsSync](_.runScheduled).fork
-    eventsSyncFib  <- ZIO.serviceWithZIO[EventsSync](_.runScheduled).fork
+    syncEngineFib <- SyncEngine.start.fork
+    _             <- Scope.addFinalizer(syncEngineFib.interrupt)
+    _             <- APIServer.run.forever
 
-    _ <- Scope.addFinalizer(meetupsSyncFib.interrupt)
-    _ <- Scope.addFinalizer(eventsSyncFib.interrupt)
-
-    _ <- APIServer.run.forever
+    _ <- syncEngineFib.join
   yield ()
 
   def run: ZIO[Environment & (ZIOAppArgs & Scope), Any, Any] = program
@@ -48,6 +46,7 @@ object Main extends ZIOAppDefault:
       HyGraph.live,
       MeetupsSync.live,
       EventsSync.live,
+      SyncEngine.live,
       DB.transactorLayer,
       PWright.livePlaywright,
       PWright.liveBrowser,

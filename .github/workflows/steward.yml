@@ -6,8 +6,10 @@ on:
 name: Scala Steward
 
 permissions:
-  contents: write
+  contents: read
   pull-requests: write
+  packages: write
+  id-token: write
 
 jobs:
   scala-steward:
@@ -25,4 +27,5 @@ jobs:
         uses: scala-steward-org/scala-steward-action@v2
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
-          cache-folder: steward-cache
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

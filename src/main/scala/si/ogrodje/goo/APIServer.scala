@@ -4,6 +4,7 @@ import si.ogrodje.goo.BaseError.{AppError, AuthenticationError}
 import si.ogrodje.goo.db.DB
 import si.ogrodje.goo.info.BuildInfo
 import si.ogrodje.goo.models.*
+import si.ogrodje.goo.sync.SyncEngine
 import zio.*
 import zio.ZIO.logInfo
 import zio.http.*
@@ -32,15 +33,10 @@ object AppError:
   given schema: Schema[AppError]            = DeriveSchema.gen
   def fromThrowable(t: Throwable): AppError = BaseError.AppError(t.getMessage)
 
-final class APIServer private (
-  private val db: DB,
-  private val keycloak: Keycloak
-):
+final class APIServer:
   private given Schema[AppError]            = DeriveSchema.gen
   private given Schema[AuthenticationError] = DeriveSchema.gen
 
-  private val dbLayer          = ZLayer.succeed(db)
-  private val keycloakLayer    = ZLayer.succeed(keycloak)
   private val ogrodjeHome: URL = URL.decode("https://ogrodje.si?from=goo").toOption.get
 
   private val corsConfig: CorsConfig = CorsConfig(
@@ -48,7 +44,7 @@ final class APIServer private (
     allowedMethods = Header.AccessControlAllowMethods.All
   )
 
-  private val routes: Routes[Any, Response] = Routes(
+  private def routes: Routes[Any, Response] = Routes(
     Method.GET / Root -> handler(Response.redirect(ogrodjeHome, isPermanent = true))
   )
 
@@ -56,6 +52,14 @@ final class APIServer private (
   private val getMe = Endpoint(RoutePattern.GET / "me" ?? Doc.p("Me"))
     .auth(AuthType.Bearer)
     .out[AuthUser]
+    .outErrors[BaseError](
+      HttpCodec.error[AppError](Status.BadRequest),
+      HttpCodec.error[AuthenticationError](Status.Unauthorized)
+    )
+
+  private val syncAllMeetups = Endpoint(RoutePattern.POST / "meetups" / "sync" ?? Doc.p("Sync meetups"))
+    .auth(AuthType.Bearer)
+    .out[String]
     .outErrors[BaseError](
       HttpCodec.error[AppError](Status.BadRequest),
       HttpCodec.error[AuthenticationError](Status.Unauthorized)
@@ -141,6 +145,7 @@ final class APIServer private (
       title = "Ogrodje Goo",
       version = BuildInfo.version,
       getMe,
+      syncAllMeetups,
       getMeetups,
       getMeetupEvents,
       getEvents,
@@ -149,35 +154,42 @@ final class APIServer private (
       getTimeline
     )
 
-  private val swaggerRoutes = SwaggerUI.routes("docs" / "openapi", openAPI)
+  private def swaggerRoutes: Routes[Any, Response] = SwaggerUI.routes("docs" / "openapi", openAPI)
 
-  private val publicRoutes = Routes(
+  private def publicRoutes: Routes[DB, Nothing] = Routes(
     meetupsRoute,
     eventsRoute,
     meetupEventsRoute,
     timelineRoute
   )
 
-  private val authRoutes = Routes(
+  private def syncMeetups(authUser: AuthUser): RIO[Scope & DB & scheduler.Scheduler & SyncEngine, String] = for
+    _ <- logInfo(s"Sync started by ${authUser.name} (${authUser.email})")
+    _ <- ZIO.serviceWithZIO[SyncEngine](_.runMeetupsSync)
+  yield "Ok"
+
+  private def syncAllMeetupsRoute(scope: Scope) = syncAllMeetups.implement: (_: Unit) =>
+    withContext((authUser: AuthUser) => syncMeetups(authUser).provideSomeLayer(ZLayer.succeed(scope)))
+      .mapError(AppError.fromThrowable)
+
+  private def authedRoutes(scope: Scope) = Routes(
+    syncAllMeetupsRoute(scope),
     getMeRoute,
     createEventRoute,
     updateEventRoute
   ) @@ Authentication.Authenticated @@ Middleware.debug
 
-  private def run: ZIO[Any, Throwable, Nothing] = for
-    port   <- AppConfig.port
-    _      <- logInfo(s"Starting server on port $port")
-    serving =
-      (routes ++ publicRoutes ++ authRoutes ++ swaggerRoutes) @@ cors(corsConfig)
-    server <-
-      Server
-        .serve(routes = serving)
-        .provide(dbLayer, keycloakLayer, Server.defaultWith(_.port(port)))
+  private def run = for
+    scope  <- ZIO.service[Scope] // This needs to be explicit or bad things happen.
+    _      <- AppConfig.port.tap(port => logInfo(s"Starting server on port $port"))
+    serving = (routes ++ publicRoutes ++ authedRoutes(scope) ++ swaggerRoutes) @@ cors(corsConfig)
+    server <- Server.serve(routes = serving)
   yield server
 
 object APIServer:
-  def run: ZIO[DB & Keycloak, Throwable, Nothing] = for
-    db       <- ZIO.service[DB]
-    keycloak <- ZIO.service[Keycloak]
-    server   <- new APIServer(db, keycloak).run
+  def run = for
+    port   <- AppConfig.port
+    server <- new APIServer().run.mapError { err =>
+                new RuntimeException(s"Boom ${err.getMessage()}")
+              }.provideSomeLayer(Server.defaultWith(_.port(port)))
   yield server

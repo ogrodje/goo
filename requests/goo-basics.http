@@ -103,3 +103,14 @@ Authorization: Bearer {{access_token}}
   "description": "Demo event updated 2",
   "endDateTime": "{{endDateTime}}"
 }
+
+### Sync
+< {%
+    let today = new Date();
+%}
+POST {{goo_endpoint}}/meetups/sync
+Accept: application/json
+Content-Type: application/json
+Authorization: Bearer {{access_token}}
+
+{}

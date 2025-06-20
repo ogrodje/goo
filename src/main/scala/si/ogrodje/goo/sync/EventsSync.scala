@@ -21,8 +21,8 @@ import si.ogrodje.goo.parsers.*
 import si.ogrodje.goo.scheduler.ScheduleOps.*
 import si.ogrodje.goo.scheduler.Scheduler
 
-final class EventsSync:
-  type FieldName = String
+final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Browser]:
+  private type FieldName = String
 
   private def sourcesOf(meetup: Meetup): List[(FieldName, Meetup, URL)] =
     meetup.productElementNames
@@ -56,27 +56,28 @@ final class EventsSync:
       else ZStream.empty
   yield events
 
-  private def sync: RIO[Scope & DB & Client & Browser, Unit] =
-    ZStream
-      .fromZIO(Meetups.all)
-      .flatMap(meetups => ZStream.fromIterable(meetups))
-      .flatMap(meetup => ZStream.fromIterable(sourcesOf(meetup)))
-      .flatMap(runParser)
-      .mapZIO(events => ZIO.foreachDiscard(events)(Events.upsert))
-      .runDrain
-
-  def run: ZIO[Scope & DB & (Client & Browser), Nothing, Unit] = for
-    _ <- logInfo("Syncing events started.")
-    // f <- sync.repeat(Schedule.fixed(10.seconds)).forever.fork
-    f <- sync.repeat(Schedule.fixed(10.seconds)).forever.fork
-    _ <- Scope.addFinalizer(f.interrupt <* logInfo("Syncing events stopped."))
+  def sync(before: UIO[Unit] = ZIO.unit, after: UIO[Unit] = ZIO.unit) = for
+    _ <- before
+    _ <- ZStream
+           .fromZIO(Meetups.all)
+           .flatMap(meetups => ZStream.fromIterable(meetups))
+           .flatMap(meetup => ZStream.fromIterable(sourcesOf(meetup)))
+           .flatMap(runParser)
+           .mapZIO(events => ZIO.foreachDiscard(events)(Events.upsert))
+           .runDrain
+    _ <- after
   yield ()
 
-  def runScheduled: RIO[Scope & DB & Scheduler & Client & Browser, Unit] = for
+  def runScheduled(
+    beforeSync: UIO[Unit] = ZIO.unit,
+    afterSync: UIO[Unit] = ZIO.unit
+  ) = for
     _  <- logInfo("Syncing events started.")
-    _  <- sync
+    _  <- sync(beforeSync, afterSync)
     f1 <-
-      sync.scheduleTo(Scheduler.simple.withIntervalInMinutes(66).repeatForever()).fork
+      sync(beforeSync, afterSync)
+        .scheduleTo(Scheduler.simple.withIntervalInMinutes(66).repeatForever())
+        .fork
     _  <- Scope.addFinalizer(f1.interrupt <* logInfo("Syncing events stopped."))
     _  <- ZIO.never
   yield ()

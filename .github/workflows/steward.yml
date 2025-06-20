@@ -6,7 +6,7 @@ on:
 name: Scala Steward
 
 permissions:
-  contents: read
+  contents: write
   pull-requests: write
   packages: write
   id-token: write
@@ -26,6 +26,7 @@ jobs:
       - name: Scala Steward
         uses: scala-steward-org/scala-steward-action@v2
         with:
+          github-repository: ogrodje/goo
           github-token: ${{ secrets.GITHUB_TOKEN }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

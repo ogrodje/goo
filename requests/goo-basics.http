@@ -108,7 +108,7 @@ Authorization: Bearer {{access_token}}
 < {%
     let today = new Date();
 %}
-POST {{goo_endpoint}}/sync
+POST {{goo_endpoint}}/meetups/sync
 Accept: application/json
 Content-Type: application/json
 Authorization: Bearer {{access_token}}

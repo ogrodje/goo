@@ -9,8 +9,6 @@ import si.ogrodje.goo.scheduler.ScheduleOps.*
 import si.ogrodje.goo.scheduler.Scheduler
 
 final class MeetupsSync private (private val hyGraph: HyGraph) extends SyncService[Scope & DB & Scheduler]:
-  private val syncSchedule = Schedule.fixed(10.minutes)
-
   private def partitionMeetups(
     dbMeetups: List[Meetup],
     graphMeetups: List[Meetup]

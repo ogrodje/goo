@@ -7,13 +7,13 @@ object Dependencies {
   object Versions {
     val circe: Version         = "0.14.14"
     val doobie: Version        = "1.0.0-RC9"
-    val flyway: Version        = "11.9.1"
+    val flyway: Version        = "11.9.2"
     val ical4j: Version        = "4.1.1"
     val log4cats: Version      = "2.7.1"
     val postgresql: Version    = "42.7.7"
     val quartz: Version        = "2.5.0"
     val scalaTest: Version     = "3.2.19"
-    val sentry: Version        = "8.13.3"
+    val sentry: Version        = "8.14.0"
     val sentryAgent: Version   = sentry
     val sentryLogback: Version = sentry
     val zio: Version           = "2.1.19"
@@ -23,7 +23,8 @@ object Dependencies {
     val zioLogging: Version    = "2.5.0"
     val zioMetrics: Version    = "2.3.1"
     val zioPrelude: Version    = "1.0.0-RC41"
-    val zioSchema: Version     = "1.7.2"
+    val zioSchema: Version     = "1.7.3"
+    val jwtScala: Version      = "11.0.0"
   }
 
   lazy val zio: Modules = Seq(
@@ -51,8 +52,6 @@ object Dependencies {
     "dev.zio" %% "zio-metrics-connectors",
     "dev.zio" %% "zio-metrics-connectors-prometheus"
   ).map(_ % Versions.zioMetrics) ++ Seq(
-    "dev.zio" %% "zio-json-yaml" % "0.7.43"
-  ) ++ Seq(
     "eu.timepit" %% "refined" % "0.11.3"
   ) ++ Seq(
     "dev.zio" %% "zio-http"         % Versions.zioHttp,
@@ -108,7 +107,7 @@ object Dependencies {
   lazy val jwt: Modules = Seq(
     "com.github.jwt-scala" %% "jwt-core",
     "com.github.jwt-scala" %% "jwt-circe"
-  ).map(_ % "10.0.4")
+  ).map(_ % Versions.jwtScala)
 
   lazy val projectResolvers: Seq[MavenRepository] = Seq(
     "Maven Central" at "https://repo1.maven.org/maven2/",

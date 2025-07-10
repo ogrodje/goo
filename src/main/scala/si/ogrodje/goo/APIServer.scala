@@ -9,13 +9,13 @@ import zio.*
 import zio.ZIO.logInfo
 import zio.http.*
 import zio.http.Header.AccessControlAllowOrigin
-import zio.http.Middleware.{CorsConfig, cors}
+import zio.http.Middleware.{cors, CorsConfig}
 import zio.http.codec.*
 import zio.http.codec.HttpCodec.query
 import zio.http.codec.PathCodec.*
 import zio.http.endpoint.*
 import zio.http.endpoint.openapi.*
-import zio.json.{SnakeCase, jsonDiscriminator, jsonHintNames}
+import zio.json.{jsonDiscriminator, jsonHintNames, SnakeCase}
 import zio.metrics.connectors.prometheus.PrometheusPublisher
 import zio.schema.*
 import zio.schema.annotation.discriminatorName

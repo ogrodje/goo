@@ -21,7 +21,6 @@ import si.ogrodje.goo.models.Source.{
 import si.ogrodje.goo.parsers.*
 import si.ogrodje.goo.scheduler.ScheduleOps.*
 import si.ogrodje.goo.scheduler.Scheduler
-import zio.metrics.Metrics
 
 final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Browser]:
   private type FieldName = String

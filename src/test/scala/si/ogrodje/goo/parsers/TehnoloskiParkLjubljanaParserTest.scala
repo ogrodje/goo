@@ -35,11 +35,11 @@ object TehnoloskiParkLjubljanaParserTest extends ZIOSpecDefault:
                     else ZIO.fail(new Exception("No response for path"))
                 yield response
 
-              Handler.fromZIO(responseZIO).catchAll(error => Handler.badRequest("Sorry. Boom."))
+              Handler.fromZIO(responseZIO).catchAll(_ => Handler.badRequest("Sorry. Boom."))
 
         homepageUrl = URL.decode("https://www.tp-lj.si").toOption.get
         meetup      = Meetup.make("tplj", "Tehnoloski park Ljubljana").copy(homepageUrl = Some(homepageUrl))
-        allEvents  <- TehnoloskiParkLjubljanaParser(meetup).parseWithClient(homepageUrl)
+        allEvents  <- TehnoloskiParkLjubljanaParser(meetup).streamEventsFrom(homepageUrl).runCollect
 
         events =
           allEvents.filter(e =>

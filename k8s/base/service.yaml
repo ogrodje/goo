@@ -15,7 +15,7 @@ spec:
       targetPort: 7777
     - name: metrics
       port: 7778
-      targetPort: 777238
+      targetPort: 7778
   type: ClusterIP
 ---
 apiVersion: v1

@@ -3,11 +3,17 @@ kind: Service
 metadata:
   name: goo-service
   namespace: goo-prod
+  annotations:
+    prometheus.io/scrape: "true"
+    prometheus.io/port: "7778"
+    prometheus.io/path: "/metrics"
 spec:
   selector: { app: goo }
   ports:
     - port: 80
       targetPort: 7777
+    - port: 7778
+      targetPort: 7778
   type: ClusterIP
 ---
 apiVersion: v1

@@ -16,8 +16,11 @@ import zio.http.codec.PathCodec.*
 import zio.http.endpoint.*
 import zio.http.endpoint.openapi.*
 import zio.json.{jsonDiscriminator, jsonHintNames, SnakeCase}
+import zio.metrics.connectors.prometheus.PrometheusPublisher
 import zio.schema.*
 import zio.schema.annotation.discriminatorName
+
+import java.nio.charset.StandardCharsets
 
 @jsonHintNames(SnakeCase)
 @jsonDiscriminator("type")
@@ -179,10 +182,38 @@ final class APIServer:
     updateEventRoute
   ) @@ Authentication.Authenticated @@ Middleware.debug
 
+  private val prometheusRoute: Routes[PrometheusPublisher, Response] = Routes(
+    Method.GET / "metrics" -> handler {
+      ZIO
+        .serviceWithZIO[PrometheusPublisher](_.get)
+        .map(response =>
+          Response(
+            status = Status.Ok,
+            headers = Headers(Header.Custom(Header.ContentType.name, "text/plain; version=0.0.4")),
+            body = Body.fromString(response, StandardCharsets.UTF_8)
+          )
+        )
+    }
+  )
+
+  private def metricServer = for
+    internalPort <- AppConfig.port.map(_ + 1)
+    _            <- logInfo(s"Starting internal metrics server on port $internalPort")
+    server       <- Server
+                      .serve(routes = prometheusRoute)
+                      .provideSomeLayer(Server.defaultWith(_.port(internalPort)))
+  yield server
+
   private def run = for
-    scope  <- ZIO.service[Scope] // This needs to be explicit or bad things happen.
-    _      <- AppConfig.port.tap(port => logInfo(s"Starting server on port $port"))
-    serving = (routes ++ publicRoutes ++ authedRoutes(scope) ++ swaggerRoutes) @@ cors(corsConfig)
+    scope <- ZIO.service[Scope] // This needs to be explicit or bad things happen.
+    _     <- AppConfig.port.tap(port => logInfo(s"Starting server on port $port"))
+
+    _ <- metricServer.fork
+
+    serving =
+      (
+        routes ++ (publicRoutes ++ authedRoutes(scope)) @@ Middleware.metrics() ++ swaggerRoutes
+      ) @@ cors(corsConfig)
     server <- Server.serve(routes = serving)
   yield server
 

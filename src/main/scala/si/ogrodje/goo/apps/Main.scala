@@ -13,10 +13,14 @@ import zio.logging.backend.SLF4J
 import si.ogrodje.goo.info.BuildInfo
 import si.ogrodje.goo.server.Keycloak
 import zio.Runtime.{removeDefaultLoggers, setConfigProvider}
+import zio.metrics.connectors.{prometheus, MetricsConfig}
+import zio.metrics.jvm.DefaultJvmMetrics
 
 object Main extends ZIOAppDefault:
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
     setConfigProvider(ConfigProvider.envProvider) >>> removeDefaultLoggers >>> SLF4J.slf4j
+
+  private val metricsConfig = ZLayer.succeed(MetricsConfig(5.seconds))
 
   private def program = for
     environment <- AppConfig.environment
@@ -50,5 +54,12 @@ object Main extends ZIOAppDefault:
       DB.transactorLayer,
       PWright.livePlaywright,
       PWright.liveBrowser,
-      Keycloak.live
+      Keycloak.live,
+
+      // Metrics
+      metricsConfig,
+      prometheus.publisherLayer,
+      prometheus.prometheusLayer,
+      Runtime.enableRuntimeMetrics,
+      DefaultJvmMetrics.liveV2.unit
     )

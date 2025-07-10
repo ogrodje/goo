@@ -11,6 +11,7 @@ import zio.{Scope, ZIO}
 import java.time.OffsetDateTime
 import java.time.format.DateTimeFormatter
 import scala.util.Try
+import si.ogrodje.goo.ClientOps.*
 
 final case class EventbriteParser(meetup: Meetup) extends Parser:
   import DocumentOps.{*, given}
@@ -78,7 +79,7 @@ final case class EventbriteParser(meetup: Meetup) extends Parser:
     client: Client,
     url: URL
   ): ZIO[Scope & Browser, Throwable, List[Event]] = for
-    response <- client.request(Request.get(url))
+    response <- client.requestMetered(Request.get(url))
     document <- response.body.asDocument
     lds      <- document.query("script[type='application/ld+json']").map(_.filter(_.data.contains("itemListElement")))
     ldJson   <- fromOption(lds.headOption)

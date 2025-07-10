@@ -10,6 +10,7 @@ import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
 import java.time.{LocalDateTime, ZoneId}
+import si.ogrodje.goo.ClientOps.requestMetered
 
 final case class StartupSiParser(meetup: Meetup) extends Parser:
   import DocumentOps.*
@@ -21,7 +22,7 @@ final case class StartupSiParser(meetup: Meetup) extends Parser:
   private def parseDateTime(raw: String) = LocalDateTime.parse(raw, formatter).atZone(cetZone).toOffsetDateTime
 
   private def parseIndividual(client: Client, rootUrl: URL, url: URL) = for
-    document   <- client.request(Request.get(url)).flatMap(_.body.asDocument)
+    document   <- client.requestMetered(Request.get(url)).flatMap(_.body.asDocument)
     maybeTitle <- document.queryFirst("div.addeventatc span.title").map(_.map(_.text().trim))
     title      <- ZIO.fromOption(maybeTitle).orElseFail(new NoSuchElementException("No title found"))
 
@@ -57,7 +58,7 @@ final case class StartupSiParser(meetup: Meetup) extends Parser:
 
   override protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]] = for
     rootUrl    <- ZIO.succeed(url.path("/sl-si/dogodki"))
-    nextEvents <- client.request(Request.get(rootUrl)).flatMap(_.body.asDocument)
+    nextEvents <- client.requestMetered(Request.get(rootUrl)).flatMap(_.body.asDocument)
     eventHrefs <- nextEvents.query("div.next-six-events a.event-card").map(_.map(_.attr("href")))
     eventUrls  <- ZIO.foreach(eventHrefs)(path => ZIO.succeed(url.path(path)))
     events     <- ZIO.foreach(eventUrls)(parseIndividual(client, rootUrl, _))

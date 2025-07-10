@@ -8,6 +8,7 @@ import zio.http.{Client, Request, URL}
 import zio.{Scope, Task, ZIO}
 
 import java.time.OffsetDateTime
+import si.ogrodje.goo.ClientOps.requestMetered
 
 final case class MeetupComParser(meetup: Meetup) extends Parser:
   import DocumentOps.{*, given}
@@ -93,7 +94,7 @@ final case class MeetupComParser(meetup: Meetup) extends Parser:
 
   private def parseEventsFrom(client: Client, url: URL) = for
     _        <- logInfo(s"Parsing events from $url")
-    response <- client.request(Request.get(url))
+    response <- client.requestMetered(Request.get(url))
     document <- response.body.asDocument
     metaJson <-
       document

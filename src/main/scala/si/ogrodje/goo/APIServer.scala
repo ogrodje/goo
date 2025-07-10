@@ -9,18 +9,18 @@ import zio.*
 import zio.ZIO.logInfo
 import zio.http.*
 import zio.http.Header.AccessControlAllowOrigin
-import zio.http.Middleware.{cors, CorsConfig}
+import zio.http.Middleware.{CorsConfig, cors}
 import zio.http.codec.*
 import zio.http.codec.HttpCodec.query
 import zio.http.codec.PathCodec.*
 import zio.http.endpoint.*
 import zio.http.endpoint.openapi.*
-import zio.json.{jsonDiscriminator, jsonHintNames, SnakeCase}
+import zio.json.{SnakeCase, jsonDiscriminator, jsonHintNames}
 import zio.metrics.connectors.prometheus.PrometheusPublisher
 import zio.schema.*
 import zio.schema.annotation.discriminatorName
 
-import java.nio.charset.StandardCharsets
+import java.nio.charset.{Charset, StandardCharsets}
 
 @jsonHintNames(SnakeCase)
 @jsonDiscriminator("type")
@@ -189,7 +189,8 @@ final class APIServer:
         .map(response =>
           Response(
             status = Status.Ok,
-            headers = Headers(Header.Custom(Header.ContentType.name, "text/plain; version=0.0.4")),
+            // headers = Headers(Header.Custom(Header.ContentType.name, "text/plain; version=0.0.4")),
+            headers = Headers(Header.ContentType(MediaType.text.plain, charset = Some(Charset.forName("UTF-8")))),
             body = Body.fromString(response, StandardCharsets.UTF_8)
           )
         )

@@ -1,24 +1,24 @@
 package si.ogrodje.goo.parsers
 
 import com.microsoft.playwright.Browser
-import si.ogrodje.goo.models.{Event, Meetup}
-import zio.{RIO, Scope, ZIO}
-import ZIO.{foreach, fromOption}
-import zio.http.{Client, Request, URL}
-import DocumentOps.*
 import org.jsoup.nodes.Element
+import si.ogrodje.goo.ClientOps.requestMetered
 import si.ogrodje.goo.models.Source.FRI
+import si.ogrodje.goo.models.{Event, Meetup}
+import si.ogrodje.goo.parsers.DocumentOps.*
+import zio.ZIO.{foreach, fromOption}
+import zio.http.{Client, Request, URL}
+import zio.{RIO, Scope, ZIO}
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-import java.time.{LocalDateTime, ZoneId, ZoneOffset}
 import java.time.format.DateTimeFormatter
+import java.time.{LocalDateTime, ZoneOffset}
 import java.util.Locale
 import scala.jdk.CollectionConverters.*
 
 final case class FRIParser(meetup: Meetup) extends Parser:
   private val digest    = MessageDigest.getInstance("SHA-1")
-  ZoneId.of("Europe/Ljubljana")
   private val formatter = DateTimeFormatter.ofPattern("d. MMM yyyy, HH:mm", Locale.ENGLISH)
 
   private val replaceMonths: String => String =
@@ -85,7 +85,7 @@ final case class FRIParser(meetup: Meetup) extends Parser:
     )
 
   override protected def parse(client: Client, url: URL): RIO[Scope & Browser, List[Event]] = for
-    document  <- client.request(Request.get(url.path("/sl/koledar-dogodkov"))).flatMap(_.body.asDocument)
+    document  <- client.requestMetered(Request.get(url.path("/sl/koledar-dogodkov"))).flatMap(_.body.asDocument)
     rawEvents <- document.query("div#vsi-dogodki div.dogodek-item")
     events    <-
       foreach(rawEvents)(parseOneEvent(url)).map(

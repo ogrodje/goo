@@ -8,6 +8,7 @@ import zio.http.*
 
 import java.nio.charset.Charset
 import java.time.OffsetDateTime
+import si.ogrodje.goo.ClientOps.requestMetered
 
 final class HyGraph private (private val client: Client):
   private given urlDecoder: Decoder[URL] = Decoder[String].emap(raw => URL.decode(raw).left.map(_.getMessage))
@@ -67,7 +68,8 @@ final class HyGraph private (private val client: Client):
                         )
                         .noSpaces
     body          = Body.fromString(text = json)
-    response     <- client.post("")(body)
+    request      <- AppConfig.config.map(_.hygraphEndpoint).map(Request.post(_, body))
+    response     <- client.requestMetered(request)
     _            <-
       ZIO.unless(response.status.isSuccess)(
         ZIO.fail(new Exception(s"GraphQL request has failed with status ${response.status}"))
@@ -109,8 +111,4 @@ final class HyGraph private (private val client: Client):
   ).flatMap(json => ZIO.fromEither(json.hcursor.get[List[Meetup]]("meetups")))
 
 object HyGraph:
-  def live: ZLayer[Client, Throwable, HyGraph] = ZLayer.fromZIO:
-    for
-      endpoint <- AppConfig.config.map(_.hygraphEndpoint)
-      client   <- ZIO.serviceWith[Client](_.url(endpoint))
-    yield new HyGraph(client)
+  def live = ZLayer.derive[HyGraph]

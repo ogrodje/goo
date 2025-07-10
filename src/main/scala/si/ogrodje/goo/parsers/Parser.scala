@@ -5,13 +5,14 @@ import si.ogrodje.goo.models.{Event, Meetup}
 import zio.*
 import zio.ZIO.{logErrorCause, logInfo}
 import zio.http.{Client, URL}
+import zio.stream.ZStream
 
 trait Parser:
   def meetup: Meetup
 
   protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]]
 
-  def parseWithClient(url: URL): ZIO[Scope & Client & Browser, Throwable, List[Event]] = for
+  protected def parseWithClient(url: URL): ZIO[Scope & Client & Browser, Throwable, List[Event]] = for
     client <- ZIO.service[Client]
     events <-
       parse(client, url)
@@ -22,3 +23,6 @@ trait Parser:
         )
     _      <- logInfo(s"Collected ${events.size} events from $url")
   yield events
+
+  final def streamEventsFrom(url: URL): ZStream[Scope & Client & Browser, Throwable, Event] =
+    ZStream.fromZIO(parseWithClient(url)).flatMap(ZStream.fromIterable)

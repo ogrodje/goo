@@ -7,7 +7,7 @@ import zio.http.{Client, Request, URL}
 import zio.{Scope, ZIO}
 
 import java.time.ZoneId
-
+import si.ogrodje.goo.ClientOps.requestMetered
 final case class ICalParser(meetup: Meetup) extends Parser:
   ZoneId.of("Europe/Ljubljana")
 
@@ -31,6 +31,6 @@ final case class ICalParser(meetup: Meetup) extends Parser:
     )
 
   override protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]] = for
-    body   <- client.request(Request.get(url)).flatMap(_.body.asString)
+    body   <- client.requestMetered(Request.get(url)).flatMap(_.body.asString)
     events <- ICalReader.fromRaw(body)
   yield events.map(eventToEvent(url, _))

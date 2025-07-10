@@ -6,7 +6,7 @@ import si.ogrodje.goo.models.{Event, Meetup, Source}
 import zio.ZIO.{attempt, fromOption, logWarning}
 import zio.http.{Client, Request, URL}
 import zio.{durationInt, Scope, ZIO}
-
+import si.ogrodje.goo.ClientOps.requestMetered
 import java.time.{LocalDate, OffsetDateTime, ZoneId}
 
 final case class TehnoloskiParkLjubljanaParser(meetup: Meetup) extends Parser:
@@ -56,7 +56,7 @@ final case class TehnoloskiParkLjubljanaParser(meetup: Meetup) extends Parser:
     event: Event
   ): ZIO[Scope, Throwable, Event] = {
     for
-      document      <- client.request(Request.get(event.eventURL.get)).flatMap(_.body.asDocument)
+      document      <- client.requestMetered(Request.get(event.eventURL.get)).flatMap(_.body.asDocument)
       maybeDuration <-
         document
           .queryFirst("p.eventDate")
@@ -81,7 +81,7 @@ final case class TehnoloskiParkLjubljanaParser(meetup: Meetup) extends Parser:
   ): ZIO[Scope & Browser, Throwable, List[Event]] = for
     now            <- zio.Clock.instant
     eventsURL      <- ZIO.succeed(url.addPath("/sl/koledar-dogodkov"))
-    response       <- client.request(Request.get(eventsURL))
+    response       <- client.requestMetered(Request.get(eventsURL))
     document       <- response.body.asDocument
     scriptTags     <- document.query("script").map(_.filter(_.data().contains("dogodkiJSON")))
     scriptTag      <-

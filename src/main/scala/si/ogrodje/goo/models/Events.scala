@@ -19,7 +19,7 @@ object EventGrouping       extends Enum[EventGrouping] with CirceEnum[EventGroup
 object Events:
   import DBOps.given
 
-  def upsert(event: Event): RIO[DB, Int] = DB.transact:
+  def upsert(event: Event): RIO[DB, Either[Throwable, UpsertResult]] = DB.transact:
     sql"""
           INSERT INTO events (
             id,
@@ -62,7 +62,14 @@ object Events:
           location_name = ${event.locationName},
           location_address = ${event.locationAddress},
           updated_at = now()
-        """.updateWithLabel("upsert-event").run
+        RETURNING
+          CASE WHEN xmax = 0 THEN 'INSERTED' ELSE 'UPDATED' END as operation,
+          id as event_id
+        """.queryWithLabel[(String, String)]("upsert-event").unique.map {
+      case ("INSERTED", eventID) => Right(UpsertResult.Inserted(eventID))
+      case ("UPDATED", eventID)  => Right(UpsertResult.Updated(eventID))
+      case _                     => Left(new RuntimeException("Unknown upsert result"))
+    }
 
   def create(event: Event): RIO[DB, Int] = for
     _      <- ZIO.fromOption(event.eventURL).orElseFail(new Exception("Event URL is required"))

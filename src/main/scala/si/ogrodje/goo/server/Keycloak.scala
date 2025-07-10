@@ -3,13 +3,14 @@ package si.ogrodje.goo.server
 import io.circe.Decoder
 import io.circe.generic.semiauto.deriveDecoder
 import si.ogrodje.goo.AppConfig
-import zio.ZIO.{logInfo, serviceWith, serviceWithZIO}
-import zio.{Duration, Ref, Schedule, Scope, Task, UIO, ZIO, ZLayer}
+import si.ogrodje.goo.ClientOps.requestMetered
+import zio.ZIO.{logInfo, serviceWithZIO}
 import zio.http.{Client, Request}
+import zio.{Duration, Ref, Schedule, Scope, Task, UIO, ZIO, ZLayer}
 
 import java.math.BigInteger
-import java.security.{KeyFactory, PublicKey}
 import java.security.spec.RSAPublicKeySpec
+import java.security.{KeyFactory, PublicKey}
 import java.util.Base64
 
 final case class Key(
@@ -55,22 +56,25 @@ object Keycloak:
   def certs: ZIO[Keycloak, Nothing, Certs]          = serviceWithZIO[Keycloak](_.certs)
   def rs256Key: ZIO[Keycloak, Throwable, PublicKey] = serviceWithZIO[Keycloak](_.rs256Key)
 
-  private def collectCerts(client: Client) = for
-    _        <- ZIO.unit
-    request   = Request.get("/protocol/openid-connect/certs")
-    response <- client.request(request)
-    json     <- response.body.asString.flatMap(body => ZIO.fromEither(io.circe.parser.parse(body)))
-    certs    <- ZIO.fromEither(json.hcursor.as[Certs])
-    _        <- logInfo(s"Keycloak certs refreshed.")
+  private def collectCerts(client: Client): ZIO[Scope, Throwable, Certs] = for
+    _         <- ZIO.unit
+    certsPath <-
+      AppConfig.keycloakConfig.map((endpoint, realm) =>
+        endpoint.addPath(s"/realms/$realm/protocol/openid-connect/certs")
+      )
+    response  <- client.requestMetered(Request.get(certsPath))
+    json      <- response.body.asString.flatMap(body => ZIO.fromEither(io.circe.parser.parse(body)))
+    certs     <- ZIO.fromEither(json.hcursor.as[Certs])
+    _         <- logInfo(s"Keycloak certs refreshed.")
   yield certs
 
-  def live: ZLayer[Client, Throwable, Keycloak] = ZLayer.scoped:
+  def live: ZLayer[Scope & Client, Throwable, Keycloak] = ZLayer.fromZIO:
     for
-      keycloakConfig @ (endpoint, realm) <- AppConfig.keycloakConfig
-      _                                  <- logInfo(s"Connecting with config: $keycloakConfig")
-      client                             <- serviceWith[Client](_.url(endpoint.addPath(s"/realms/$realm")))
-      certsRef                           <- Ref.make(Certs.empty)
-      _                                  <- collectCerts(client).flatMap(certsRef.set)
+      (endpoint, realm) <- AppConfig.keycloakConfig
+      _                 <- logInfo(s"Connecting on endpoint $endpoint, realm $realm.")
+      client            <- ZIO.service[Client]
+      certsRef          <- Ref.make(Certs.empty)
+      // _                 <- collectCerts(client).flatMap(certsRef.set)
 
       reloadFib <-
         collectCerts(client)

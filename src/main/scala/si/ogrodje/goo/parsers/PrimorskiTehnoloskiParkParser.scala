@@ -8,8 +8,9 @@ import io.circe.{Decoder, Json}
 import si.ogrodje.goo.models.Source.PrimorskiTehnoloskiPark
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
-
+import si.ogrodje.goo.ClientOps.requestMetered
 import java.time.{OffsetDateTime, ZoneId}
+
 final case class PrimorskiTehnoloskiParkParser(meetup: Meetup) extends Parser:
   import DocumentOps.{*, given}
   private val cetZone = ZoneId.of("Europe/Ljubljana")
@@ -50,7 +51,7 @@ final case class PrimorskiTehnoloskiParkParser(meetup: Meetup) extends Parser:
 
   override protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]] = for
     eventsUrl <- ZIO.succeed(url.path("vsi-dogodki/"))
-    document  <- client.request(Request.get(eventsUrl)).flatMap(_.body.asDocument)
+    document  <- client.requestMetered(Request.get(eventsUrl)).flatMap(_.body.asDocument)
     jsonLDs   <- document.query("script[type=application/ld+json]").map(_.filter(_.data().contains("\"Event\"")))
     json      <-
       ZIO

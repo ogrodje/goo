@@ -3,10 +3,7 @@ kind: Service
 metadata:
   name: goo-service
   namespace: goo-prod
-  annotations:
-    prometheus.io/scrape: "true"
-    prometheus.io/port: "7778"
-    prometheus.io/path: "/metrics"
+  labels: { app: goo }
 spec:
   selector: { app: goo }
   ports:
@@ -29,3 +26,19 @@ spec:
     - port: 80
       targetPort: 8080
   type: ClusterIP
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: goo
+  namespace: goo-prod
+  labels: { release: prom }
+spec:
+  selector:
+    matchLabels: { app: goo }
+  namespaceSelector:
+    matchNames: [ goo-prod ]
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 10s

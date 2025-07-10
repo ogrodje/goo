@@ -10,10 +10,12 @@ metadata:
 spec:
   selector: { app: goo }
   ports:
-    - port: 80
+    - name: http
+      port: 80
       targetPort: 7777
-    - port: 7778
-      targetPort: 7778
+    - name: metrics
+      port: 7778
+      targetPort: 777238
   type: ClusterIP
 ---
 apiVersion: v1

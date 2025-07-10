@@ -35,6 +35,7 @@ services:
       dockerfile: keycloak.Dockerfile
     ports:
       - "0.0.0.0:8080:8080"
+      - "0.0.0.0:8443:8443"
     environment:
       - KEYCLOAK_ADMIN=${KEYCLOAK_ADMIN}
       - KEYCLOAK_ADMIN_PASSWORD=${KEYCLOAK_ADMIN_PASSWORD}
@@ -46,6 +47,7 @@ services:
       - KC_DB_PASSWORD=${POSTGRES_PASSWORD}
       - KC_HEALTH_ENABLED=true
       - KC_METRICS_ENABLED=true
+      - KC_HOSTNAME_STRICT=false
       - KEYCLOAK_LOGLEVEL=INFO
     command: 'start-dev'
     depends_on:

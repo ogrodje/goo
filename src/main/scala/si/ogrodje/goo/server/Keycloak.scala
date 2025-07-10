@@ -56,7 +56,9 @@ object Keycloak:
   def rs256Key: ZIO[Keycloak, Throwable, PublicKey] = serviceWithZIO[Keycloak](_.rs256Key)
 
   private def collectCerts(client: Client) = for
-    response <- client.request(Request.get("/protocol/openid-connect/certs"))
+    _        <- ZIO.unit
+    request   = Request.get("/protocol/openid-connect/certs")
+    response <- client.request(request)
     json     <- response.body.asString.flatMap(body => ZIO.fromEither(io.circe.parser.parse(body)))
     certs    <- ZIO.fromEither(json.hcursor.as[Certs])
     _        <- logInfo(s"Keycloak certs refreshed.")

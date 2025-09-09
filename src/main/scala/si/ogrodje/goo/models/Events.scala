@@ -163,7 +163,7 @@ object Events:
       fr"'logoImage', m.logo_image, 'mainColor', m.main_color, 'backgroundColor', m.background_color ) as meetup"
 
   // TODO: Remove this if it is not needed.
-  private given Meta[Meetup] = Meta[Json].tiemap(json => json.as[Meetup].left.map(_.getMessage))(pom =>
+  private given Meta[Meetup] = Meta[Json].tiemap(json => json.as[Meetup].left.map(_.getMessage))(_ =>
     Json.obj("id" -> Json.fromString("x"), "name" -> Json.fromString("x"), "stage" -> Json.fromString("x"))
   )
 
@@ -214,11 +214,7 @@ object Events:
       .map(_.headOption)
       .flatMap(ZIO.fromOption(_).orElseFail(new Exception("Event not found")))
 
-  def timeline(
-    limit: Int,
-    offset: Int,
-    groupBy: EventGrouping = EventGrouping.Day
-  ): RIO[DB, List[Event]] =
+  def timeline: RIO[DB, List[Event]] =
     val baseQuery =
       fr"""SELECT
              $baseFields,

@@ -8,7 +8,7 @@ import si.ogrodje.goo.models.{Event, Meetup}
 import si.ogrodje.goo.parsers.DocumentOps.*
 import zio.ZIO.{foreach, fromOption}
 import zio.http.{Client, Request, URL}
-import zio.{RIO, Scope, ZIO}
+import zio.{RIO, Scope}
 
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest

@@ -6,27 +6,27 @@ object Dependencies {
 
   object Versions {
     val circe: Version          = "0.14.14"
-    val doobie: Version         = "1.0.0-RC9"
-    val flyway: Version         = "11.10.1"
+    val doobie: Version         = "1.0.0-RC10"
+    val flyway: Version         = "11.12.0"
     val ical4j: Version         = "4.1.1"
-    val jsoup: Version          = "1.21.1"
+    val jsoup: Version          = "1.21.2"
     val jwtScala: Version       = "11.0.2"
     val log4cats: Version       = "2.7.1"
-    val playwright: Version     = "1.53.0"
+    val playwright: Version     = "1.55.0"
     val postgresql: Version     = "42.7.7"
     val quartz: Version         = "2.5.0"
     val scalaTest: Version      = "3.2.19"
-    val sentry: Version         = "8.17.0"
+    val sentry: Version         = "8.21.0"
     val sentryAgent: Version    = sentry
     val sentryLogback: Version  = sentry
-    val zio: Version            = "2.1.19"
-    val zioCli: Version         = "0.7.2"
+    val zio: Version            = "2.1.21"
+    val zioCli: Version         = "0.7.3"
     val zioConfig: Version      = "4.0.4"
-    val zioHttp: Version        = "3.3.3"
-    val zioLogging: Version     = "2.5.0"
-    val zioMetrics: Version     = "2.4.0"
+    val zioHttp: Version        = "3.5.0"
+    val zioLogging: Version     = "2.5.1"
+    val zioMetrics: Version     = "2.5.0"
     val zioPrelude: Version     = "1.0.0-RC41"
-    val zioSchema: Version      = "1.7.3"
+    val zioSchema: Version      = "1.7.4"
     val logbackClassic: Version = "1.5.18"
   }
 

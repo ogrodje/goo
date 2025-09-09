@@ -2,7 +2,7 @@ import Dependencies.*
 import com.typesafe.sbt.packager.docker.{Cmd, DockerPermissionStrategy}
 import sbtassembly.AssemblyKeys.assembly
 import sbtassembly.{MergeStrategy, PathList}
-val scala3Version = "3.7.1"
+val scala3Version = "3.7.3"
 
 ThisBuild / dynverVTagPrefix  := false
 ThisBuild / dynverSeparator   := "-"
@@ -65,7 +65,7 @@ lazy val root = project
     dockerUsername           := Some("ogrodje"),
     dockerUpdateLatest       := true,
     dockerRepository         := Some("ghcr.io"),
-    dockerBaseImage          := "azul/zulu-openjdk:21-jre-headless-latest",
+    dockerBaseImage          := "azul/zulu-openjdk:24-jre-headless-latest",
     Docker / daemonUserUid   := None,
     Docker / daemonUser      := "root",
     dockerPermissionStrategy := DockerPermissionStrategy.None,

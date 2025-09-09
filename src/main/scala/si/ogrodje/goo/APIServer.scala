@@ -141,7 +141,7 @@ final class APIServer:
       .mapError(AppError.fromThrowable)
 
   private def timelineRoute = getTimeline.implement: _ =>
-    Events.timeline(100, 0).mapError(AppError.fromThrowable)
+    Events.timeline.mapError(AppError.fromThrowable)
 
   private val openAPI =
     OpenAPIGen.fromEndpoints(

@@ -11,4 +11,4 @@ images:
   - name: ghcr.io/otobrglez/koofr-watch
     newTag: '0.0.2'
   - name: quay.io/keycloak/keycloak
-    newTag: '26.2.5'
+    newTag: '26.3'

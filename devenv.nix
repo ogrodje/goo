@@ -22,18 +22,20 @@ in
   };
 
   packages = [ 
+	pkgs.yq-go
   	pkgs.git
-    pkgs.kubectl
+    pkgs.jq
     pkgs.k9s
-    pkgs.kubie
+    pkgs.kubectl
     pkgs.kubectx
     pkgs.kubernetes-helm
-    pkgs.jq
-	  pkgs.yq-go
+    pkgs.kubie
   ];
 
   enterShell = ''
     echo "~~~ goo in $GOO_ENV ~~~"
+    export KUBECONFIG="ogrodje-one-config"
+    kubens goo-prod
     alias k='microk8s kubectl
   '';
   

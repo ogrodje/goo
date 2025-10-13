@@ -44,7 +44,6 @@ final case class EventbriteParser(meetup: Meetup) extends Parser:
           .map { json =>
             val cursor = json.hcursor
             for
-              kind                                     <- cursor.get[String]("@type")
               name                                     <- cursor.get[String]("name")
               startDate                                <- cursor.get[OffsetDateTime]("startDate")
               endDate                                  <- cursor.get[Option[OffsetDateTime]]("endDate")

@@ -42,24 +42,25 @@ object Main extends ZIOAppDefault:
     _ <- syncEngineFib.join
   yield ()
 
-  def run: ZIO[Environment & (ZIOAppArgs & Scope), Any, Any] = program
-    .provide(
-      Scope.default,
-      Scheduler.live,
-      Client.default,
-      HyGraph.live,
-      MeetupsSync.live,
-      EventsSync.live,
-      SyncEngine.live,
-      DB.transactorLayer,
-      PWright.livePlaywright,
-      PWright.liveBrowser,
-      Keycloak.live,
+  def run: ZIO[Environment & (ZIOAppArgs & Scope), Any, Any] =
+    program
+      .provide(
+        Scope.default,
+        Scheduler.live,
+        Client.default,
+        HyGraph.live,
+        MeetupsSync.live,
+        EventsSync.live,
+        SyncEngine.live,
+        DB.transactorLayer,
+        PWright.livePlaywright,
+        PWright.liveBrowser,
+        Keycloak.live,
 
-      // Metrics
-      metricsConfig,
-      prometheus.publisherLayer,
-      prometheus.prometheusLayer,
-      Runtime.enableRuntimeMetrics,
-      DefaultJvmMetrics.liveV2.unit
-    )
+        // Metrics
+        metricsConfig,
+        prometheus.publisherLayer,
+        prometheus.prometheusLayer,
+        Runtime.enableRuntimeMetrics,
+        DefaultJvmMetrics.liveV2.unit
+      )

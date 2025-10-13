@@ -2,13 +2,13 @@ package si.ogrodje.goo.parsers
 
 import com.microsoft.playwright.Browser
 import io.circe.{Decoder, Json}
+import si.ogrodje.goo.ClientOps.requestMetered
 import si.ogrodje.goo.models.{Event, Meetup, Source}
 import zio.ZIO.{fromOption, logInfo}
 import zio.http.{Client, Request, URL}
 import zio.{Scope, Task, ZIO}
 
 import java.time.OffsetDateTime
-import si.ogrodje.goo.ClientOps.requestMetered
 
 final case class MeetupComParser(meetup: Meetup) extends Parser:
   import DocumentOps.{*, given}
@@ -102,7 +102,8 @@ final case class MeetupComParser(meetup: Meetup) extends Parser:
         .orElseFail(new NoSuchElementException(s"No __NEXT_DATA__ found for $url"))
     json     <- metaJson.dataAsJson.orElse(ZIO.succeed(Json.obj()))
     events   <- readEventsFromMeta(url, json)
-  yield events
+    cutoff    = OffsetDateTime.now().minusMonths(6)
+  yield events.filter(_.startDateTime.isAfter(cutoff))
 
   override protected def parse(
     client: Client,

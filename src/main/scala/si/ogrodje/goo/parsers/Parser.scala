@@ -12,7 +12,7 @@ trait Parser:
 
   protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]]
 
-  protected def parseWithClient(url: URL): ZIO[Scope & Client & Browser, Throwable, List[Event]] = for
+  private def parseWithClient(url: URL): ZIO[Scope & Client & Browser, Throwable, List[Event]] = for
     client <- ZIO.service[Client]
     events <-
       parse(client, url)

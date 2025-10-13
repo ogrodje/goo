@@ -5,29 +5,29 @@ object Dependencies {
   type Modules = Seq[ModuleID]
 
   object Versions {
-    val circe: Version          = "0.14.14"
+    val circe: Version          = "0.14.15"
     val doobie: Version         = "1.0.0-RC10"
-    val flyway: Version         = "11.12.0"
-    val ical4j: Version         = "4.1.1"
+    val flyway: Version         = "11.14.0"
+    val ical4j: Version         = "4.2.0"
     val jsoup: Version          = "1.21.2"
-    val jwtScala: Version       = "11.0.2"
+    val jwtScala: Version       = "11.0.3"
     val log4cats: Version       = "2.7.1"
+    val logbackClassic: Version = "1.5.19"
     val playwright: Version     = "1.55.0"
-    val postgresql: Version     = "42.7.7"
+    val postgresql: Version     = "42.7.8"
     val quartz: Version         = "2.5.0"
     val scalaTest: Version      = "3.2.19"
-    val sentry: Version         = "8.21.0"
+    val sentry: Version         = "8.23.0"
     val sentryAgent: Version    = sentry
     val sentryLogback: Version  = sentry
     val zio: Version            = "2.1.21"
     val zioCli: Version         = "0.7.3"
-    val zioConfig: Version      = "4.0.4"
-    val zioHttp: Version        = "3.5.0"
+    val zioConfig: Version      = "4.0.5"
+    val zioHttp: Version        = "3.5.1"
     val zioLogging: Version     = "2.5.1"
     val zioMetrics: Version     = "2.5.0"
     val zioPrelude: Version     = "1.0.0-RC41"
-    val zioSchema: Version      = "1.7.4"
-    val logbackClassic: Version = "1.5.18"
+    val zioSchema: Version      = "1.7.5"
   }
 
   lazy val zio: Modules = Seq(
@@ -38,7 +38,6 @@ object Dependencies {
     "dev.zio" %% "zio-test-sbt",
     "dev.zio" %% "zio-test-magnolia"
   ).map(_ % Versions.zio % Test) ++ Seq(
-    "dev.zio" %% "zio-prelude" % Versions.zioPrelude,
     "dev.zio" %% "zio-cli"     % Versions.zioCli
   ) ++ Seq(
     "dev.zio" %% "zio-logging",
@@ -89,13 +88,11 @@ object Dependencies {
     "com.beachape" %% "enumeratum-circe"
   ).map(_ % "1.9.0")
 
-  lazy val jsoup: Modules      = Seq("org.jsoup" % "jsoup" % Versions.jsoup)
-  lazy val ical4j: Modules     = Seq(
-    "org.mnode.ical4j" % "ical4j" % Versions.ical4j
-  )
-  lazy val playwright: Modules = Seq(
-    "com.microsoft.playwright" % "playwright" % Versions.playwright
-  )
+  lazy val jsoup: Modules  = "org.jsoup" % "jsoup" % Versions.jsoup :: Nil
+  lazy val ical4j: Modules =
+    "org.mnode.ical4j" % "ical4j" % Versions.ical4j :: Nil
+  lazy val playwright: Modules =
+    "com.microsoft.playwright" % "playwright" % Versions.playwright :: Nil
 
   lazy val json: Modules = Seq(
     "io.circe" %% "circe-core",

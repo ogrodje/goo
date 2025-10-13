@@ -22,8 +22,8 @@ in
   };
 
   packages = [ 
-	pkgs.yq-go
-  	pkgs.git
+    pkgs.yq-go
+    pkgs.git
     pkgs.jq
     pkgs.k9s
     pkgs.kubectl

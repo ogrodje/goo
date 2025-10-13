@@ -13,7 +13,7 @@ import zio.{RIO, Scope}
 import java.nio.charset.StandardCharsets
 import java.security.MessageDigest
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, ZoneOffset}
+import java.time.{LocalDateTime, OffsetDateTime, ZoneOffset}
 import java.util.Locale
 import scala.jdk.CollectionConverters.*
 
@@ -91,4 +91,6 @@ final case class FRIParser(meetup: Meetup) extends Parser:
       foreach(rawEvents)(parseOneEvent(url)).map(
         _.filterNot(_.eventURL.exists(_.path.toString.contains("javna-predstavitev")))
       )
-  yield events
+
+    cutoff = OffsetDateTime.now().minusMonths(6)
+  yield events.filter(_.startDateTime.isAfter(cutoff))

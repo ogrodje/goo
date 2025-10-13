@@ -58,4 +58,6 @@ final case class GZSParser(meetup: Meetup) extends Parser:
               locationName = Some(locationName)
             )
         }
-  yield events
+
+    cutoff = OffsetDateTime.now().minusMonths(3)
+  yield events.filter(_.startDateTime.isAfter(cutoff))

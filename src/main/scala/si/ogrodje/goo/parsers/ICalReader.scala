@@ -3,14 +3,14 @@ package si.ogrodje.goo.parsers
 import net.fortuna.ical4j.data.CalendarBuilder
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.{Calendar, Component}
-import zio.ZIO.logWarningCause
+import zio.ZIO.{logDebugCause, logWarningCause}
 import zio.http.URL
 import zio.{Cause, Scope, Task, UIO, URIO, ZIO}
 
 import java.io.StringReader
 import java.net.URI
 import java.time.format.DateTimeFormatter
-import java.time.{LocalDateTime, OffsetDateTime, ZoneId}
+import java.time.{LocalDateTime, OffsetDateTime, ZoneId, ZonedDateTime}
 import scala.jdk.CollectionConverters.*
 import scala.jdk.OptionConverters.*
 import scala.util.Try
@@ -23,7 +23,7 @@ object ICalOps:
       calendar.getComponents(kind).asScala.toList
 
   extension (event: VEvent)
-    def summary: Task[String] = ZIO.attempt(event.getSummary).flatMap(s => ZIO.attempt(s.getValue))
+    def summary: Task[String] = ZIO.attempt(event.getSummary).flatMap(s => ZIO.attempt(s.getValue)).map(_.trim)
     def uid: Task[String]     = ZIO
       .attempt(event.getUid)
       .flatMap(s => ZIO.fromOption(s.toScala).orElseFail(new RuntimeException("Failed reading uid")))
@@ -45,14 +45,35 @@ object ICalOps:
             .toOffsetDateTime
         ).map(_ -> false).toEither
       else
-        Try(
-          OffsetDateTime
-            .parse(raw, DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmssX"))
-            .atZoneSameInstant(cetZone)
-            .toOffsetDateTime
-        )
-          .map(_ -> true)
-          .toEither
+        val hasZSuffix    = raw.endsWith("Z")
+        val hasExplicitTz = raw.matches(""".*[+-]\d{2}:?\d{2}$""")
+        // Try order: UTC(Z), explicit offset, floating (local)
+        val result        =
+          if hasZSuffix then
+            // UTC format strictly: yyyyMMdd'T'HHmmss'Z'
+            Try(
+              ZonedDateTime
+                .parse(raw, DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmssX"))
+                .withZoneSameInstant(cetZone)
+                .toOffsetDateTime
+            )
+          else if hasExplicitTz then
+            // Offset present: yyyyMMdd'T'HHmmss±HHmm or ±HH:MM
+            Try(
+              OffsetDateTime
+                .parse(raw, DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmssXXXXX"))
+                .atZoneSameInstant(cetZone)
+                .toOffsetDateTime
+            )
+          else
+            // Floating local time: interpret in cetZone
+            Try(
+              LocalDateTime
+                .parse(raw, DateTimeFormatter.ofPattern("yyyyMMdd'T'HHmmss"))
+                .atZone(cetZone)
+                .toOffsetDateTime
+            )
+        result.map(_ -> true).toEither
 
     def dateTimeStart: ZIO[Any, Throwable, (OffsetDateTime, Boolean)] =
       ZIO
@@ -78,7 +99,7 @@ object ICalOps:
       ZIO.fromTry(Try(event.getUrl).map(_.getUri)).option
 
     def details: ZIO[Any, Throwable, Option[String]] =
-      ZIO.attempt(event.getDescription).map(s => Option(s.getValue))
+      ZIO.attempt(event.getDescription).map(s => Option(s.getValue).map(_.trim))
 
     def detailsUrls: ZIO[Any, Throwable, List[String]] = details.flatMap {
       case Some(txt) => ZIO.succeed(extractUrls(txt))
@@ -156,7 +177,9 @@ object ICalReader:
         }
         .map(_.partitionMap(identity))
 
-    _ <- ZIO.foreachDiscard(parsingErrors)(err => logWarningCause("Parsing of event has failed.", Cause.fail(err)))
+    _ <- ZIO.foreachDiscard(parsingErrors)(err =>
+           logDebugCause("Parsing of event has failed. Event skipped.", Cause.fail(err))
+         )
 
     events =
       rawEvents.filter { e =>

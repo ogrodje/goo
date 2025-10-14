@@ -49,8 +49,7 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
         PrimorskiTehnoloskiParkParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(StartupSi) && url.host.exists(_.contains("startup.si")) then
         StartupSiParser(meetup).streamEventsFrom(url)
-      else if sourcesList.enabled(ICal) && fieldName == "icalUrl" && url.host.exists(_.contains("google.com")) then
-        ICalParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(ICal) && fieldName == "icalUrl" then ICalParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(FRI) && url.host.exists(_.contains("fri.uni-lj.si")) then
         FRIParser(meetup).streamEventsFrom(url)
       else ZStream.empty

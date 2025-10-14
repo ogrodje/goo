@@ -3,7 +3,7 @@ package si.ogrodje.goo.parsers
 import net.fortuna.ical4j.data.CalendarBuilder
 import net.fortuna.ical4j.model.component.VEvent
 import net.fortuna.ical4j.model.{Calendar, Component}
-import zio.ZIO.{logDebugCause, logWarningCause}
+import zio.ZIO.logDebugCause
 import zio.http.URL
 import zio.{Cause, Scope, Task, UIO, URIO, ZIO}
 

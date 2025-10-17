@@ -2,7 +2,7 @@
 
 [![Ogrodje Site Build](https://github.com/ogrodje/goo/actions/workflows/build.yml/badge.svg)](https://github.com/ogrodje/goo/actions/workflows/build.yml)
 [![OpenAPI Documentation](https://img.shields.io/badge/OpenAPI_Documentation-📕-blue)](https://goo.ogrodje.si/docs/openapi)
-[![ZIO LLM](https://img.shields.io/github/stars/ogrodje/goo?style=social)](https://github.com/ogrodje/goo)
+[![Ogrodje Goo](https://img.shields.io/github/stars/ogrodje/goo?style=social)](https://github.com/ogrodje/goo)
 
 Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 

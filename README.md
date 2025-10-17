@@ -18,15 +18,15 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 - [x] Improve Sentry integration for better observability
 - [x] Add Sentry for error and release tracking
 - [x] Add [FRI Dogodki](https://www.fri.uni-lj.si/sl/koledar-dogodkov)
-- [ ] Add [FERI Dogodki](https://feri.um.si/dogodki/) (RSS? - `https://feri.um.si/dogodki/rss/`)
+- [x] Add [SAŠA Inkubator](https://sasainkubator.si/dogodki/)
+- [x] Add [Kovačnica](https://kovacnica.si/dogodki/)
+- [ ] ~~Add [FERI Dogodki](https://feri.um.si/dogodki/) (RSS? - `https://feri.um.si/dogodki/rss/`)~~
 - [ ] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
 - [ ] Add [Kompot](https://kompot.si/)
 - [ ] Sent automatic newsletter for weekly/monthly events (via [Postmark](https://postmarkapp.com/))
 - [ ] Add [GDG Ljubljana](https://gdg.community.dev/gdg-ljubljana/)
-- [ ] Add [SAŠA Inkubator](https://sasainkubator.si/dogodki/)
-- [ ] Add [Kovačnica](https://kovacnica.si/dogodki/)
 - [ ] Add [Podjetniški inkubator Perspektiva](https://www.inkubator-perspektiva.si/)
-- [ ] Add [Inkubator Savinjske regije](https://inkubatorsr.si/)
+- [ ] Add [Inkubator Savinjske regije](https://inkubatorsr.si/) ([dogodki](https://www.inkubatorsr.si/aktualno/dogodki/))
 - [ ] Add [LUI (Ljubljanski univerzitetni inkubator)](https://lui.si/aktualno/)
 - [ ] Allow manual adding of events
 - [ ] Send batch emails via

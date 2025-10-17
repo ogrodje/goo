@@ -10,9 +10,9 @@ import zio.stream.ZStream
 trait Parser:
   def meetup: Meetup
 
-  protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]]
+  protected def parse(client: Client, url: URL): RIO[Scope & Browser, List[Event]]
 
-  private def parseWithClient(url: URL): ZIO[Scope & Client & Browser, Throwable, List[Event]] = for
+  private def parseWithClient(url: URL): RIO[Scope & Client & Browser, List[Event]] = for
     client <- ZIO.service[Client]
     events <-
       parse(client, url)
@@ -21,7 +21,7 @@ trait Parser:
           policy = Schedule.exponential(10.seconds) && Schedule.recurs(3),
           orElse = (err, _) => logErrorCause(s"""Crash with retry: ${err.getMessage}""", Cause.fail(err)).as(Nil)
         )
-    _      <- logInfo(s"Collected ${events.size} events from $url")
+    _      <- logInfo(s"Collected ${events.size} events from $url") when events.nonEmpty
   yield events
 
   final def streamEventsFrom(url: URL): ZStream[Scope & Client & Browser, Throwable, Event] =

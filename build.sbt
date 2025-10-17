@@ -80,38 +80,69 @@ lazy val root = project
           Cmd("ENV", s"GOO_VERSION=${version.value}"),
           Cmd(
             "RUN",
-            """apt-get update -yyqq && apt-get install -yyqq libglib2.0-0\
-              |	libnss3\
-              |	libnspr4\
-              |	libdbus-1-3\
-              |	libatk1.0-0\
-              |	libatspi2.0-0\
-              |	libx11-6\
-              |	libxcomposite1\
-              |	libxdamage1\
-              |	libxext6\
-              |	libxfixes3\
-              |	libxrandr2\
-              |	libgbm1\
-              |	libxcb1\
-              |	libxkbcommon0\
-              |	libasound2\
-              | libatk-bridge2.0-0\
-              | libcups2\
-              | libpango-1.0-0\
-              | libcairo2\
-              | libx11-xcb1\
-              | libxcursor1\
-              | libgtk-3-0\
-              | libpangocairo-1.0-0\
-              | libcairo-gobject2\
-              | libgdk-pixbuf-2.0-0""".stripMargin
+            s"""apt-get update -yyqq && apt-get install -yyqq ${ubuntuPackages.mkString(" ")}"""
           ),
           cmd
         )
       case other                   => List(other)
     }
   )
+
+lazy val ubuntuPackages = Seq(
+  "libasound2",
+  "libatk-bridge2.0-0",
+  "libatk1.0-0",
+  "libatspi2.0-0",
+  "libcairo-gobject2",
+  "libcairo2",
+  "libcups2",
+  "libdbus-1-3",
+  "libgbm1",
+  "libgdk-pixbuf-2.0-0",
+  "libglib2.0-0",
+  "libgtk-3-0",
+  "libgtk-3-0",
+  "libgtk-4-bin",
+  "libgtk-4-common",
+  "libgtk-4-dev",
+  "libnspr4",
+  "libnss3",
+  "libpango-1.0-0",
+  "libpangocairo-1.0-0",
+  "libx11-6",
+  "libx11-xcb1",
+  "libxcb1",
+  "libxcomposite1",
+  "libxcursor1",
+  "libxdamage1",
+  "libxext6",
+  "libxfixes3",
+  "libxkbcommon0",
+  "libxrandr2",
+  // added
+  "libgstreamer1.0-0",
+  "libgstreamer-plugins-base1.0-0",
+  "libgstreamer-plugins-good1.0-0",
+  "libgstreamer-plugins-bad1.0-0",
+  "libgstreamer-gl1.0-0",
+  "libxslt1.1",
+  "libvpx7",
+  "libevent-2.1-7",
+  "libflite1",
+  "libavif13",
+  "libnghttp2-14",
+  "libx264-163",
+  "libopus0",
+  "libopusfile0",
+  "libsecret-1-0",
+  "libhyphen0",
+  "libmanette-0.2-0",
+  "libwebpdemux2",
+  "libwebpmux3",
+  "libenchant-2-2",
+  "libpsl5",
+  "libwoff1"
+).distinct.sorted
 
 addCommandAlias("fmt", ";scalafmtAll;scalafmtSbt")
 addCommandAlias("fix", ";scalafixAll")

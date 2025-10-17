@@ -7,7 +7,7 @@ object Dependencies {
   object Versions {
     val circe: Version          = "0.14.15"
     val doobie: Version         = "1.0.0-RC10"
-    val flyway: Version         = "11.14.0"
+    val flyway: Version         = "11.14.1"
     val ical4j: Version         = "4.2.0"
     val jsoup: Version          = "1.21.2"
     val jwtScala: Version       = "11.0.3"
@@ -20,7 +20,7 @@ object Dependencies {
     val sentry: Version         = "8.23.0"
     val sentryAgent: Version    = sentry
     val sentryLogback: Version  = sentry
-    val zio: Version            = "2.1.21"
+    val zio: Version            = "2.1.22"
     val zioCli: Version         = "0.7.3"
     val zioConfig: Version      = "4.0.5"
     val zioHttp: Version        = "3.5.1"
@@ -38,7 +38,7 @@ object Dependencies {
     "dev.zio" %% "zio-test-sbt",
     "dev.zio" %% "zio-test-magnolia"
   ).map(_ % Versions.zio % Test) ++ Seq(
-    "dev.zio" %% "zio-cli"     % Versions.zioCli
+    "dev.zio" %% "zio-cli" % Versions.zioCli
   ) ++ Seq(
     "dev.zio" %% "zio-logging",
     "dev.zio" %% "zio-logging-slf4j2"

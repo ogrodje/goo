@@ -15,7 +15,7 @@ in
     SBT_OPTS="--sun-misc-unsafe-memory-access=allow --enable-native-access=ALL-UNNAMED ";
   };
 
-  languages.java.jdk.package = pkgs.jdk24_headless;
+  languages.java.jdk.package = unstable.jdk25_headless;
   languages.scala = {
     enable = true;
     sbt.enable = true;

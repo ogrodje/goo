@@ -58,15 +58,10 @@ final class HyGraph private (private val client: Client):
     query: String,
     variables: (String, Json)*
   ): RIO[Scope, Json] = for
-    json         <- ZIO.succeed:
-                      Json
-                        .fromFields(
-                          Seq(
-                            "query"     -> Json.fromString(query),
-                            "variables" -> Json.fromFields(variables)
-                          )
-                        )
-                        .noSpaces
+    json         <-
+      ZIO.succeed(
+        Json.fromFields(Seq("query" -> Json.fromString(query), "variables" -> Json.fromFields(variables))).noSpaces
+      )
     body          = Body.fromString(text = json)
     request      <- AppConfig.config.map(_.hygraphEndpoint).map(Request.post(_, body))
     response     <- client.requestMetered(request)

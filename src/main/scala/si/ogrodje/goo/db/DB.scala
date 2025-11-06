@@ -21,12 +21,21 @@ object DBOps:
 
 object DB:
 
-  private def flyway: Task[Flyway] = for
+  private def flyway(appConfig: AppConfig): Task[Flyway] = for
+    /*
     db              <- AppConfig.config.map(_.postgresDb)
     host            <- AppConfig.config.map(_.postgresHost)
     port            <- AppConfig.config.map(_.postgresPort)
     user            <- AppConfig.config.map(_.postgresUser)
-    password        <- AppConfig.config.map(_.postgresPassword)
+    password        <- AppConfig.config.map(_.postgresPassword) */
+
+    _       <- ZIO.unit
+    db       = appConfig.postgresDb
+    host     = appConfig.postgresHost
+    port     = appConfig.postgresPort
+    user     = appConfig.postgresUser
+    password = appConfig.postgresPassword
+
     configuredFlyway =
       Flyway
         .configure()
@@ -36,9 +45,13 @@ object DB:
   yield configuredFlyway
 
   def migrate: ZIO[Any, Throwable, Unit] = for
-    _ <- logInfo("Migrating,...")
-    _ <- flyway.map(_.migrate())
+    _         <- logInfo("Migrating,...")
+    appConfig <- AppConfig.config
+    _         <- flyway(appConfig).map(_.migrate())
   yield ()
+
+  def migrate(appConfig: AppConfig): RIO[AppConfig, Unit] =
+    migrate.provideEnvironment(ZEnvironment(appConfig))
 
   def transact[Out](in: ConnectionIO[Out]): RIO[DB, Out] = for
     db  <- ZIO.service[DB]
@@ -53,11 +66,31 @@ object DB:
       user     <- AppConfig.config.map(_.postgresUser)
       password <- AppConfig.config.map(_.postgresPassword)
 
-      tx = Transactor.fromDriverManager[Task](
-             driver = "org.postgresql.Driver",
-             url = s"jdbc:postgresql://$host:$port/$db",
-             user = user,
-             password = password,
-             logHandler = None
-           )
+      tx =
+        Transactor.fromDriverManager[Task](
+          driver = "org.postgresql.Driver",
+          url = s"jdbc:postgresql://$host:$port/$db",
+          user = user,
+          password = password,
+          logHandler = None
+        )
+    yield DB(tx)
+
+  def transactionLayerFromAppConfig: ZLayer[AppConfig, Nothing, DB] = ZLayer.fromZIO:
+    for
+      appConfig <- ZIO.service[AppConfig]
+      db         = appConfig.postgresDb
+      host       = appConfig.postgresHost
+      port       = appConfig.postgresPort
+      user       = appConfig.postgresUser
+      password   = appConfig.postgresPassword
+
+      tx =
+        Transactor.fromDriverManager[Task](
+          driver = "org.postgresql.Driver",
+          url = s"jdbc:postgresql://$host:$port/$db",
+          user = user,
+          password = password,
+          logHandler = None
+        )
     yield DB(tx)

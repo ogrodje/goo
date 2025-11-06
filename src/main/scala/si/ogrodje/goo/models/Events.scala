@@ -66,8 +66,8 @@ object Events:
           CASE WHEN xmax = 0 THEN 'INSERTED' ELSE 'UPDATED' END as operation,
           id as event_id
         """.queryWithLabel[(String, String)]("upsert-event").unique.map {
-      case ("INSERTED", eventID) => Right(UpsertResult.Inserted(eventID))
-      case ("UPDATED", eventID)  => Right(UpsertResult.Updated(eventID))
+      case "INSERTED" -> eventID => Right(UpsertResult.Inserted(eventID))
+      case "UPDATED" -> eventID  => Right(UpsertResult.Updated(eventID))
       case _                     => Left(new RuntimeException("Unknown upsert result"))
     }
 

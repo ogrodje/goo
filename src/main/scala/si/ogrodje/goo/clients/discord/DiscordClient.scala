@@ -1,9 +1,8 @@
 package si.ogrodje.goo.clients.discord
 
-import io.circe.generic.semiauto.deriveEncoder
+import io.circe.*
 import io.circe.syntax.*
-import io.circe.{Encoder, Json}
-import si.ogrodje.goo.clients.{DiscordWebhookClient, DiscordWebhookPayload, Embed, Field}
+import io.circe.generic.semiauto.deriveEncoder
 import zio.*
 import zio.http.*
 import zio.http.Header.{Accept, ContentType}
@@ -44,7 +43,9 @@ final case class DiscordClient(
     headers   = Headers(Accept(MediaType.application.json), ContentType(MediaType.application.`json`))
     request   = Request.post(url, body = Body.fromString(payload.asJson.noSpaces)).setHeaders(headers)
     response <- Client.batched(request)
-    _         = println(response)
+    _        <- ZIO.fail(
+                  new Exception(s"Webhook failed with status: \"${response.status}\"")
+                ) when (!response.status.isSuccess)
   yield ()
 
 object DiscordClient:

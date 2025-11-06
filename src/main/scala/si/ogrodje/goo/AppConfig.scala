@@ -74,4 +74,4 @@ object AppConfig:
   def portLayer: TaskLayer[Port]                  = ZLayer.fromZIO(port)
   def sourcesList: IO[Error, SourcesList]         = config.map(_.sourcesList)
   def environment: ZIO[Any, Error, Environment]   = config.map(_.environment)
-  def keycloakConfig: IO[Error, (URL, String)]    = config.map(cfg => (cfg.keycloakEndpoint, cfg.keycloakRealm))
+  def keycloakConfig: IO[Error, (URL, String)]    = config.map(cfg => cfg.keycloakEndpoint -> cfg.keycloakRealm)

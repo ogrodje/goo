@@ -273,4 +273,4 @@ object Events:
       val runningOrExpiring              = runningOrPastStart.sortBy(p => p.endDateTime.getOrElse(p.startDateTime))
       val upcomingSorted                 = upcoming.sortBy(_.startDateTime)
       upcomingSorted ++ runningOrExpiring
-  yield (from, to, filteredEvents)
+  yield (from, to, sorted)

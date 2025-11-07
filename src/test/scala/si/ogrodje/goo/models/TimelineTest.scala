@@ -1,42 +1,42 @@
 package si.ogrodje.goo.models
 
-import si.ogrodje.goo.{AppConfig, Environment, SourcesList}
+import si.ogrodje.goo.*
 import si.ogrodje.goo.db.DB
 import zio.*
 import zio.test.*
 import zio.http.*
+import zio.Console.printLine
+import java.time.OffsetDateTime
 
 object TimelineTest extends ZIOSpecDefault:
-
-  private val mockConfigProvider: ZLayer[Any, Nothing, Unit] =
-    Runtime.setConfigProvider(
-      ConfigProvider.fromMap(
-        Map(
-          "SOURCES"           -> "All",
-          "KEYCLOAK_ENDPOINT" -> "http://localhost:8080",
-          "GOO_ENVIRONMENT"   -> "Development"
-        )
-      )
-    )
-
   def spec = suite("TimelineTest") {
     test("general timeline") {
       for
-        _        <- ZIO.serviceWithZIO[AppConfig](c => DB.migrate(c))
-        timeline <- Events.timeline
-        _         = println(timeline.size)
+        _  <- ZIO.serviceWithZIO[AppConfig](DB.migrate)
+        now = OffsetDateTime.of(2025, 11, 9, 0, 0, 0, 0, OffsetDateTime.now().getOffset)
+        _  <- printLine(s"Now is ${now.toLocalDate}")
+
+        (from, to, timeline) <- Events.upcomingFor(EventView.Weekly, now)
+        _                    <- printLine(s"Upcoming events from ${from.toLocalDate} to ${to.toLocalDate}")
+        _                     =
+          timeline.foreach { event =>
+            println(
+              s"${event.startDateTime.toLocalDate} - ${event.endDateTime.map(_.toLocalDate).getOrElse("None")} " +
+                s"${event.title}"
+            )
+          }
       yield assertCompletes
     }
   }.provideShared(
-    mkConfigLayer,
+    mkAppConfig,
     DB.transactionLayerFromAppConfig
   )
     @@ TestAspect.withLiveClock @@ TestAspect.withLiveSystem
 
-  private def mkConfigLayer: TaskLayer[AppConfig] = ZLayer.fromZIO:
+  private def mkAppConfig: TaskLayer[AppConfig] = ZLayer.fromZIO:
     for
       db         <- zio.System.env("POSTGRES_DB").flatMap(ZIO.getOrFail)
-      dbPort     <- zio.System.env("POSTGRES_PORT").flatMap(ZIO.getOrFail)
+      dbPort     <- zio.System.env("POSTGRES_PORT").flatMap(ZIO.getOrFail).map(_.toInt)
       dbHost     <- zio.System.env("POSTGRES_HOST").flatMap(ZIO.getOrFail)
       dbPassword <- zio.System.env("POSTGRES_PASSWORD").flatMap(ZIO.getOrFail)
       dbUser     <- zio.System.env("POSTGRES_USER").flatMap(ZIO.getOrFail)
@@ -45,7 +45,7 @@ object TimelineTest extends ZIOSpecDefault:
       postgresUser = dbUser,
       postgresPassword = dbPassword,
       postgresHost = dbHost,
-      postgresPort = dbPort.toInt,
+      postgresPort = dbPort,
       postgresDb = db,
       hygraphEndpoint = URL.decode("http://xx").toTry.get,
       sourcesList = SourcesList.fromString("All"),

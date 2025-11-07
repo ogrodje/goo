@@ -8,6 +8,9 @@ env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   KUBECONFIG: ogrodje-one-config
+  POSTGRES_USER: goo
+  POSTGRES_DB: goo
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
 
 jobs:
   build:
@@ -59,6 +62,9 @@ jobs:
           cache: 'sbt'
 
       - uses: sbt/setup-sbt@v1
+
+      - name: Docker Compose UP
+        run: docker compose -p goo -f docker/docker-compose.yml up pg
 
       - run: sbt "test"
 

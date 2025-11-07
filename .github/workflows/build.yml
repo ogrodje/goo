@@ -63,8 +63,7 @@ jobs:
 
       - uses: sbt/setup-sbt@v1
 
-      - name: Docker Compose UP
-        run: docker compose -p goo -f docker/docker-compose.yml up pg
+      - run: docker compose -p goo -f docker/docker-compose.yml up pg -d
 
       - run: sbt "test"
 

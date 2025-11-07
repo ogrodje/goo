@@ -15,6 +15,7 @@ spec:
       containers:
         - name: goo
           image: ghcr.io/ogrodje/goo:0.0.6
+          command: [ "server", "--start" ]
           ports: [ { containerPort: 7777 }, { containerPort: 7778 } ]
           env:
             - { name: GOO_ENVIRONMENT, value: "Production" }

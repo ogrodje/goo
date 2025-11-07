@@ -24,7 +24,7 @@ services:
       - JAVA_TOOL_OPTIONS=--enable-native-access=ALL-UNNAMED --add-opens=java.base/java.util=ALL-UNNAMED --add-opens=java.base/sun.nio.ch=ALL-UNNAMED --add-opens=java.base/jdk.internal.misc=ALL-UNNAMED
     volumes:
       - playwright-cache:/root/.cache/ms-playwright
-    
+    command: [ "server", "--start" ]
     depends_on:
       keycloak:
         condition: service_healthy

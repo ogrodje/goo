@@ -7,7 +7,7 @@ object Dependencies {
   object Versions {
     val circe: Version          = "0.14.15"
     val doobie: Version         = "1.0.0-RC10"
-    val flyway: Version         = "11.15.0"
+    val flyway: Version         = "11.16.0"
     val ical4j: Version         = "4.2.0"
     val jsoup: Version          = "1.21.2"
     val jwtScala: Version       = "11.0.3"

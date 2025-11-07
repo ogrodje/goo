@@ -27,7 +27,7 @@ object Embed:
 
 final case class Payload(
   content: String,
-  username: Option[String],
+  username: Option[String] = None,
   embeds: List[Embed] = List.empty,
   tts: Boolean = false
 )

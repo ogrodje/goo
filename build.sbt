@@ -33,8 +33,7 @@ lazy val root = project
       "-feature",
       "-unchecked",
       "-explain",
-      "-release",
-      "25",
+      // "-release", "25",
       "-Yretain-trees",
       "-Xmax-inlines:100",
       "-Ximplicit-search-limit:150000",
@@ -44,7 +43,10 @@ lazy val root = project
   )
   .settings(javaAgents += "io.sentry" % "sentry-opentelemetry-agent" % Versions.sentryAgent)
   .settings(
-    assembly / mainClass             := Some("si.ogrodje.goo.apps.Main"),
+    // assembly / mainClass             := Some("si.ogrodje.goo.apps.Main"),
+    Compile / run / mainClass        := Some("si.ogrodje.goo.cli.Main"),
+    Compile / mainClass              := Some("si.ogrodje.goo.cli.Main"),
+    assembly / mainClass             := Some("si.ogrodje.goo.cli.Main"),
     assembly / assemblyJarName       := "goo.jar",
     assembly / assemblyMergeStrategy := {
       case PathList("module-info.class")                        =>

@@ -1,15 +1,19 @@
 name: Build && Publish
 
 on:
-  push:
-    branches: [ "master" ]
-  pull_request:
-    branches: [ "master" ]
+  push: { branches: [ "master" ] }
+  pull_request: { branches: [ "master" ] }
 
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   KUBECONFIG: ogrodje-one-config
+  POSTGRES_DB: goo
+  POSTGRES_PORT: 5433
+  POSTGRES_HOST: localhost
+  POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD }}
+  POSTGRES_USER: goo
+  DISCORD_EVENTS_WEBHOOK: ${{ secrets.DISCORD_EVENTS_WEBHOOK }}
 
 jobs:
   build:
@@ -62,6 +66,8 @@ jobs:
 
       - uses: sbt/setup-sbt@v1
 
+      - run: docker compose -p goo -f docker/docker-compose.yml up pg -d
+
       - run: sbt "test"
 
       - name: Run tests and publish
@@ -81,7 +87,7 @@ jobs:
           # Write kubeconfig file first
           echo "$OGRODJE_ONE_CONFIG" > ogrodje-one-config
           export KUBECONFIG=ogrodje-one-config
-    
+          
           # Refresh version
           ./bin/refresh-version.sh
           

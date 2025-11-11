@@ -8,13 +8,13 @@ import io.circe.Json
 import si.ogrodje.goo.db.{DB, DBOps}
 import si.ogrodje.goo.server.AuthUser
 import zio.{RIO, ZIO}
+import java.time.OffsetDateTime
 
-sealed trait EventGrouping extends EnumEntry
-object EventGrouping       extends Enum[EventGrouping] with CirceEnum[EventGrouping]:
-  case object Day   extends EventGrouping
-  case object Week  extends EventGrouping
-  case object Month extends EventGrouping
-  val values: IndexedSeq[EventGrouping] = findValues
+sealed trait EventView extends EnumEntry
+object EventView       extends Enum[EventView] with CirceEnum[EventView]:
+  case object Weekly  extends EventView
+  case object Monthly extends EventView
+  val values: IndexedSeq[EventView] = findValues
 
 object Events:
   import DBOps.given
@@ -66,8 +66,8 @@ object Events:
           CASE WHEN xmax = 0 THEN 'INSERTED' ELSE 'UPDATED' END as operation,
           id as event_id
         """.queryWithLabel[(String, String)]("upsert-event").unique.map {
-      case ("INSERTED", eventID) => Right(UpsertResult.Inserted(eventID))
-      case ("UPDATED", eventID)  => Right(UpsertResult.Updated(eventID))
+      case "INSERTED" -> eventID => Right(UpsertResult.Inserted(eventID))
+      case "UPDATED" -> eventID  => Right(UpsertResult.Updated(eventID))
       case _                     => Left(new RuntimeException("Unknown upsert result"))
     }
 
@@ -107,9 +107,7 @@ object Events:
 
   def authedCreate(createEvent: CreateEvent)(authUser: AuthUser): RIO[DB, Event] = for
     _               <- ZIO.logInfo(s"Creating event: ${createEvent.title} by ${authUser.`preferred_username`}")
-    (event, result) <- ZIO
-                         .attempt(createEvent.toDBEvent)
-                         .flatMap(e => Events.create(e).map(r => e -> r))
+    (event, result) <- ZIO.attempt(createEvent.toDBEvent).flatMap(e => Events.create(e).map(e -> _))
     _               <- ZIO.logInfo(s"Created event: ${event.id} result: $result")
   yield event
 
@@ -214,7 +212,10 @@ object Events:
       .map(_.headOption)
       .flatMap(ZIO.fromOption(_).orElseFail(new Exception("Event not found")))
 
-  def timeline: RIO[DB, List[Event]] =
+  private val utc                             = java.time.ZoneOffset.UTC
+  private def currentDateTime: OffsetDateTime = OffsetDateTime.now(utc)
+
+  def timeline(now: OffsetDateTime = currentDateTime): RIO[DB, List[Event]] =
     val baseQuery =
       fr"""SELECT
              $baseFields,
@@ -228,17 +229,48 @@ object Events:
           m.hidden IS false AND
           e.hidden_at IS NULL
           AND (
-            start_date_time >= now() OR
+            start_date_time >= $now OR
             (
-                date_trunc('week', now())::date <= start_date_time::date
-                  AND start_date_time::date < (date_trunc('week', now()) + interval '7 days')::date
+                date_trunc('week', $now)::date <= start_date_time::date
+                  AND start_date_time::date < (date_trunc('week', $now) + interval '7 days')::date
                 )
                 OR
             (
-                date_trunc('week', now())::date <= end_date_time::date
-                  AND end_date_time::date < (date_trunc('week', now()) + interval '7 days')::date
+                date_trunc('week', $now)::date <= end_date_time::date
+                  AND end_date_time::date < (date_trunc('week', $now) + interval '7 days')::date
                 )
             )
         ORDER BY e.start_date_time"""
 
     DB.transact(baseQuery.queryWithLabel[Event]("events-timeline").to[List])
+
+  def upcomingFor(
+    view: EventView,
+    now: OffsetDateTime = currentDateTime
+  ): RIO[DB, (OffsetDateTime, OffsetDateTime, List[Event])] = for
+    _          <- ZIO.unit
+    sundayStart =
+      val dow = now.getDayOfWeek.getValue % 7 // Sunday -> 0, Monday -> 1, ..., Saturday -> 6
+      now.minusDays(dow.toLong).withHour(0).withMinute(0).withSecond(0).withNano(0)
+    from        = sundayStart
+
+    to =
+      view match
+        case EventView.Weekly  => from.plusDays(7) // This was extended by 1
+        case EventView.Monthly => from.plusMonths(1)
+
+    events <- timeline(now)
+
+    filteredEvents =
+      events.filter { e =>
+        val start = Option(e.startDateTime).getOrElse(now)
+        val end   = e.endDateTime.getOrElse(start)
+        (start.isBefore(to) || start.isEqual(to)) && (end.isAfter(from) || end.isEqual(from))
+      }
+
+    sorted =
+      val (upcoming, runningOrPastStart) = filteredEvents.partition(_.startDateTime.isAfter(now))
+      val runningOrExpiring              = runningOrPastStart.sortBy(p => p.endDateTime.getOrElse(p.startDateTime))
+      val upcomingSorted                 = upcoming.sortBy(_.startDateTime)
+      upcomingSorted ++ runningOrExpiring
+  yield (from, to, sorted)

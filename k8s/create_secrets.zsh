@@ -8,7 +8,8 @@ kubectl delete secret goo-secret --namespace=$NS --ignore-not-found
 kubectl create secret generic --namespace=$NS \
   goo-secret \
   --from-literal=hygraph_endpoint=$HYGRAPH_ENDPOINT \
-  --from-literal=sentry_auth_token=$SENTRY_AUTH_TOKEN
+  --from-literal=sentry_auth_token=$SENTRY_AUTH_TOKEN \
+  --from-literal=discord_events_webhook=$DISCORD_EVENTS_WEBHOOK_PROD
 
 # koofr-secret
 kubectl delete secret koofr-secret --namespace=$NS --ignore-not-found

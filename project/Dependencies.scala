@@ -6,18 +6,18 @@ object Dependencies {
 
   object Versions {
     val circe: Version          = "0.14.15"
-    val doobie: Version         = "1.0.0-RC10"
-    val flyway: Version         = "11.16.0"
-    val ical4j: Version         = "4.2.0"
+    val doobie: Version         = "1.0.0-RC11"
+    val flyway: Version         = "11.17.0"
+    val ical4j: Version         = "4.2.1"
     val jsoup: Version          = "1.21.2"
     val jwtScala: Version       = "11.0.3"
     val log4cats: Version       = "2.7.1"
-    val logbackClassic: Version = "1.5.20"
+    val logbackClassic: Version = "1.5.21"
     val playwright: Version     = "1.56.0"
     val postgresql: Version     = "42.7.8"
     val quartz: Version         = "2.5.1"
     val scalaTest: Version      = "3.2.19"
-    val sentry: Version         = "8.25.0"
+    val sentry: Version         = "8.26.0"
     val sentryAgent: Version    = sentry
     val sentryLogback: Version  = sentry
     val zio: Version            = "2.1.22"

@@ -21,6 +21,7 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 - [x] Add [FRI Dogodki](https://www.fri.uni-lj.si/sl/koledar-dogodkov)
 - [x] Add [SAŠA Inkubator](https://sasainkubator.si/dogodki/)
 - [x] Add [Kovačnica](https://kovacnica.si/dogodki/)
+- [ ] Add [Institut "Jožef Stefan" (IJS)](https://indico.ijs.si/)
 - [ ] ~~Add [FERI Dogodki](https://feri.um.si/dogodki/) (RSS? - `https://feri.um.si/dogodki/rss/`)~~
 - [ ] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
 - [ ] Add [Kompot](https://kompot.si/)

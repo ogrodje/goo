@@ -21,6 +21,8 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 - [x] Add [FRI Dogodki](https://www.fri.uni-lj.si/sl/koledar-dogodkov)
 - [x] Add [SAŠA Inkubator](https://sasainkubator.si/dogodki/)
 - [x] Add [Kovačnica](https://kovacnica.si/dogodki/)
+- [x] ~Expose the data via iCal format/feed.~ Events are now available in iCalendar format via [icaly](https://github.com/ogrodje/icaly).
+- [x] Allow manual adding of events for admins
 - [ ] Add [Institut "Jožef Stefan" (IJS)](https://indico.ijs.si/)
 - [ ] ~~Add [FERI Dogodki](https://feri.um.si/dogodki/) (RSS? - `https://feri.um.si/dogodki/rss/`)~~
 - [ ] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
@@ -31,12 +33,10 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 - [ ] Add [Inkubator Savinjske regije](https://inkubatorsr.si/) ([dogodki](https://www.inkubatorsr.si/aktualno/dogodki/))
 - [ ] Add [LUI (Ljubljanski univerzitetni inkubator)](https://lui.si/aktualno/)
 - [ ] Add [Pomurje Technology Park](https://www.p-tech.si/)
-- [ ] Allow manual adding of events
 - [ ] Send batch emails via
   Postmark ([API documentation](https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails))
 - [ ] Allow users to be notified about new events
 - [ ] Expose the data via RSS feed
-- [ ] Expose the data via iCal format/feed
 - [ ] Add parser for Facebook Events
 - [ ] Add parser for LinkedIn Events
 

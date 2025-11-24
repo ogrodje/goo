@@ -66,7 +66,7 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
     collectionFib <-
       ZStream
         .fromZIO(Meetups.all)
-        .flatMap(meetups => ZStream.fromIterable(meetups))
+        .flatMap(ZStream.fromIterable)
         .flatMap(meetup => ZStream.fromIterable(sourcesOf(meetup)))
         .flatMap { case (filedName, meetup, url) =>
           runParser(sourcesList, filedName, meetup, url).map(_ -> meetup.name)

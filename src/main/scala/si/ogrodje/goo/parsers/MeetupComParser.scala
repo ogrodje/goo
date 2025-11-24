@@ -6,8 +6,9 @@ import si.ogrodje.goo.ClientOps.requestMetered
 import si.ogrodje.goo.models.{Event, Meetup, Source}
 import zio.ZIO.{fromOption, logInfo}
 import zio.http.{Client, Request, URL}
-import zio.{Scope, Task, ZIO}
+import zio.{Cause, Scope, Task, ZIO}
 
+import java.nio.charset.Charset
 import java.time.OffsetDateTime
 
 final case class MeetupComParser(meetup: Meetup) extends Parser:
@@ -108,7 +109,7 @@ final case class MeetupComParser(meetup: Meetup) extends Parser:
   override protected def parse(
     client: Client,
     url: URL
-  ): ZIO[Scope & Browser, Throwable, List[Event]] = (
-    parseEventsFrom(client, url.addQueryParam("type", "upcoming")) <&>
-      parseEventsFrom(client, url.addQueryParam("type", "past"))
-  ).map(_ ++ _)
+  ): ZIO[Scope & Browser, Throwable, List[Event]] =
+    parseEventsFrom(client, url.addPath("events/")).catchSome { case th: NoSuchElementException =>
+      ZIO.logWarningCause(s"__NEXT_DATA__ missing at $url. Proceeding with no events.", Cause.fail(th)).as(List.empty)
+    }

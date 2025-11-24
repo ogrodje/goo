@@ -4,7 +4,7 @@ import com.microsoft.playwright.Browser
 import si.ogrodje.goo.models.{Event, Meetup}
 import zio.*
 import zio.ZIO.{logErrorCause, logInfo}
-import zio.http.{Client, URL}
+import zio.http.{Client, URL, ZClientAspect}
 import zio.stream.ZStream
 
 trait Parser:
@@ -12,8 +12,10 @@ trait Parser:
 
   protected def parse(client: Client, url: URL): RIO[Scope & Browser, List[Event]]
 
+  private val followRedirects = ZClientAspect.followRedirects(3)((resp, message) => ZIO.logInfo(message).as(resp))
+
   private def parseWithClient(url: URL): RIO[Scope & Client & Browser, List[Event]] = for
-    client <- ZIO.service[Client]
+    client <- ZIO.serviceWith[Client](_ @@ followRedirects)
     events <-
       parse(client, url)
         .tapError(err => logErrorCause(s"Failed to parse $url: ${err.getMessage}", Cause.fail(err)))

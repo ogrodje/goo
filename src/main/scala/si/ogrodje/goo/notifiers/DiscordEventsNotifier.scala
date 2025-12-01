@@ -18,10 +18,11 @@ object DiscordEventsNotifier:
     now: OffsetDateTime = current
   ): ZIO[Client & DiscordClient & DB, Throwable, Unit] = for
     (from, to, events) <- Events.upcomingFor(view, now)
-    payload             = eventsToPayload(from, to, events)
-    _                  <- printLine(s"Sending: ${payload}")
-    _                  <- DiscordClient.emit(payload)
-    _                  <- logInfo(s"Emitted to discord server.")
+
+    _ <- ZIO.foreachDiscard(
+           eventsToPayloads(from, to, events)
+         )(payload => DiscordClient.emit(payload) <* ZIO.sleep(3.seconds))
+    _ <- logInfo(s"Emitted to discord server.")
   yield ()
 
   private def fieldsFrom(event: Event): List[Field] =
@@ -59,6 +60,31 @@ object DiscordEventsNotifier:
     event.promotedAt.map(_ => ":star2: ").getOrElse("") +
       event.meetupName.fold(event.title)(name => s"$name / ${event.title}")
   }.trim
+
+  private def eventsToPayloads(
+    from: OffsetDateTime,
+    to: OffsetDateTime,
+    events: List[Event],
+    split: Int = 5
+  ) =
+    events
+      .sliding(split)
+      .zipWithIndex
+      .map {
+        case (events, 0) => eventsToPayload(from, to, events)
+        case (events, n) =>
+          Payload(
+            content = s"Paket ${n + 1}.",
+            embeds = events.map { event =>
+              Embed(
+                title = humanTitle(event),
+                url = event.eventURL.map(_.toString),
+                fields = fieldsFrom(event)
+              )
+            }
+          )
+      }
+      .toList
 
   private def eventsToPayload(from: OffsetDateTime, to: OffsetDateTime, events: List[Event]) = Payload(
     content = s"Dogodki za obdobje **${from.toLocalDate}** do **${to.toLocalDate}**.",

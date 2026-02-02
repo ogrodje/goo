@@ -1,19 +1,18 @@
 package si.ogrodje.goo.cli
 
-import zio.*
-import zio.cli.*
+import si.ogrodje.goo.apps.Main as MainServer
 import si.ogrodje.goo.info.BuildInfo
 import si.ogrodje.goo.models.EventView
-import zio.Console.printLine
-import zio.cli.HelpDoc.Span.text
-import si.ogrodje.goo.apps.Main as MainServer
 import si.ogrodje.goo.notifiers.DiscordEventsNotifier
+import zio.*
 import zio.Runtime.{removeDefaultLoggers, setConfigProvider}
+import zio.cli.*
+import zio.cli.HelpDoc.Span.text
+import zio.http.URL
 import zio.logging.backend.SLF4J
 
 import java.time.LocalDate
-import java.util.Date
-import zio.http.URL
+
 object Main extends ZIOCliDefault:
   override val bootstrap: ZLayer[ZIOAppArgs, Any, Any] =
     setConfigProvider(ConfigProvider.envProvider) >>> removeDefaultLoggers >>> SLF4J.slf4j

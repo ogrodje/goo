@@ -8,7 +8,7 @@ resources:
   - ingress.yaml
 images:
   - name: ghcr.io/ogrodje/goo
-    newTag: '0.1.28'
+    newTag: '0.1.29'
   - name: ghcr.io/otobrglez/koofr-watch
     newTag: '0.0.2'
   - name: quay.io/keycloak/keycloak

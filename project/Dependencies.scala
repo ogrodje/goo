@@ -7,25 +7,25 @@ object Dependencies {
   object Versions {
     val circe: Version          = "0.14.15"
     val doobie: Version         = "1.0.0-RC11"
-    val flyway: Version         = "11.17.0"
-    val ical4j: Version         = "4.2.1"
-    val jsoup: Version          = "1.21.2"
+    val flyway: Version         = "12.0.0"
+    val ical4j: Version         = "4.2.3"
+    val jsoup: Version          = "1.22.1"
     val jwtScala: Version       = "11.0.3"
     val log4cats: Version       = "2.7.1"
-    val logbackClassic: Version = "1.5.21"
-    val playwright: Version     = "1.56.0"
-    val postgresql: Version     = "42.7.8"
-    val quartz: Version         = "2.5.1"
+    val logbackClassic: Version = "1.5.27"
+    val playwright: Version     = "1.58.0"
+    val postgresql: Version     = "42.7.9"
+    val quartz: Version         = "2.5.2"
     val scalaTest: Version      = "3.2.19"
-    val sentry: Version         = "8.26.0"
+    val sentry: Version         = "8.31.0"
     val sentryAgent: Version    = sentry
     val sentryLogback: Version  = sentry
-    val zio: Version            = "2.1.22"
-    val zioCli: Version         = "0.7.4"
-    val zioConfig: Version      = "4.0.5"
-    val zioHttp: Version        = "3.5.1"
-    val zioLogging: Version     = "2.5.1"
-    val zioMetrics: Version     = "2.5.2"
+    val zio: Version            = "2.1.24"
+    val zioCli: Version         = "0.7.5"
+    val zioConfig: Version      = "4.0.6"
+    val zioHttp: Version        = "3.8.1"
+    val zioLogging: Version     = "2.5.3"
+    val zioMetrics: Version     = "2.5.5"
     val zioPrelude: Version     = "1.0.0-RC41"
     val zioSchema: Version      = "1.7.5"
   }
@@ -75,7 +75,7 @@ object Dependencies {
     "org.flywaydb" % "flyway-core",
     "org.flywaydb" % "flyway-database-postgresql"
   ).map(_ % Versions.flyway) ++ Seq(
-    "dev.zio" %% "zio-interop-cats" % "23.1.0.5"
+    "dev.zio" %% "zio-interop-cats" % "23.1.0.13"
   )
 
   lazy val scheduler: Modules = Seq(
@@ -86,7 +86,7 @@ object Dependencies {
   lazy val enumeratum: Modules = Seq(
     "com.beachape" %% "enumeratum",
     "com.beachape" %% "enumeratum-circe"
-  ).map(_ % "1.9.0")
+  ).map(_ % "1.9.4")
 
   lazy val jsoup: Modules  = "org.jsoup" % "jsoup" % Versions.jsoup :: Nil
   lazy val ical4j: Modules =

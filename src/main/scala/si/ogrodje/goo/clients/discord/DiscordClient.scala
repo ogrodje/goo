@@ -35,7 +35,7 @@ object Payload:
   given encoder: Encoder[Payload] = deriveEncoder
 
 final case class DiscordClient(
-  url: URL
+  private val url: URL
 ):
 
   def emit(payload: Payload): RIO[Client, Unit] = for
@@ -53,3 +53,8 @@ object DiscordClient:
     ZIO.serviceWithZIO[DiscordClient](_.emit(payload))
   def live(url: URL): ULayer[DiscordClient]                     =
     ZLayer.succeed(DiscordClient(url))
+
+  def liveFromURL: URLayer[URL, DiscordClient] = ZLayer.fromZIO {
+    for url <- ZIO.service[URL]
+    yield DiscordClient(url)
+  }

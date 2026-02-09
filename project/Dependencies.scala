@@ -12,12 +12,12 @@ object Dependencies {
     val jsoup: Version          = "1.22.1"
     val jwtScala: Version       = "11.0.3"
     val log4cats: Version       = "2.7.1"
-    val logbackClassic: Version = "1.5.27"
+    val logbackClassic: Version = "1.5.28"
     val playwright: Version     = "1.58.0"
     val postgresql: Version     = "42.7.9"
     val quartz: Version         = "2.5.2"
     val scalaTest: Version      = "3.2.19"
-    val sentry: Version         = "8.31.0"
+    val sentry: Version         = "8.32.0"
     val sentryAgent: Version    = sentry
     val sentryLogback: Version  = sentry
     val zio: Version            = "2.1.24"

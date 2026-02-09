@@ -31,7 +31,7 @@ object DiscordClientTest extends ZIOSpecDefault:
   }.when(runThis)
     .provide(
       Client.default,
-      ZLayer.fromZIO(discordWebhookURLFromENV).flatMap(urlEnv => DiscordClient.live(urlEnv.get))
+      ZLayer.fromZIO(discordWebhookURLFromENV) >>> DiscordClient.liveFromURL
     ) @@ TestAspect.withLiveSystem @@ TestAspect.withLiveClock
 
   private def discordWebhookURLFromENV: Task[URL] = for

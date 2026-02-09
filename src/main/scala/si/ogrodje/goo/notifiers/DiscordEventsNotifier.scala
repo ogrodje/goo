@@ -6,7 +6,6 @@ import si.ogrodje.goo.models.{Event, EventView, Events}
 import zio.*
 import zio.ZIO.logInfo
 import zio.http.*
-import zio.Console.printLine
 import java.time.{LocalDate, LocalTime, OffsetDateTime, ZoneOffset}
 import ZoneOffset.UTC
 
@@ -68,34 +67,29 @@ object DiscordEventsNotifier:
     split: Int = 5
   ) =
     events
-      .sliding(split)
+      .grouped(split)
       .zipWithIndex
       .map {
         case (events, 0) => eventsToPayload(from, to, events)
         case (events, n) =>
           Payload(
             content = s"Paket ${n + 1}.",
-            embeds = events.map { event =>
-              Embed(
-                title = humanTitle(event),
-                url = event.eventURL.map(_.toString),
-                fields = fieldsFrom(event)
-              )
-            }
+            embeds = events.map(embedsFromEvents)
           )
       }
       .toList
 
   private def eventsToPayload(from: OffsetDateTime, to: OffsetDateTime, events: List[Event]) = Payload(
     content = s"Dogodki za obdobje **${from.toLocalDate}** do **${to.toLocalDate}**.",
-    embeds = events.map { event =>
-      Embed(
-        title = humanTitle(event),
-        url = event.eventURL.map(_.toString),
-        fields = fieldsFrom(event)
-      )
-    }
+    embeds = events.map(embedsFromEvents)
   )
+
+  private val embedsFromEvents: Event => Embed = event =>
+    Embed(
+      title = humanTitle(event),
+      url = event.eventURL.map(_.toString),
+      fields = fieldsFrom(event)
+    )
 
   def run(webhookURL: URL, view: EventView, maybeNow: Option[LocalDate] = None) = {
     for

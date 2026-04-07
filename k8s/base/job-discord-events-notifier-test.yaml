@@ -1,23 +1,23 @@
-apiVersion: apps/v1
-kind: Deployment
+apiVersion: batch/v1
+kind: Job
 metadata:
-  name: goo
+  name: discord-events-notifier-test
   namespace: goo-prod
-  labels: { app: goo }
+  labels: { app: discord-events-notifier-test }
 spec:
-  replicas: 1
-  selector:
-    matchLabels: { app: goo }
+  backoffLimit: 3
   template:
-    metadata:
-      labels: { app: goo }
+    metadata: { labels: { app: discord-events-notifier-test } }
     spec:
+      restartPolicy: OnFailure
       containers:
-        - name: goo
+        - name: discord-events-notifier
           image: ghcr.io/ogrodje/goo:0.1.26
-          args: [ "server", "--start" ]
-          ports: [ { containerPort: 7777 }, { containerPort: 7778 } ]
+          args: [ "discord-events-notifier", "Weekly", "$(DISCORD_EVENTS_WEBHOOK)" ]
           env:
+            - name: DISCORD_EVENTS_WEBHOOK
+              valueFrom:
+                secretKeyRef: { name: goo-secret, key: discord_events_webhook }
             - { name: GOO_ENVIRONMENT, value: "Production" }
             - { name: PORT, value: "7777" }
             - { name: OTEL_TRACES_EXPORTER, value: "none" }
@@ -39,23 +39,3 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef: { name: main-cluster-goo, key: password }
-          volumeMounts:
-            - name: playwright-cache
-              mountPath: /root/.cache/ms-playwright
-          livenessProbe:
-            httpGet:
-              path: /
-              port: 7777
-            initialDelaySeconds: 45
-            periodSeconds: 10
-          readinessProbe:
-            httpGet:
-              path: /
-              port: 7777
-            initialDelaySeconds: 20
-            periodSeconds: 50
-
-      volumes:
-        - name: playwright-cache
-          persistentVolumeClaim:
-            claimName: playwright-cache-pvc

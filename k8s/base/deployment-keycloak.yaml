@@ -27,7 +27,6 @@ spec:
           env:
             - { name: KEYCLOAK_LOGLEVEL, value: "INFO" }
             - { name: KC_DB, value: "postgres" }
-
             - name: KEYCLOAK_ADMIN
               valueFrom: { secretKeyRef: { name: keycloak-secret, key: keycloak_admin } }
             - name: KEYCLOAK_ADMIN_PASSWORD

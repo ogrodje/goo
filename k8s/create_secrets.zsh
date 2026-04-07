@@ -30,7 +30,7 @@ kubectl create secret generic --namespace=$NS \
   --from-literal=keycloak_db=$KEYCLOAK_DB \
   --from-literal=keycloak_realm=$KEYCLOAK_REALM \
   --from-literal=keycloak_endpoint=$KEYCLOAK_ENDPOINT \
-  --from-literal=kc_db_url=jdbc:postgresql://pg-one-postgresql.goo-prod.svc.cluster.local:5432/${KEYCLOAK_DB} \
+  --from-literal=kc_db_url=jdbc:postgresql://main-cluster-rw.pg.svc.cluster.local:5432/${KEYCLOAK_DB} \
   --from-literal=kc_db_username=$POSTGRES_USER \
   --from-literal=kc_db_password=$POSTGRES_PASSWORD
 

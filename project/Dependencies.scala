@@ -6,28 +6,28 @@ object Dependencies {
 
   object Versions {
     val circe: Version          = "0.14.15"
-    val doobie: Version         = "1.0.0-RC11"
-    val flyway: Version         = "12.0.0"
-    val ical4j: Version         = "4.2.3"
-    val jsoup: Version          = "1.22.1"
-    val jwtScala: Version       = "11.0.3"
+    val doobie: Version         = "1.0.0-RC12"
+    val flyway: Version         = "12.4.0"
+    val ical4j: Version         = "4.2.5"
+    val jsoup: Version          = "1.22.2"
+    val jwtScala: Version       = "11.0.4"
     val log4cats: Version       = "2.7.1"
-    val logbackClassic: Version = "1.5.28"
-    val playwright: Version     = "1.58.0"
-    val postgresql: Version     = "42.7.9"
+    val logbackClassic: Version = "1.5.32"
+    val playwright: Version     = "1.59.0"
+    val postgresql: Version     = "42.7.10"
     val quartz: Version         = "2.5.2"
     val scalaTest: Version      = "3.2.19"
-    val sentry: Version         = "8.32.0"
+    val sentry: Version         = "8.39.1"
     val sentryAgent: Version    = sentry
     val sentryLogback: Version  = sentry
-    val zio: Version            = "2.1.24"
-    val zioCli: Version         = "0.7.5"
-    val zioConfig: Version      = "4.0.6"
-    val zioHttp: Version        = "3.8.1"
+    val zio: Version            = "2.1.25"
+    val zioCli: Version         = "0.8.0"
+    val zioConfig: Version      = "4.0.7"
+    val zioHttp: Version        = "3.10.1"
     val zioLogging: Version     = "2.5.3"
     val zioMetrics: Version     = "2.5.5"
     val zioPrelude: Version     = "1.0.0-RC41"
-    val zioSchema: Version      = "1.7.5"
+    val zioSchema: Version      = "1.8.3"
   }
 
   lazy val zio: Modules = Seq(
@@ -86,7 +86,7 @@ object Dependencies {
   lazy val enumeratum: Modules = Seq(
     "com.beachape" %% "enumeratum",
     "com.beachape" %% "enumeratum-circe"
-  ).map(_ % "1.9.4")
+  ).map(_ % "1.9.7")
 
   lazy val jsoup: Modules  = "org.jsoup" % "jsoup" % Versions.jsoup :: Nil
   lazy val ical4j: Modules =

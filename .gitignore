@@ -1,3 +1,4 @@
+.claude/
 .metals/
 
 requests/http-client.private.env.json

@@ -8,10 +8,11 @@ import zio.ZIO.{fromOption, logInfo}
 import zio.http.{Client, Request, URL}
 import zio.{Cause, Scope, Task, ZIO}
 
-import java.nio.charset.Charset
 import java.time.OffsetDateTime
 
-final case class MeetupComParser(meetup: Meetup) extends Parser:
+final case class MeetupComParser(
+  meetup: Meetup
+) extends Parser:
   import DocumentOps.{*, given}
 
   private def venueIDFromEvent(json: Json): Option[String] =
@@ -93,6 +94,10 @@ final case class MeetupComParser(meetup: Meetup) extends Parser:
         .collect { case Some(event) => event }
   yield events
 
+  private def groupEventsUrl(url: URL): URL =
+    val slug = url.path.toString.split("/").find(_.nonEmpty).getOrElse("")
+    url.path(s"/$slug/events")
+
   private def parseEventsFrom(client: Client, url: URL) = for
     _        <- logInfo(s"Parsing events from $url")
     response <- client.requestMetered(Request.get(url))
@@ -110,6 +115,6 @@ final case class MeetupComParser(meetup: Meetup) extends Parser:
     client: Client,
     url: URL
   ): ZIO[Scope & Browser, Throwable, List[Event]] =
-    parseEventsFrom(client, url.addPath("events/")).catchSome { case th: NoSuchElementException =>
+    parseEventsFrom(client, groupEventsUrl(url)).catchSome { case th: NoSuchElementException =>
       ZIO.logWarningCause(s"__NEXT_DATA__ missing at $url. Proceeding with no events.", Cause.fail(th)).as(List.empty)
     }

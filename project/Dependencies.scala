@@ -5,29 +5,29 @@ object Dependencies {
   type Modules = Seq[ModuleID]
 
   object Versions {
-    val circe: Version          = "0.14.15"
+    val circe: Version          = "0.14.16"
     val doobie: Version         = "1.0.0-RC12"
-    val flyway: Version         = "12.4.0"
-    val ical4j: Version         = "4.2.5"
+    val flyway: Version         = "12.10.0"
+    val ical4j: Version         = "4.3.0"
     val jsoup: Version          = "1.22.2"
     val jwtScala: Version       = "11.0.4"
     val log4cats: Version       = "2.7.1"
-    val logbackClassic: Version = "1.5.32"
-    val playwright: Version     = "1.59.0"
-    val postgresql: Version     = "42.7.10"
+    val logbackClassic: Version = "1.5.37"
+    val playwright: Version     = "1.61.0"
+    val postgresql: Version     = "42.7.12"
     val quartz: Version         = "2.5.2"
     val scalaTest: Version      = "3.2.19"
-    val sentry: Version         = "8.39.1"
+    val sentry: Version         = "8.46.0"
     val sentryAgent: Version    = sentry
     val sentryLogback: Version  = sentry
-    val zio: Version            = "2.1.25"
-    val zioCli: Version         = "0.8.0"
+    val zio: Version            = "2.1.26"
+    val zioCli: Version         = "0.8.1"
     val zioConfig: Version      = "4.0.7"
-    val zioHttp: Version        = "3.10.1"
+    val zioHttp: Version        = "3.11.3"
     val zioLogging: Version     = "2.5.3"
-    val zioMetrics: Version     = "2.5.5"
+    val zioMetrics: Version     = "2.5.6"
     val zioPrelude: Version     = "1.0.0-RC41"
-    val zioSchema: Version      = "1.8.3"
+    val zioSchema: Version      = "1.8.5"
   }
 
   lazy val zio: Modules = Seq(
@@ -54,7 +54,7 @@ object Dependencies {
     "dev.zio" %% "zio-metrics-connectors",
     "dev.zio" %% "zio-metrics-connectors-prometheus"
   ).map(_ % Versions.zioMetrics) ++ Seq(
-    "eu.timepit" %% "refined" % "0.11.3"
+    "eu.timepit" %% "refined" % "0.11.4"
   ) ++ Seq(
     "dev.zio" %% "zio-http"         % Versions.zioHttp,
     "dev.zio" %% "zio-http-testkit" % Versions.zioHttp % Test
@@ -86,7 +86,7 @@ object Dependencies {
   lazy val enumeratum: Modules = Seq(
     "com.beachape" %% "enumeratum",
     "com.beachape" %% "enumeratum-circe"
-  ).map(_ % "1.9.7")
+  ).map(_ % "1.9.8")
 
   lazy val jsoup: Modules  = "org.jsoup" % "jsoup" % Versions.jsoup :: Nil
   lazy val ical4j: Modules =

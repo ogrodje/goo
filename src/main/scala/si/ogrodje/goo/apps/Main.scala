@@ -42,7 +42,7 @@ object Main extends ZIOAppDefault:
     _ <- syncEngineFib.join
   yield ()
 
-  def run: ZIO[Environment & (ZIOAppArgs & Scope), Any, Any] =
+  def run =
     program
       .provide(
         Scope.default,

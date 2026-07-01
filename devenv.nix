@@ -36,10 +36,6 @@ in
     echo "~~~ goo in $GOO_ENV ~~~"
     export KUBECONFIG="ogrodje-one-config"
     kubens goo-prod
-    alias k='microk8s kubectl
-  '';
-  
-  enterTest = ''
-  	sbt test
+    alias k='microk8s kubectl'
   '';
 }

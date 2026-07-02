@@ -6,10 +6,11 @@ import si.ogrodje.goo.models.{Event, EventView, Events}
 import zio.*
 import zio.ZIO.logInfo
 import zio.http.*
-import java.time.{LocalDate, LocalTime, OffsetDateTime, ZoneOffset}
+import java.time.{LocalDate, LocalTime, OffsetDateTime, ZoneId, ZoneOffset}
 import ZoneOffset.UTC
 
 object DiscordEventsNotifier:
+  private val displayZone: ZoneId     = ZoneId.of("Europe/Ljubljana")
   private def current: OffsetDateTime = OffsetDateTime.now(UTC)
 
   private def notify(
@@ -27,11 +28,11 @@ object DiscordEventsNotifier:
   private def fieldsFrom(event: Event): List[Field] =
     List(
       "Pričetek / Konec" -> {
-        val startLocalDT = event.startDateTime.toLocalDateTime
+        val startLocalDT = event.startDateTime.atZoneSameInstant(displayZone).toLocalDateTime
         val startDate    = startLocalDT.toLocalDate
         val startStr     = if event.hasStartTime then startLocalDT.toString else startDate.toString
 
-        val maybeEndLocalDT = event.endDateTime.map(_.toLocalDateTime)
+        val maybeEndLocalDT = event.endDateTime.map(_.atZoneSameInstant(displayZone).toLocalDateTime)
         val value           =
           maybeEndLocalDT match
             case Some(endLocalDT) =>

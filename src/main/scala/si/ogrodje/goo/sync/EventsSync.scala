@@ -14,6 +14,7 @@ import si.ogrodje.goo.models.Source.{
   FRI,
   GZS,
   ICal,
+  KCUI,
   PrimorskiTehnoloskiPark,
   StartupSi,
   TehnoloskiParkLjubljana
@@ -52,6 +53,8 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
       else if sourcesList.enabled(ICal) && fieldName == "icalUrl" then ICalParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(FRI) && url.host.exists(_.contains("fri.uni-lj.si")) then
         FRIParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(KCUI) && url.host.exists(_.contains("kcui.si")) then
+        KCUIParser(meetup).streamEventsFrom(url)
       else ZStream.empty
   yield event
 

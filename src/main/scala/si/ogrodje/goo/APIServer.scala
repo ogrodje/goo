@@ -119,17 +119,26 @@ final class APIServer:
 
   private def meetupsRoute = getMeetups.implement: (maybeLimit, maybeOffset, maybeQuery) =>
     Meetups
-      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeQuery.filterNot(_.isEmpty))
+      .public(Pagination.limit(maybeLimit), Pagination.offset(maybeOffset), maybeQuery.filterNot(_.isEmpty))
       .mapError(AppError.fromThrowable)
 
   private def meetupEventsRoute = getMeetupEvents.implement: (meetupId, maybeLimit, maybeOffset) =>
     Events
-      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeMeetupID = Some(meetupId), maybeQuery = None)
+      .public(
+        Pagination.limit(maybeLimit),
+        Pagination.offset(maybeOffset),
+        maybeMeetupID = Some(meetupId),
+        maybeQuery = None
+      )
       .mapError(AppError.fromThrowable)
 
   private def eventsRoute = getEvents.implement: (maybeLimit, maybeOffset, maybeQuery) =>
     Events
-      .public(maybeLimit.getOrElse(100), maybeOffset.getOrElse(0), maybeQuery = maybeQuery.filterNot(_.isEmpty))
+      .public(
+        Pagination.limit(maybeLimit),
+        Pagination.offset(maybeOffset),
+        maybeQuery = maybeQuery.filterNot(_.isEmpty)
+      )
       .mapError(AppError.fromThrowable)
 
   private def createEventRoute = createEvent.implement: event =>

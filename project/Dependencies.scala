@@ -7,17 +7,15 @@ object Dependencies {
   object Versions {
     val circe: Version          = "0.14.16"
     val doobie: Version         = "1.0.0-RC12"
-    val flyway: Version         = "12.10.0"
+    val flyway: Version         = "12.11.0"
     val ical4j: Version         = "4.3.0"
     val jsoup: Version          = "1.22.2"
     val jwtScala: Version       = "11.0.4"
-    val log4cats: Version       = "2.7.1"
-    val logbackClassic: Version = "1.5.37"
+    val logbackClassic: Version = "1.5.38"
     val playwright: Version     = "1.61.0"
-    val postgresql: Version     = "42.7.12"
+    val postgresql: Version     = "42.7.13"
     val quartz: Version         = "2.5.2"
-    val scalaTest: Version      = "3.2.19"
-    val sentry: Version         = "8.46.0"
+    val sentry: Version         = "8.48.0"
     val sentryAgent: Version    = sentry
     val sentryLogback: Version  = sentry
     val zio: Version            = "2.1.26"
@@ -25,7 +23,7 @@ object Dependencies {
     val zioConfig: Version      = "4.0.7"
     val zioHttp: Version        = "3.11.3"
     val zioLogging: Version     = "2.5.3"
-    val zioMetrics: Version     = "2.5.6"
+    val zioMetrics: Version     = "2.5.7"
     val zioPrelude: Version     = "1.0.0-RC41"
     val zioSchema: Version      = "1.8.5"
   }

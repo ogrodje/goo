@@ -55,8 +55,15 @@ lazy val root = project
         MergeStrategy.discard
       case PathList("META-INF", "io.netty.versions.properties") =>
         MergeStrategy.first
+      // OSGi bundle manifests shipped by multi-release jars (bouncycastle, postgresql) collide at
+      // identical paths and are irrelevant inside an uber-jar.
+      case PathList("META-INF", xs @ _*) if xs.lastOption.contains("MANIFEST.MF") =>
+        MergeStrategy.discard
       case PathList("deriving.conf")                            =>
         MergeStrategy.last
+      // scala-library 3.8 now bundles scala.annotation.unroll, which duplicates the (transitive,
+      // now-redundant) com.lihaoyi unroll-annotation jar.
+      case PathList(ps @ _*) if ps.last endsWith ".tasty"       => MergeStrategy.last
       case PathList(ps @ _*) if ps.last endsWith ".class"       => MergeStrategy.last
       case x                                                    =>
         val old = (assembly / assemblyMergeStrategy).value

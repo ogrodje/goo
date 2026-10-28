@@ -48,4 +48,13 @@ spec:
                 - name: POSTGRES_PASSWORD
                   valueFrom:
                     secretKeyRef: { name: main-cluster-goo, key: password }
+                # Its heap would otherwise be a quarter of the node's memory
+                - { name: JAVA_OPTS, value: "-Xmx384m" }
+              # Production: ~200 MB, at most 408 MB, for its ~30 s a week
+              resources:
+                limits:
+                  memory: "768Mi"
+                requests:
+                  cpu: "100m"
+                  memory: "384Mi"
 

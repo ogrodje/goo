@@ -41,6 +41,14 @@ spec:
               valueFrom: { secretKeyRef: { name: keycloak-secret, key: kc_db_username } }
             - name: KC_DB_PASSWORD
               valueFrom: { secretKeyRef: { name: keycloak-secret, key: kc_db_password } }
+          # Production: ~660 MB, at most 756 MB (Prometheus, 10 days to 2026-10-28). Keycloak sizes its heap from the
+          # limit (70% of it), as it would from the node's memory without one.
+          resources:
+            limits:
+              memory: "1Gi"
+            requests:
+              cpu: "50m"
+              memory: "640Mi"
 
 #           livenessProbe:
 #             httpGet:

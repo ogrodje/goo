@@ -30,6 +30,9 @@ spec:
             - { name: SOURCES, value: "All" }
             - { name: KEYCLOAK_ENDPOINT, value: "https://keycloak.ogrodje.si" }
             - { name: KEYCLOAK_REALM, value: "Ogrodje" }
+            # Without it, the heap may grow to a quarter of the node's memory (3.9 GB); production's used at most
+            # 272 MB of it, typically 121 MB (Prometheus, 10 days to 2026-10-28)
+            - { name: JAVA_OPTS, value: "-Xmx512m" }
             - name: SENTRY_AUTH_TOKEN
               valueFrom:
                 secretKeyRef: { name: goo-secret, key: sentry_auth_token }
@@ -39,6 +42,13 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef: { name: main-cluster-goo, key: password }
+          # Production: ~1.0 GB, at most 1.2 GB, with the heap uncapped and Chromium (Playwright) in the same container
+          resources:
+            limits:
+              memory: "1280Mi"
+            requests:
+              cpu: "50m"
+              memory: "768Mi"
           volumeMounts:
             - name: playwright-cache
               mountPath: /root/.cache/ms-playwright

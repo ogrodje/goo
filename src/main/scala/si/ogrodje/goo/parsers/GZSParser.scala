@@ -2,7 +2,6 @@ package si.ogrodje.goo.parsers
 
 import com.microsoft.playwright.Browser
 import si.ogrodje.goo.models.*
-import zio.ZIO.*
 import zio.http.{Client, URL}
 import zio.{Scope, ZIO}
 import org.jsoup.Jsoup
@@ -21,10 +20,11 @@ final case class GZSParser(meetup: Meetup) extends Parser:
     val Array(startDate, endDate) = raw.split("-", 2).map(_.trim)
     parseDate(startDate) -> parseDate(endDate)
 
-  override protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]] = for
-    startUrl <- ZIO.succeed(url.path("/zdruzenje_za_informatiko_in_telekomunikacije/vsebina/Dogodki"))
-    page     <- ZIO.serviceWithZIO[Browser](b => ZIO.fromAutoCloseable(ZIO.attemptBlocking(b.newPage())))
-    events   <-
+  override protected def parse(client: Client, url: URL): ZIO[Scope & Browser, Throwable, List[Event]] =
+    val startUrl = url.path("/zdruzenje_za_informatiko_in_telekomunikacije/vsebina/Dogodki")
+    // withPage scopes the Playwright page so it is closed as soon as this parse completes (and
+    // between retries), rather than leaking onto the long-lived application scope.
+    withPage { page =>
       ZIO.attemptBlocking:
         page.navigate(startUrl.toString)
         page.locator("text=MESEČNI").click()
@@ -58,6 +58,7 @@ final case class GZSParser(meetup: Meetup) extends Parser:
               locationName = Some(locationName)
             )
         }
-
-    cutoff = OffsetDateTime.now().minusMonths(3)
-  yield events.filter(_.startDateTime.isAfter(cutoff))
+    }.map { events =>
+      val cutoff = OffsetDateTime.now().minusMonths(3)
+      events.filter(_.startDateTime.isAfter(cutoff))
+    }

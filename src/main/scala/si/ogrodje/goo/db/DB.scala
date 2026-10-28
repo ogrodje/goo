@@ -7,6 +7,8 @@ import zio.ZIO.logInfo
 import zio.interop.catz.*
 import doobie.*
 import doobie.implicits.*
+import doobie.hikari.HikariTransactor
+import doobie.util.ExecutionContexts
 import io.circe.Json
 import si.ogrodje.goo.models.Source
 import zio.http.URL
@@ -51,39 +53,30 @@ object DB:
   def transact[Out](in: ConnectionIO[Out]): RIO[DB, Out] =
     ZIO.serviceWithZIO[DB](d => in.transact(d.call))
 
-  def transactorLayer: TaskLayer[DB] = ZLayer.fromZIO:
+  // Pool size for the JDBC connection pool. Kept small on purpose: the service is I/O bound
+  // on scraping, and Postgres connections are a scarce resource.
+  private val maxPoolSize: Int = 10
+
+  private def pooledTransactor(appConfig: AppConfig): RIO[Scope, Transactor[Task]] =
+    val url = s"jdbc:postgresql://${appConfig.postgresHost}:${appConfig.postgresPort}/${appConfig.postgresDb}"
     for
-      db       <- AppConfig.config.map(_.postgresDb)
-      host     <- AppConfig.config.map(_.postgresHost)
-      port     <- AppConfig.config.map(_.postgresPort)
-      user     <- AppConfig.config.map(_.postgresUser)
-      password <- AppConfig.config.map(_.postgresPassword)
+      connectEC  <- ExecutionContexts.fixedThreadPool[Task](maxPoolSize).toScopedZIO
+      transactor <-
+        HikariTransactor
+          .newHikariTransactor[Task](
+            driverClassName = "org.postgresql.Driver",
+            url = url,
+            user = appConfig.postgresUser,
+            pass = appConfig.postgresPassword,
+            connectEC = connectEC
+          )
+          .evalTap(_.configure(ds => ZIO.succeed(ds.setMaximumPoolSize(maxPoolSize))))
+          .toScopedZIO
+      _          <- logInfo(s"Initialized Hikari connection pool (maxPoolSize=$maxPoolSize) for $url")
+    yield transactor
 
-      tx =
-        Transactor.fromDriverManager[Task](
-          driver = "org.postgresql.Driver",
-          url = s"jdbc:postgresql://$host:$port/$db",
-          user = user,
-          password = password,
-          logHandler = None
-        )
-    yield DB(tx)
+  def transactorLayer: TaskLayer[DB] = ZLayer.scoped:
+    AppConfig.config.flatMap(pooledTransactor).map(DB(_))
 
-  def transactionLayerFromAppConfig: URLayer[AppConfig, DB] = ZLayer.fromZIO:
-    for
-      appConfig <- ZIO.service[AppConfig]
-      db         = appConfig.postgresDb
-      host       = appConfig.postgresHost
-      port       = appConfig.postgresPort
-      user       = appConfig.postgresUser
-      password   = appConfig.postgresPassword
-
-      tx =
-        Transactor.fromDriverManager[Task](
-          driver = "org.postgresql.Driver",
-          url = s"jdbc:postgresql://$host:$port/$db",
-          user = user,
-          password = password,
-          logHandler = None
-        )
-    yield DB(tx)
+  def transactionLayerFromAppConfig: RLayer[AppConfig, DB] = ZLayer.scoped:
+    ZIO.service[AppConfig].flatMap(pooledTransactor).map(DB(_))

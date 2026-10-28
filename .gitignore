@@ -1,3 +1,6 @@
+project/project
+.bloop/
+**/.bloop
 .claude/
 .metals/
 
@@ -8,6 +11,7 @@ DEPLOY.md
 .bsp/
 .envrc
 project/target
+project/metals.*
 target
 .idea/
 

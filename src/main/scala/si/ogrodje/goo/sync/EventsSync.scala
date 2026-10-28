@@ -71,7 +71,11 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
         .fromZIO(Meetups.all)
         .flatMap(ZStream.fromIterable)
         .flatMap(meetup => ZStream.fromIterable(sourcesOf(meetup)))
-        .flatMap { case (filedName, meetup, url) =>
+        // flatMapPar so a slow or bot-walled source (e.g. Eventbrite burning ~70s of retries) cannot
+        // starve every other scraper the way sequential flatMap did. Each parser is already isolated
+        // (failures degrade to an empty list in Parser.parseWithClient), so bounded concurrency here
+        // only affects throughput, never correctness.
+        .flatMapPar(EventsSync.collectionConcurrency) { case (filedName, meetup, url) =>
           runParser(sourcesList, filedName, meetup, url).map(_ -> meetup.name)
         }
         .runIntoQueue(eventsQ)
@@ -92,12 +96,14 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
         .timed
         .fork
 
-    result <- (collectionFib.join *> writingFib.join).either
-    _      <-
+    // zipPar (not *>) so that a failure in either fiber interrupts the sibling instead of leaving
+    // the writer draining an abandoned queue forever.
+    result     <- collectionFib.join.zipPar(writingFib.join).either
+    _          <-
       result match
         case Right((duration, _)) => logInfo(s"Sync completed successfully in ${duration.getSeconds}s")
         case Left(error)          => logInfo(s"Sync failed: ${error.getMessage}") *> ZIO.fail(error)
-    _      <- after
+    _          <- after
   yield ()
 
   def runScheduled(
@@ -115,4 +121,8 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
   yield ()
 
 object EventsSync:
+  // How many sources to scrape concurrently. Bounded to avoid opening too many Playwright pages /
+  // HTTP connections at once, while ensuring one stuck source cannot block the rest.
+  private val collectionConcurrency: Int = 6
+
   def live: ZLayer[Any, Nothing, EventsSync] = ZLayer.derive[EventsSync]

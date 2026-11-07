@@ -42,13 +42,16 @@ spec:
             - name: POSTGRES_PASSWORD
               valueFrom:
                 secretKeyRef: { name: main-cluster-goo, key: password }
-          # Production: ~1.0 GB, at most 1.2 GB, with the heap uncapped and Chromium (Playwright) in the same container
+          # Production: ~1.2 GB between syncs (the JVM ~940 MB, Playwright's driver and Chromium ~320 MB), more while
+          # the events sync runs Chromium for Eventbrite. At 1280Mi it ran at its limit, so the kernel kept dropping
+          # the pages of the JVM's and Chromium's own files and reading them back, ~500 MB/s from the node's disk for
+          # each 17-minute sync (NodeMemoryMajorPagesFaults, OG-50).
           resources:
             limits:
-              memory: "1280Mi"
+              memory: "2Gi"
             requests:
               cpu: "50m"
-              memory: "768Mi"
+              memory: "1280Mi"
           volumeMounts:
             - name: playwright-cache
               mountPath: /root/.cache/ms-playwright

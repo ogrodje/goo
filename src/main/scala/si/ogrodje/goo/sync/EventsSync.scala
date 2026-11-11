@@ -16,8 +16,10 @@ import si.ogrodje.goo.models.Source.{
   ICal,
   InkubatorSavinjskeRegije,
   KCUI,
+  LUI,
   PrimorskiTehnoloskiPark,
   RacunalniskiMuzej,
+  SpletneUrice,
   StartupSi,
   TehnoloskiParkLjubljana
 }
@@ -61,6 +63,10 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
         InkubatorSavinjskeRegijeParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(RacunalniskiMuzej) && url.host.exists(_.contains("racunalniski-muzej.si")) then
         RacunalniskiMuzejParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(LUI) && url.host.exists(h => h == "lui.si" || h.endsWith(".lui.si")) then
+        LUIParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(SpletneUrice) && url.host.exists(_.contains("wwwhmb.si")) then
+        SpletneUriceParser(meetup).streamEventsFrom(url)
       else ZStream.empty
   yield event
 

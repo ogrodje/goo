@@ -76,84 +76,31 @@ lazy val root = project
     dockerUsername           := Some("ogrodje"),
     dockerUpdateLatest       := true,
     dockerRepository         := Some("ghcr.io"),
-    dockerBaseImage          := "azul/zulu-openjdk:25-jre-headless-latest",
+    // Microsoft's Playwright image ships Chromium (and every library it needs) for exactly our Playwright version, so
+    // the image needs no apt-get, and Playwright doesn't download a browser at runtime. Java comes from Azul's image.
+    dockerBaseImage          := s"mcr.microsoft.com/playwright:v${Versions.playwright}-noble",
     Docker / daemonUserUid   := None,
     Docker / daemonUser      := "root",
     dockerPermissionStrategy := DockerPermissionStrategy.None,
     packageName              := "goo",
-    dockerCommands           := dockerCommands.value.flatMap {
+    dockerCommands           := Cmd("FROM", s"$jreImage AS jre") +: dockerCommands.value.flatMap {
       case cmd @ Cmd("WORKDIR", _) =>
         List(
           Cmd("LABEL", "maintainer=\"Oto Brglez <otobrglez@gmail.com>\""),
           Cmd("LABEL", "org.opencontainers.image.url=https://github.com/ogrodje/goo"),
           Cmd("LABEL", "org.opencontainers.image.source=https://github.com/ogrodje/goo"),
+          Cmd("COPY", "--from=jre", "/usr/lib/jvm", "/usr/lib/jvm"),
+          Cmd("ENV", "JAVA_HOME=/usr/lib/jvm/zulu25"),
+          Cmd("ENV", "PATH=/usr/lib/jvm/zulu25/bin:$PATH"),
           Cmd("ENV", "PORT=7777"),
           Cmd("ENV", s"GOO_VERSION=${version.value}"),
-          Cmd(
-            "RUN",
-            s"""apt-get update -yyqq && apt-get install -yyqq ${ubuntuPackages.mkString(" ")}"""
-          ),
           cmd
         )
       case other                   => List(other)
     }
   )
 
-lazy val ubuntuPackages = Seq(
-  "libasound2",
-  "libatk-bridge2.0-0",
-  "libatk1.0-0",
-  "libatspi2.0-0",
-  "libcairo-gobject2",
-  "libcairo2",
-  "libcups2",
-  "libdbus-1-3",
-  "libgbm1",
-  "libgdk-pixbuf-2.0-0",
-  "libglib2.0-0",
-  "libgtk-3-0",
-  "libgtk-3-0",
-  "libgtk-4-bin",
-  "libgtk-4-common",
-  "libgtk-4-dev",
-  "libnspr4",
-  "libnss3",
-  "libpango-1.0-0",
-  "libpangocairo-1.0-0",
-  "libx11-6",
-  "libx11-xcb1",
-  "libxcb1",
-  "libxcomposite1",
-  "libxcursor1",
-  "libxdamage1",
-  "libxext6",
-  "libxfixes3",
-  "libxkbcommon0",
-  "libxrandr2",
-  // added
-  "libgstreamer1.0-0",
-  "libgstreamer-plugins-base1.0-0",
-  "libgstreamer-plugins-good1.0-0",
-  "libgstreamer-plugins-bad1.0-0",
-  "libgstreamer-gl1.0-0",
-  "libxslt1.1",
-  "libvpx7",
-  "libevent-2.1-7",
-  "libflite1",
-  "libavif13",
-  "libnghttp2-14",
-  "libx264-163",
-  "libopus0",
-  "libopusfile0",
-  "libsecret-1-0",
-  "libhyphen0",
-  "libmanette-0.2-0",
-  "libwebpdemux2",
-  "libwebpmux3",
-  "libenchant-2-2",
-  "libpsl5",
-  "libwoff1"
-).distinct.sorted
+lazy val jreImage = "azul/zulu-openjdk:25-jre-headless-latest"
 
 addCommandAlias("fmt", ";scalafmtAll;scalafmtSbt")
 addCommandAlias("fix", ";scalafixAll")

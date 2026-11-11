@@ -26,6 +26,7 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 - [ ] Add [Institut "Jožef Stefan" (IJS)](https://indico.ijs.si/)
 - [ ] ~~Add [FERI Dogodki](https://feri.um.si/dogodki/) (RSS? - `https://feri.um.si/dogodki/rss/`)~~
 - [x] Add [Računalniški Muzej](https://www.racunalniski-muzej.si/)
+- [x] Add [Spletne urice Maribor](https://wwwhmb.si/)
 - [ ] Add [Kompot](https://kompot.si/)
 - [ ] Sent automatic newsletter for weekly/monthly events (via [Postmark](https://postmarkapp.com/))
 - [ ] Add [GDG Ljubljana](https://gdg.community.dev/gdg-ljubljana/)

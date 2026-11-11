@@ -4,6 +4,12 @@ on:
   push: { branches: [ "master" ] }
   pull_request: { branches: [ "master" ] }
 
+# Master builds publish and deploy, so they take turns: two merged at once raced (2026-11-11), and the one that
+# finished last published its image over the other's. PR builds of the same branch replace each other.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
 env:
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}

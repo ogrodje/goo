@@ -30,7 +30,7 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 - [ ] Sent automatic newsletter for weekly/monthly events (via [Postmark](https://postmarkapp.com/))
 - [ ] Add [GDG Ljubljana](https://gdg.community.dev/gdg-ljubljana/)
 - [ ] Add [Podjetniški inkubator Perspektiva](https://www.inkubator-perspektiva.si/)
-- [ ] Add [Inkubator Savinjske regije](https://inkubatorsr.si/) ([dogodki](https://www.inkubatorsr.si/aktualno/dogodki/))
+- [x] Add [Inkubator Savinjske regije](https://inkubatorsr.si/) ([dogodki](https://www.inkubatorsr.si/aktualno/dogodki/))
 - [ ] Add [LUI (Ljubljanski univerzitetni inkubator)](https://lui.si/aktualno/)
 - [ ] Add [Pomurje Technology Park](https://www.p-tech.si/)
 - [ ] Send batch emails via

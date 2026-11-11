@@ -17,6 +17,7 @@ import si.ogrodje.goo.models.Source.{
   InkubatorSavinjskeRegije,
   KCUI,
   PrimorskiTehnoloskiPark,
+  RacunalniskiMuzej,
   StartupSi,
   TehnoloskiParkLjubljana
 }
@@ -58,6 +59,8 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
         KCUIParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(InkubatorSavinjskeRegije) && url.host.exists(_.contains("inkubatorsr.si")) then
         InkubatorSavinjskeRegijeParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(RacunalniskiMuzej) && url.host.exists(_.contains("racunalniski-muzej.si")) then
+        RacunalniskiMuzejParser(meetup).streamEventsFrom(url)
       else ZStream.empty
   yield event
 

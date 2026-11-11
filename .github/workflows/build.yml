@@ -70,9 +70,21 @@ jobs:
 
       - run: sbt "test"
 
-      - name: Run tests and publish
+      # Every PR builds the image too, so a broken image is caught before it reaches master.
+      - name: Build image
+        run: sbt "Docker/publishLocal"
+
+      # Java, the Playwright driver and the image's Chromium (with its system libraries) all have to work:
+      # Playwright's own CLI launches Chromium and takes a screenshot inside the image.
+      - name: Smoke-test image
+        run: |
+          docker run --rm --entrypoint java ghcr.io/ogrodje/goo:latest \
+            -cp '/opt/docker/lib/*' com.microsoft.playwright.CLI \
+            screenshot --browser chromium 'data:text/html,<h1>goo</h1>' /tmp/smoke.png
+
+      - name: Publish image
         if: ${{ github.ref == 'refs/heads/master' }}
-        run: sbt "docker:publish"
+        run: sbt "Docker/publish"
 
       - name: Install yq v4
         run: |

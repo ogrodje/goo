@@ -34,6 +34,7 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 - [x] Add [Inkubator Savinjske regije](https://inkubatorsr.si/) ([dogodki](https://www.inkubatorsr.si/aktualno/dogodki/))
 - [x] Add [LUI (Ljubljanski univerzitetni inkubator)](https://lui.si/aktualno/)
 - [x] Add [Slovenska tovarna UI (SLAIF)](https://www.slaif.si/events)
+- [x] Support [Luma](https://luma.com) calendars (a meetup's `lumaUrl` in Hygraph)
 - [ ] Add [Pomurje Technology Park](https://www.p-tech.si/)
 - [ ] Send batch emails via
   Postmark ([API documentation](https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails))

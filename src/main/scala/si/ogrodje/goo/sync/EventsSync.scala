@@ -17,6 +17,7 @@ import si.ogrodje.goo.models.Source.{
   InkubatorSavinjskeRegije,
   KCUI,
   LUI,
+  Luma,
   PrimorskiTehnoloskiPark,
   RacunalniskiMuzej,
   SLAIF,
@@ -56,6 +57,7 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
       else if sourcesList.enabled(StartupSi) && url.host.exists(_.contains("startup.si")) then
         StartupSiParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(ICal) && fieldName == "icalUrl" then ICalParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(Luma) && fieldName == "lumaUrl" then LumaParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(FRI) && url.host.exists(_.contains("fri.uni-lj.si")) then
         FRIParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(KCUI) && url.host.exists(_.contains("kcui.si")) then

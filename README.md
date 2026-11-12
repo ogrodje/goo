@@ -41,6 +41,7 @@ Service is live at [`goo.ogrodje.si`](https://goo.ogrodje.si).
 - [x] Add [Mrežni podjetniški inkubator Rogaška Slatina](https://www.inkubator-rs.si/category/dogodki/)
 - [x] Add [Katapult](https://katapult.si/dogodki)
 - [x] Add [Podjetniški inkubator Podbreznik (RC Novo mesto)](https://www.rc-nm.si/dogodki/)
+- [x] Add [Mrežni podjetniški inkubator Koroška (MPIK)](https://rra-koroska.si/aktualno/dogodki)
 - [ ] Add [Pomurje Technology Park](https://www.p-tech.si/)
 - [ ] Send batch emails via
   Postmark ([API documentation](https://postmarkapp.com/developer/user-guide/send-email-with-api/batch-emails))

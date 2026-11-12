@@ -22,8 +22,9 @@ import si.ogrodje.goo.models.Source.{
   Katapult,
   LUI,
   Luma,
-  PomurskiTehnoloskiPark,
+  MPIKKoroska,
   PodjetniskiInkubatorPodbreznik,
+  PomurskiTehnoloskiPark,
   PrimorskiTehnoloskiPark,
   RacunalniskiMuzej,
   SLAIF,
@@ -98,6 +99,9 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
       else if sourcesList.enabled(PodjetniskiInkubatorPodbreznik) &&
         url.host.exists(h => h == "rc-nm.si" || h == "www.rc-nm.si")
       then PodbreznikParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(MPIKKoroska) &&
+        url.host.exists(h => Set("rra-koroska.si", "www.rra-koroska.si", "mpik-koroska.si", "www.mpik-koroska.si")(h))
+      then MPIKKoroskaParser(meetup).streamEventsFrom(url)
       else ZStream.empty
   yield event
 

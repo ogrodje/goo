@@ -15,10 +15,16 @@ import si.ogrodje.goo.models.Source.{
   FRI,
   GZS,
   ICal,
+  InkubatorBelaKrajina,
+  InkubatorRogaskaSlatina,
   InkubatorSavinjskeRegije,
   KCUI,
+  Katapult,
   LUI,
   Luma,
+  MPIKKoroska,
+  PodjetniskiInkubatorPodbreznik,
+  PomurskiTehnoloskiPark,
   PrimorskiTehnoloskiPark,
   RacunalniskiMuzej,
   SLAIF,
@@ -74,8 +80,28 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
         LUIParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(SpletneUrice) && url.host.exists(_.contains("wwwhmb.si")) then
         SpletneUriceParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(PomurskiTehnoloskiPark) && url.host.exists(h =>
+          h == "p-tech.si" || h == "www.p-tech.si"
+        )
+      then WordPressEventsParser(meetup, WordPressEventsParser.PomurskiTehnoloskiPark).streamEventsFrom(url)
+      else if sourcesList.enabled(InkubatorBelaKrajina) && url.host.exists(h =>
+          h == "inkubator-belakrajina.si" || h == "www.inkubator-belakrajina.si"
+        )
+      then WordPressEventsParser(meetup, WordPressEventsParser.InkubatorBelaKrajina).streamEventsFrom(url)
+      else if sourcesList.enabled(InkubatorRogaskaSlatina) && url.host.exists(h =>
+          h == "inkubator-rs.si" || h == "www.inkubator-rs.si"
+        )
+      then WordPressEventsParser(meetup, WordPressEventsParser.InkubatorRogaskaSlatina).streamEventsFrom(url)
       else if sourcesList.enabled(SLAIF) && url.host.exists(h => h == "slaif.si" || h.endsWith(".slaif.si")) then
         SLAIFParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(Katapult) && url.host.exists(h => h == "katapult.si" || h == "www.katapult.si") then
+        KatapultParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(PodjetniskiInkubatorPodbreznik) &&
+        url.host.exists(h => h == "rc-nm.si" || h == "www.rc-nm.si")
+      then PodbreznikParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(MPIKKoroska) &&
+        url.host.exists(h => Set("rra-koroska.si", "www.rra-koroska.si", "mpik-koroska.si", "www.mpik-koroska.si")(h))
+      then MPIKKoroskaParser(meetup).streamEventsFrom(url)
       else ZStream.empty
   yield event
 

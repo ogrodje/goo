@@ -23,6 +23,7 @@ import si.ogrodje.goo.models.Source.{
   LUI,
   Luma,
   PomurskiTehnoloskiPark,
+  PodjetniskiInkubatorPodbreznik,
   PrimorskiTehnoloskiPark,
   RacunalniskiMuzej,
   SLAIF,
@@ -94,6 +95,9 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
         SLAIFParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(Katapult) && url.host.exists(h => h == "katapult.si" || h == "www.katapult.si") then
         KatapultParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(PodjetniskiInkubatorPodbreznik) &&
+        url.host.exists(h => h == "rc-nm.si" || h == "www.rc-nm.si")
+      then PodbreznikParser(meetup).streamEventsFrom(url)
       else ZStream.empty
   yield event
 

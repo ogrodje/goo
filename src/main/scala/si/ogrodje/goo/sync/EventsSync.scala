@@ -10,6 +10,7 @@ import com.microsoft.playwright.Browser
 import si.ogrodje.goo.{AppConfig, SourcesList}
 import si.ogrodje.goo.db.DB
 import si.ogrodje.goo.models.Source.{
+  DataScience,
   Eventbrite,
   FRI,
   GZS,
@@ -58,7 +59,10 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
         StartupSiParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(ICal) && fieldName == "icalUrl" then ICalParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(Luma) && fieldName == "lumaUrl" then LumaParser(meetup).streamEventsFrom(url)
-      else if sourcesList.enabled(FRI) && url.host.exists(_.contains("fri.uni-lj.si")) then
+      else if sourcesList.enabled(DataScience) && url.host.contains("datascience.fri.uni-lj.si") then
+        DataScienceParser(meetup).streamEventsFrom(url)
+      // Exactly FRI: its subdomains (e.g. datascience.fri.uni-lj.si) are other sites.
+      else if sourcesList.enabled(FRI) && url.host.exists(h => h == "fri.uni-lj.si" || h == "www.fri.uni-lj.si") then
         FRIParser(meetup).streamEventsFrom(url)
       else if sourcesList.enabled(KCUI) && url.host.exists(_.contains("kcui.si")) then
         KCUIParser(meetup).streamEventsFrom(url)

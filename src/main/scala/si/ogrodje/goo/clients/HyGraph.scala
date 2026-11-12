@@ -27,6 +27,7 @@ final class HyGraph private (private val client: Client):
       kompotUrl      <- cursor.get[Option[URL]]("kompotUrl")
       eventbriteUrl  <- cursor.get[Option[URL]]("eventbriteUrl")
       icalUrl        <- cursor.get[Option[URL]]("icalUrl")
+      lumaUrl        <- cursor.get[Option[URL]]("lumaUrl")
       logoImage       = cursor.downFields("logoImage", "url").focus.flatMap(_.as[Option[URL]].toOption).flatten
       mainColor       = cursor.downFields("mainColor", "hex").focus.flatMap(_.as[Option[String]].toOption).flatten
       backgroundColor = cursor.downFields("backgroundColor", "hex").focus.flatMap(_.as[Option[String]].toOption).flatten
@@ -44,6 +45,7 @@ final class HyGraph private (private val client: Client):
       kompotUrl = kompotUrl,
       eventbriteUrl = eventbriteUrl,
       icalUrl = icalUrl,
+      lumaUrl = lumaUrl,
       logoImage = logoImage,
       mainColor = mainColor,
       backgroundColor = backgroundColor,
@@ -88,6 +90,7 @@ final class HyGraph private (private val client: Client):
       |   kompotUrl
       |   eventbriteUrl
       |   icalUrl
+      |   lumaUrl
       |   updatedAt
       |   createdAt
       |   mainColor { hex }

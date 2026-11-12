@@ -11,7 +11,7 @@ object Meetups:
 
   private val allFields: Fragment =
     fr"id, name, hidden, stage, homepage_url, meetup_url, discord_url, " ++
-      fr"linkedin_url, kompot_url, eventbrite_url, ical_url, logo_image, main_color, background_color, " ++
+      fr"linkedin_url, kompot_url, eventbrite_url, ical_url, luma_url, logo_image, main_color, background_color, " ++
       fr"created_at, updated_at"
 
   def all: RIO[DB, List[Meetup]] = DB.transact:
@@ -51,7 +51,7 @@ object Meetups:
            |INSERT INTO meetups ( $allFields ) VALUES (
            |${meetup.id}, ${meetup.name}, ${meetup.hidden}, ${meetup.stage}, ${meetup.homepageUrl},
            |${meetup.meetupUrl}, ${meetup.discordUrl}, ${meetup.linkedinUrl}, ${meetup.kompotUrl},
-           |${meetup.eventbriteUrl}, ${meetup.icalUrl}, ${meetup.logoImage}, 
+           |${meetup.eventbriteUrl}, ${meetup.icalUrl}, ${meetup.lumaUrl}, ${meetup.logoImage}, 
            |${meetup.mainColor}, ${meetup.backgroundColor},
            |${meetup.createdAt}, ${meetup.updatedAt}
            |)
@@ -66,6 +66,7 @@ object Meetups:
            |kompot_url = ${meetup.kompotUrl},
            |eventbrite_url = ${meetup.eventbriteUrl},
            |ical_url = ${meetup.icalUrl},
+           |luma_url = ${meetup.lumaUrl},
            |logo_image = ${meetup.logoImage},
            |background_color = ${meetup.backgroundColor},
            |main_color = ${meetup.mainColor}
@@ -76,11 +77,11 @@ object Meetups:
       sql"""
            UPDATE meetups SET (
             name, hidden, stage, homepage_url, meetup_url, discord_url, linkedin_url, kompot_url,
-            eventbrite_url, ical_url, logo_image, main_color, background_color, updated_at
+            eventbrite_url, ical_url, luma_url, logo_image, main_color, background_color, updated_at
            ) = (
             ${meetup.name}, ${meetup.hidden}, ${meetup.stage}, ${meetup.homepageUrl}, ${meetup.meetupUrl},
             ${meetup.discordUrl}, ${meetup.linkedinUrl}, 
-            ${meetup.kompotUrl}, ${meetup.eventbriteUrl}, ${meetup.icalUrl},
+            ${meetup.kompotUrl}, ${meetup.eventbriteUrl}, ${meetup.icalUrl}, ${meetup.lumaUrl},
             ${meetup.logoImage}, ${meetup.mainColor}, ${meetup.backgroundColor},
             ${meetup.updatedAt}
          ) WHERE id = ${meetup.id}""".update.run

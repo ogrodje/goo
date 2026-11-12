@@ -3,6 +3,9 @@ name: Build && Publish
 on:
   push: { branches: [ "master" ] }
   pull_request: { branches: [ "master" ] }
+  # The merge queue builds and tests each PR on top of the PRs ahead of it (refs/heads/gh-readonly-queue/…), so
+  # publishing and deploying, which need refs/heads/master, still happen only after the merge.
+  merge_group: { types: [ checks_requested ] }
 
 # Master builds publish and deploy, so they take turns: two merged at once raced (2026-11-11), and the one that
 # finished last published its image over the other's. PR builds of the same branch replace each other.

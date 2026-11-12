@@ -67,8 +67,16 @@ final case class FRIParser(meetup: Meetup) extends Parser:
                    parseOneEvent(url, today)(raw).asSome
                      .catchAll(err => logWarning(s"Failed to parse FRI event: ${err.getMessage}").as(None))
                  )
+    // DataScience@UL-FRI is part of FRI and lists its own events, so those are left to it. If its page can't be read,
+    // FRI keeps them all: a duplicate is better than a missing event.
+    ownedByDS <-
+      DataScienceParser
+        .listed(client, DataScienceParser.homepage, today)
+        .catchAll(err => logWarning(s"Could not read DataScience events, keeping all: ${err.getMessage}").as(Nil))
   // No cutoff needed: dateOf picks the year closest to today, so no event lands more than ~6 months in the past.
-  yield events.flatten.filterNot(_.eventURL.exists(_.path.toString.contains("javna-predstavitev")))
+  yield events.flatten
+    .filterNot(_.eventURL.exists(_.path.toString.contains("javna-predstavitev")))
+    .filterNot(e => ownedByDS.exists(DataScienceParser.sameEvent(e.startDateTime.toLocalDate, e.title, _)))
 
 object FRIParser:
   private val zone = ZoneId.of("Europe/Ljubljana")

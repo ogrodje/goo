@@ -19,6 +19,7 @@ import si.ogrodje.goo.models.Source.{
   InkubatorRogaskaSlatina,
   InkubatorSavinjskeRegije,
   KCUI,
+  Katapult,
   LUI,
   Luma,
   PomurskiTehnoloskiPark,
@@ -91,6 +92,8 @@ final class EventsSync extends SyncService[Scope & DB & Scheduler & Client & Bro
       then WordPressEventsParser(meetup, WordPressEventsParser.InkubatorRogaskaSlatina).streamEventsFrom(url)
       else if sourcesList.enabled(SLAIF) && url.host.exists(h => h == "slaif.si" || h.endsWith(".slaif.si")) then
         SLAIFParser(meetup).streamEventsFrom(url)
+      else if sourcesList.enabled(Katapult) && url.host.exists(h => h == "katapult.si" || h == "www.katapult.si") then
+        KatapultParser(meetup).streamEventsFrom(url)
       else ZStream.empty
   yield event
 
